@@ -1,0 +1,12 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div>
+    <h1>{{ingredient.title}}</h1>
+    <div><img src={{ url_for('static', filename=ingredient.img_URI) }} alt=”Bananas”  width="60" height="60"></div>
+    <p>{{ingredient.description}}</p>
+    
+
+</div>
+
+{% endblock %}
