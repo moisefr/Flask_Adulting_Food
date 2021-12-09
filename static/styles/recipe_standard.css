@@ -1,0 +1,30 @@
+.grid-container {
+    display: inline-grid;
+    grid-template-columns: auto auto auto;
+    background-color: #2196F3;
+    padding: 10px;
+    grid-column-gap: 70px;
+    box-shadow: 1px -2px 5px 1px rgba(0,0,0,0.68);
+    -webkit-box-shadow: 1px -2px 5px 1px rgba(0,0,0,0.68);
+    -moz-box-shadow: 1px -2px 5px 1px rgba(0,0,0,0.68);
+    padding-right: 2%;
+    margin: 0 0.5% 0  0.5%;
+    width: 25%;
+  }
+  .grid-item-standard {
+    /* background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.8); */
+    padding: 20px;
+    font-size: 30px;
+    text-align: center;
+  }
+  .main-area {
+    margin: 0 7.5% 0  7.5%;
+  }
+  /*  */
+  .type-area{
+    font-size: xx-large;
+  }
+  .ingredient-area{
+    font-size: x-large;
+  }

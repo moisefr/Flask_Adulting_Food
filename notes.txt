@@ -1,0 +1,43 @@
+General
+Libraries
+OS - helps me create and access files from the directory that the code sits on or the computers directory
+flask - major framework handles RESTful API architecture with request, response, template rendering
+pymango - MongoDB library with python
+json - formats dictionary data to json
+bson.objectID - 🧐learn more
+secure file name werkzeug.utils - helps encode your file names as you save them
+wtforms - Flask forms library that helps with filed validation and Form object mapping
+try except in python is like try catch in node.JS 
+    we attempy an action if that attempt fails we throw an exception and inform the user why
+you need to connect to the DB via the pymongo MongoClient
+    connection string you get from MongoDb collection set up
+    use client boiler plate code
+    set db to the main collection you're using for the project
+
+File uploads 😥😐😑 this is where OS and request.files is clutch
+1. Create a directory called uploads with an if not tree
+2. set app config upload folder to uploads variable
+3. the trick is to render the upload template and pass on the key id so a picture can go with the id
+4. You also need to make the upload image part of the form a setperate route on the multi part form because 
+    text input gets one post request
+    then you need another post request for the image input
+        this post then redirects to the upload/id endpoint
+        This is where you learned what the action keyword of an html form does
+            it redirects the form data to a given endpoint once you submit
+            we want this endpoint to be the same endpoint that deals with file uploads
+            http://localhost:5000/upload/{{id}} => double curly brace jinja syntax for the win!
+        Now I want to associate each image upload to an ID so when you save the file you want to append the id to the file.name
+        secure_filename(id + "-" + f.filename)
+    Now I want to write the new name of the image in the static folder back to the img_uri attribute of the key model
+        use os.chdir to switch to the uploads directory
+        slice through all files in the directory, match it against an img search variable
+        im search is just a python string slide, for the id part of the file name
+        if that matches the incoking id, then do a put/update action against the database
+        to upload the im_URI attribute!!!
+    Finally we want to render those images, not so straight forward, need to use url for under default static folder 
+        then pass on the file name that should be saved to URI attributes
+        <img src={{ url_for('static', filename=ingredient.img_URI) }} alt=”Bananas”  width="60" height="60">
+
+
+11/18/21
+

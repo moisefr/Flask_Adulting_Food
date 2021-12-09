@@ -1,0 +1,29 @@
+.grid-container {
+  display: grid; 
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr; 
+  grid-template-rows: 1fr 1fr 1fr; 
+  gap: 0px 0px; 
+  grid-template-areas: 
+    ". . . . ."
+    ". . . . ."
+    ". . . . .";
+  }
+  .grid-item{
+    box-shadow: 1px -2px 5px 1px rgba(0,0,0,0.68);
+    -webkit-box-shadow: 1px -2px 5px 1px rgba(0,0,0,0.68);
+    -moz-box-shadow: 1px -2px 5px 1px rgba(0,0,0,0.68);
+    width: 100%;
+    height: 100%;
+    flex: auto;
+    background-color: #f321d0;
+    border: black;
+    border-style: solid;
+  }
+  /*  */
+  .type-area{
+    font-size: xx-large;
+  }
+  .description-area{
+    font-size: x-large;
+  }
+  
