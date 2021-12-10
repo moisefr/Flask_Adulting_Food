@@ -451,7 +451,7 @@ def update_recipee_ingredients(id):
                         {"message": "Recipee ingridients added"}),
                         status = 200,
                         mimetype='application/json'
-                ) and redirect("/")
+                ) and redirect("/recipe/update/instructions/"f"{id}")
         except Exception as ex:
             return ("unable to add the ingredients")   
     return Response(
