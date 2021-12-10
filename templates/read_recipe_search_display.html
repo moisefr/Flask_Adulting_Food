@@ -17,7 +17,7 @@
               <td class="tg-0lax">{{recipe.title}}</td>
               <td class="tg-0lax"><img src={{ url_for('static', filename=recipe.img_URI) }} alt=”Bananas width="250" height="250"></td>
               <td class="tg-0lax"><a href="/recipe/{{recipe._id}}">{{recipe.title}}</a></td>
-              <td class="tg-0lax"><a  href="update/{{recipe._id}}">Update</a><p>    </p><a href="delete/{{recipe._id}}">Delete</a></td>
+              <td class="tg-0lax"><a  href="/recipe/update/{{recipe._id}}">Update</a><p>    </p><a href="delete/{{recipe._id}}">Delete</a></td>
           </tr>
           
         {% endfor %}

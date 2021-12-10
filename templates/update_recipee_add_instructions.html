@@ -1,0 +1,44 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<h1>Current Instructions</h1>
+    <div class="ya">
+      <ol>
+        {% for stuff in current_recipe.instructions %}
+          <li>{{stuff}}</li>
+        {% endfor %}
+      </ol>
+    </div>
+<h1>Add Instructions</h1>
+<form method="POST" enctype="multipart/form-data" action="" id ="holder">
+  <div class="form-group" id ="instructions">
+    <!-- <input type="text" name="instruct"> -->
+    </div>
+  <p><input type="submit" class="btn btn-primary" value="Submit"></p>
+</form>
+<script>
+  var counter = 0;
+  var inst = document.getElementById("holder");
+  label = "<label for = 'inst_element'>Instruction </label>";
+  button = "<button id = 'inst_button' onmouseover = 'myFunction()'>Hover Here</button>";
+  function myFunction() {
+    counter = counter +1
+    var newbie = document.createElement("DIV");
+    newbie.className = 'form-group';
+    newbie.id = 'instructions'
+    input = "<input type='text' name='instruct"+counter+"'"+"  id = 'inst_element'>";
+    newbie.innerHTML = label + input + button;
+    console.log(newbie.innerHTML)
+    inst.appendChild(newbie);
+    
+    
+    
+  }
+  // window.addEventListener("load", myFunction())
+  // e.preventDefault();
+  // window.onload(
+    myFunction()
+  // )
+
+</script>
+{% endblock %}

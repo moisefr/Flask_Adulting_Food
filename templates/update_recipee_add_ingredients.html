@@ -1,8 +1,16 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<h1>Add Ingredients</h1>
-<form method="POST" enctype="multipart/form-data" action="/add_recipee/ingredients/{{id}}">
+<h1>Current Ingredients</h1>
+    <div class="ya">
+      <ol>
+        {% for stuff in current_ingredients %}
+          <li>{{stuff.title}}</li>
+        {% endfor %}
+      </ol>
+      <h1>Add Ingredients</h1>
+    </div>
+<form method="POST" enctype="multipart/form-data" action="">
     <div class="form-group">
       {% for ingredient in ingredients%}
         <input type="checkbox" name="{{ingredient.title}}" id = {{ingredient._id}} value = "{{ingredient.title}}"/>

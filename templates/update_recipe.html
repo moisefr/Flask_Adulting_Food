@@ -16,7 +16,26 @@
     <div class="form-group">
       <img src={{ url_for('static', filename=form.img_URI) }} alt=”Bananas”  width="60" height="60">
     </div>
-    <input type="checkbox" name="wants-image"/>
-    <p><input type="submit" class="btn btn-primary" value="Submit"></p>
+    <div class="form-group"><p><input type="file" name="file" /></p></div>
+    <h1>Current Ingredients</h1>
+    <div class="form-group">
+      <ol>
+        {% for stuff in form.ingredients %}
+          <li>{{stuff.title}}</li>
+        {% endfor %}
+      </ol>
+      {% for ingredient in ingredients%}
+        <input type="checkbox" name="{{ingredient.title}}" id = {{ingredient._id}} value = "{{ingredient.title}}"/>
+        <label for={{ingredient._id}}> {{ingredient.title}}</label><br>
+      {% endfor %}
+    </div>
+    <h1>Current Instructions</h1>
+    <div class="form-group">
+      <ol>
+        {% for stuff in form.instructions %}
+          <li>{{stuff}}</li>
+        {% endfor %}
+      </ol>
+    <p><input type="submit" class="btn btn-primary" value="Submit and update ingredients"></p>
   </form>
 {% endblock %}
