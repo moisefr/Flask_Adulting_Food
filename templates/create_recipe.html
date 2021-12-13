@@ -18,7 +18,8 @@
       {% for ingredient in ingredients%}
         <input type="checkbox" name="{{ingredient.title}}" id = {{ingredient._id}} value = "{{ingredient.title}}"/>
         <label for={{ingredient._id}}> {{ingredient.title}}</label><br>
-      {% endfor %}
+        <img src ={{ url_for('static', filename=ingredient.img_URI)}} height="100" width="100" />
+        {% endfor %}
     </div>
     <h1>Add Instructions</h1>
     <div id ="holder">

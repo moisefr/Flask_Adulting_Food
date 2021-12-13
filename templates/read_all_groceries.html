@@ -1,0 +1,30 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div>
+  <h1>All Groceries Lists </h1>
+  <table class="table table-dark">
+      <thead>
+        <tr>
+          <td class="tg-0lax">Title</td>
+          <td class="tg-0lax">Link</td>
+          <td class="tg-0lax">Actions</td>
+
+        </tr>
+        {% for grocery in groceries%}
+          <tr>
+              <td class="tg-0lax"><a href="/groceries/{{grocery._id}}">{{grocery.title}}</a></td>
+              <td class="tg-0lax">
+                <ul>{% for ingredient in grocery.ingredients %}
+                    <li>{{ingredient.title}}</li>
+                    {% endfor %}
+                </ul>
+              </td>
+              <td class="tg-0lax"><a  href="/groceries/update/{{grocery._id}}">Update</a><p>    </p><a href="delete/{{grocery._id}}">Delete</a></td>
+          </tr>
+        {% endfor %}
+      </thead>
+  </table>
+</div>
+
+{% endblock %}

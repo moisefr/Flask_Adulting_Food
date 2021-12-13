@@ -49,11 +49,10 @@ class Recipe(Form):
                 "date_created": self.date_created
             }
         )
-
 class Grocerries(Form):
     title = StringField('Title', [validators.Length(min=1, max=50)])
-    ingredients = {}
-    date_created = ''
+    ingredients = []
+    date_created = str(date.today())
     def export(self):
         return (
             {"title": self.title.data, 

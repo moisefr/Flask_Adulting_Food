@@ -26,4 +26,7 @@
   .description-area{
     font-size: x-large;
   }
-  
+  .options-area{
+    font-size: large;
+    color: black;
+  }

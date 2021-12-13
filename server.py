@@ -509,7 +509,7 @@ def delete_recipe(id):
         print("Ammount of recipees BEFORE deletion:" f"{db.ingredients.count_documents({})}")
         try:
             dbAction = db.recipes.delete_one({"_id": ObjectId(id)})
-            print("Ammount of recipes AFTER deletion:" f"{db.ingredients.count_documents({})}")
+            print("Ammount of recipes AFTER deletion:" f"{db.recipes.count_documents({})}")
             #Delete Picture file as well
             #Get file path from the folder
             if os.getcwd().find("static") < 0:
@@ -532,57 +532,97 @@ def delete_recipe(id):
             return("Delete Operation didn't Work")
     return render_template("home.html")
 
-#Grocceries 🛒
+#############********************************************************************Grocceries 🛒
 from Models_Plan import Grocerries
 #Create Routes 👀
 #👽Create Grocerries 
-@app.route("/add_grocerries", methods = ["PUT", "POST", "GET"])
+@app.route("/groceries", methods = ["GET", "POST"])
 def create_grocerries():
+    dbAction = db.recipes.find({})
+    dbAction2 = db.ingredients.find({})
     form = Grocerries(request.form)
-    dbAction = db.recipes.find_one({"title": request.form.get("title")}) 
+    if request.method =="GET":
+        try:
+            recipes = list(dbAction)
+            ingrdients = list(dbAction2)
+        except Exception as ex:
+            return("That shit didn't work")
+    if request.method == "POST":
+        final_ingredients = []
+        types = []
+        for item in request.form.keys():
+            if (item.find("title")>0):
+                id_for_search = item[item.find("id")+15:item.find("title")-5]
+                id_for_search = ObjectId(id_for_search)
+                db_pull = db.ingredients.find_one({"_id": id_for_search})
+                final_ingredients.append(db_pull)
+                types.append(db_pull['type'])
+            elif (item.find("title")):
+                print("title leaf: " + item)
+                id_for_search = item[item.find("id")+15:item.find("title")-5]
+                id_for_search = ObjectId(item)
+                db_pull_recipe = db.recipes.find_one({"_id": id_for_search})
+                db_pull_recipe = dict(db_pull_recipe)
+                for ingredient in db_pull_recipe['ingredients']:
+                    final_ingredients.append(ingredient)
+                    types.append(ingredient['type'])
+            else:
+                print((form.title.data))
+        dbAction_groceries = db.groceries.insert_one({"ingredients": final_ingredients, "title": form.title.data, "date": form.date_created})
+        types = list(set(types))     
+        # dbCheck = db.groceries.find_one({"_id": dbAction.inserted_id})
+        # print(dbCheck) 
+        return render_template('read_groceries.html', ingredients = final_ingredients, types = types)
+    return render_template('add_groceries.html', recipes = recipes, ingredients = ingrdients, form=form)
+#Read Routes 👀
+@app.route('/groceries/<id>', methods = ["GET"])
+def groceries(id):
+    types = []
     if request.method == "GET":
         try:
+            dbAction = db.groceries.find_one({"_id": ObjectId(id)})
             print(dbAction)
-            return Response(
-                    response = json.dumps(
-                            {"message": "Inside the Create Grocerries section"
-                            }),
-                        status = 200,
-                        mimetype='application/json'
-                )
         except Exception as ex:
-            print(request.form.keys())
-            return ("unable to find key recipee for this grocerry list")
+            print("That shit dind't work, can't see all ingredeints")
+    return render_template("see_grocery.html", ingredients = dbAction['ingredients'], identifier = dbAction['title'] + "-" + dbAction['date'])
 
-    #if request.method == "POST":
-
-    if request.method == "POST":
+@app.route("/groceries/all", methods = ["GET"])
+def all_groceries():
+    if request.method == "GET":
         try:
-            recipee_id = ObjectId(dbAction["_id"])
-            form.ingredients = dbAction["ingredients"]
-            form.date_created = request.form.get('date_created')
-            dbAction_gro = db.groceries.insert_one(form.export())
-            print("Groccery Object Made: ", form.export())
+            dbAction = db.groceries.find({})
+            groceries = list(dbAction)
+        except Exception as ex:
+            print("That shit dind't work, can't see all ingredeints")
+    return render_template("read_all_groceries.html", groceries = groceries)
+
+#Delete Routes 🚮
+@app.route("/groceries/delete/<id>", methods =  ['POST', 'GET'])
+def delete_groceries(id): 
+    if request.method == "GET":
+        try:
+            print("Ammount of recipes BEFPRE deletion:" f"{db.groceries.count_documents({})}")
+            dbAction = db.groceries.delete_one({"_id": ObjectId(id)})
+            print("Ammount of recipes AFTER deletion:" f"{db.groceries.count_documents({})}")
+            flash("Deleted grocery list: " f"{id}", "success")
             return Response(
                     response = json.dumps(
-                            {"message" : "Groccery List Made", 
-                            "recipe id": str(recipee_id)
+                            {"message": "just did a delete"
                             }),
                         status = 200,
                         mimetype='application/json'
-                )
+                ) and redirect('/groceries/all')
         except Exception as ex:
-            print(request.form.keys())
-            return ("unable to make groccery list")
-        
-    return "Grocerries Front End Template Placeholer"
+            return ("unable to find key grocery for this grocerry list")
+    
+    return redirect("/")
 
-#Read Routes 👀
+
 
 
 #Update Routes 🚅
 
-#Delete Routes 🚮
+
 
 
 if __name__ == "__main__":
