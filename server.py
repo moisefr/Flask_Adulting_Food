@@ -1,4 +1,4 @@
-##############SET UP 🙏🏾#####################
+##########################################SET UP 🙏🏾#################################################
 #Import Key Libraries: os, flask(response, request), pymango, json, bson.objectid objectid
 import os, sys, stat
 from flask import Flask, Response, request, render_template, flash, redirect, url_for
@@ -23,7 +23,7 @@ except Exception:
     print("Unable to connect to the server.")
     # print(client)
 
-#****************Configuration for File Uploads🌍**************
+#****************Configuration for File Uploads 📂**************
 upload_folder = "static/"
 if not os.path.exists(upload_folder):
    os.mkdir(upload_folder)
@@ -59,9 +59,8 @@ def uploadfile(id):
                 img_file = file
         return img_file
     
-
-##############********************************Routes 🙏🏾****************#####################
-#👽Home Route
+##############********************************Routes 🧳****************#####################
+#Home Route ✅[FE finish]
 @app.route("/", methods = ["GET", "POST"])
 def landing():
     return render_template("home.html")
@@ -97,7 +96,7 @@ def create_ingredient():
     return render_template('/create_ingredient.html', form=form)
  
 ##############Read/Search Routes 📚
-#Standard Read by ID route ✅
+#Standard Read by ID route ✅[FE finish]
 @app.route('/ingredient/<id>', methods = ['GET'])
 def read_ingredient_standard(id):
     if request.method == 'GET':
@@ -117,7 +116,7 @@ def read_ingredient_standard(id):
             return("Unable to retrieve Ingredient")
     return "In standard read route"
 
-##Search against MongoDB✅
+##Search against MongoDB✅   [FE finish]
 @app.route('/ingredient/search',  methods = ['GET', 'POST'])
 def read_ingredient_search():
     form = request.form
@@ -575,6 +574,7 @@ def create_grocerries():
         return render_template('read_groceries.html', ingredients = final_ingredients, types = types)
     return render_template('add_groceries.html', recipes = recipes, ingredients = ingrdients, form=form)
 #Read Routes 👀
+#Singe Read ✅ [FE finish]
 @app.route('/groceries/<id>', methods = ["GET"])
 def groceries(id):
     types = []
@@ -585,7 +585,7 @@ def groceries(id):
         except Exception as ex:
             print("That shit dind't work, can't see all ingredeints")
     return render_template("see_grocery.html", ingredients = dbAction['ingredients'], identifier = dbAction['title'] + "-" + dbAction['date'])
-
+#Read All ✅ [FE finish]
 @app.route("/groceries/all", methods = ["GET"])
 def all_groceries():
     if request.method == "GET":
@@ -595,6 +595,47 @@ def all_groceries():
         except Exception as ex:
             print("That shit dind't work, can't see all ingredeints")
     return render_template("read_all_groceries.html", groceries = groceries)
+
+#Update Routes 🚅
+#Standard update Route ✅ [FE finish]
+@app.route("/groceries/update/<id>",  methods = ["GET", "POST"])
+def update_groceries(id):
+    form = Grocerries(request.form)
+    if request.method == 'GET':
+        dbAction = db.recipes.find({})
+        dbAction2 = db.ingredients.find({})
+        dbGrocery_search = db.groceries.find_one({"_id": ObjectId(id)})
+        form.ingredients = dbGrocery_search['ingredients']
+        form.title.data = dbGrocery_search['title']
+        form.date_created = dbGrocery_search['date']
+        types =[ingredient['type'] for ingredient in form.ingredients]
+        types = list(set(types))
+        print(form.ingredients)
+    if request.method == 'POST':
+        final_ingredients = []
+        types = []
+        for item in request.form.keys():
+            print(item)
+            if (item.find("title")>0):
+                id_for_search = item[item.find("id")+15:item.find("title")-5]
+                id_for_search = ObjectId(id_for_search)
+                db_pull = db.ingredients.find_one({"_id": id_for_search})
+                final_ingredients.append(db_pull)
+                # types.append(dict(db_pull['type']))
+                if db_pull != None:
+                   types.append(db_pull['type'])
+            else:
+                print((form.title.data))
+        dbAction_groceries = db.groceries.update_one(
+            {"_id": ObjectId(id)},
+            {"$set": {"ingredients": final_ingredients, "title": form.title.data, "date": form.date_created}}
+            )
+        types = list(set(types))     
+        # dbCheck = db.groceries.find_one({"_id": dbAction.inserted_id})
+        # print(dbCheck) 
+        # return "Hello"
+        return render_template('read_groceries.html', ingredients = final_ingredients, types = types)
+    return render_template("update_groceries.html", form = form, types = types, ingredients = dbAction2, recipes = dbAction )
 
 #Delete Routes 🚮
 @app.route("/groceries/delete/<id>", methods =  ['POST', 'GET'])
@@ -620,7 +661,7 @@ def delete_groceries(id):
 
 
 
-#Update Routes 🚅
+
 
 
 

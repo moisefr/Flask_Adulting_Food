@@ -3,15 +3,13 @@
 <div>
     {% for type in types %}
         <button class="accordion">{{type}}</button>
-        {% for ingredient in ingredients %}
-            {% if ingredient.type == type %}
-            <div class="panel">
-                <ul>
-                    <li>{{ingredient.title}}</li>
-                </ul>
-            </div>
-            {% endif %}
-        {% endfor %}
+        <div class="panel"> 
+            {% for ingredient in ingredients %}
+                {% if type == ingredient.type %}
+                    <p class="no_ingredient">{{ingredient.title}}</p>
+                {% endif %}
+            {% endfor %}
+        </div>
     {% endfor %}
 </div>
 
