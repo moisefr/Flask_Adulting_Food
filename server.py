@@ -3,13 +3,15 @@
 import os, sys, stat
 from flask import Flask, Response, request, render_template, flash, redirect, url_for
 from werkzeug.utils import secure_filename
-# from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators
 import pymongo
 import json
 from bson.objectid import ObjectId
 #Instantiate app
 app = Flask(__name__)
+
+#Rules of the road
+#**** forcing U&D routes access via the front end only (unless you want to remember ids)
 
 #****************DB Connection 🌍**************
 connection_string = 'mongodb+srv://default_test:yYDiCDe9AJmEXkrF@cluster0.oxeo8.mongodb.net/Adulting_Food?retryWrites=true&w=majority'
@@ -30,17 +32,58 @@ if not os.path.exists(upload_folder):
 app.config['UPLOAD_FOLDER'] = upload_folder
 app.secret_key = 'whatitiscuhwhatisup'
 #######################Handles File Uploads
+#Ingredients
 def uploadfile(id):
+    if request.method == 'POST':
+        f = request.files['file'] # get the file from the files object
+        if os.getcwd().find("static") < 0:
+            os.chdir(os.getcwd()+ '/static')
+        if f.filename =="":
+            for file in os.listdir(os.getcwd()):
+            #👁‍🗨Edit string slicing
+                img_search = file[file.find("_")+1: file.find("-")]
+                handle = file[0: file.find("_")]
+                if (img_search == id and handle == "Ingredient"):
+                    flash('Picture was not updated', 'info')
+                    return file
+                else:
+                     return f
+        else:
+            for file in os.listdir(os.getcwd()):
+                #👁‍🗨Edit string slicing
+                img_search = file[file.find("_")+1: file.find("-")]
+                handle = file[0: file.find("_")]
+                if (img_search == id and handle == "Ingredient"):
+                    os.remove(file)
+                    flash('Old Picture Deleted upload new picture', 'success')
+        if os.getcwd().find("static") < 0:
+            os.chdir(os.getcwd()+ '/static')
+        # Saving the file in the required destination
+        #👁‍🗨Edit string slicing
+        f.save(secure_filename("Ingredient_"+ id + "-" + f.filename))
+      #Get file path from the folder
+        if os.getcwd().find("static") < 0:
+            os.chdir(os.getcwd()+ '/static')
+        for file in os.listdir(os.getcwd()):
+            handle = file[0: file.find("_")]
+            img_search = file[file.find("_")+1: file.find("-")]
+            if (img_search == id and handle == 'Ingredient'):
+                img_file = file
+        return img_file
+
+#Recipes
+def upload_recipe_file(id):
     if request.method == 'GET':
         if os.getcwd().find("static") < 0:
             os.chdir(os.getcwd()+ '/static')
         for file in os.listdir(os.getcwd()):
             #👁‍🗨Edit string slicing
-            img_search = file[0: file.find("-")]
-            if (img_search == id):
+            img_search = file[file.find("_")+1: file.find("-")]
+            handle = file[0: file.find("_")]
+            if (img_search == id and handle == 'Recipe'):
                 os.remove(file)
                 flash('Old Picture Deleted upload new picture', 'success')
-                return
+                return ''
     if request.method == 'POST':
         f = request.files['file'] # get the file from the files object
         if os.getcwd().find("static") < 0:
@@ -68,21 +111,20 @@ def landing():
 #############********************************************************************Ingridients 🍍
 from Models_Plan import Ingredient
 
-##############Create Routes 🦾
-#Create Ingredients ✅[FE finish]
-@app.route("/add_ingredient", methods=["GET","POST"])
+##########################################Create Routes 🦾
+#Create  an Ingredient ✅[FE finish]
+@app.route("/ingredient", methods=["GET","POST"])
 def create_ingredient():
     #this binds form entries to the object class, it's like saying all the 
     #let the data entered in the form or postman map to the attributes defined in the class
     ###👁‍🗨so does 2 things, sends form entries to class attributes and let's you use class methods!!!!
     form = Ingredient(request.form)
     if request.method == "POST" and form.validate():
-        try:   
-            
+        try:    
             dbAction = db.ingredients.insert_one(form.export())
             form.img_URI = uploadfile(str(dbAction.inserted_id))
-            dbUpdate_immage = db.ingredients.update_one({"_id": dbAction.inserted_id},{'$set':{'img_URI': form.img_URI}})
-            print("Ingrident Shell Object Made ", form.export())
+            dbUpdate_image = db.ingredients.update_one({"_id": dbAction.inserted_id},{'$set':{'img_URI': form.img_URI}})
+            flash("Ingredient Added!", 'success')
             return Response(
                 response = json.dumps(
                         {"message": "ingridient created", 
@@ -95,28 +137,27 @@ def create_ingredient():
             return ("unable to create new ingridient")
     return render_template('/create_ingredient.html', form=form)
  
-##############Read/Search Routes 📚
+######################################Read/Search Routes 📚
 #Standard Read by ID route ✅[FE finish]
 @app.route('/ingredient/<id>', methods = ['GET'])
 def read_ingredient_standard(id):
     if request.method == 'GET':
-        flash("Ingredient Added!", 'success')
         try:
             dbConfirm = db.ingredients.find_one({"_id": ObjectId(id)})
             return Response(
                         response = json.dumps(
-                                {"message": "ingridient image added", 
+                                {"message": "Ingredient found", 
                                 "id": f"{dbConfirm['_id']}",
                                 "name": f"{dbConfirm['title']}",
                                 }),
                             status = 200,
                             mimetype='application/json'
-                    ) and render_template('read_ingredient_standard.html', ingredient = dbConfirm)
+                    ) and render_template('read_ingredient.html', ingredient = dbConfirm)
         except Exception as ex:
             return("Unable to retrieve Ingredient")
-    return "In standard read route"
+    return redirect("/")
 
-##Search against MongoDB✅   [FE finish]
+#Search against MongoDB✅   [FE finish]
 @app.route('/ingredient/search',  methods = ['GET', 'POST'])
 def read_ingredient_search():
     form = request.form
@@ -125,23 +166,23 @@ def read_ingredient_search():
             all_ingredients = db.ingredients.find({})
             return Response(
                     response = json.dumps(
-                            {"message": "all ingredients"
+                            {"message": "here are all the ingredients"
                             }),
                         status = 200,
                         mimetype='application/json'
                 ) and render_template('read_ingredient_search.html', ingredients = all_ingredients)
         except  Exception as ex:
-            return('da fuq')
+            return('Unable to return all ingredients')
     if request.method == 'POST':
         tree_filter = form['diselecta']
         tree_filter2 = tree_filter[tree_filter.find("by")+3: len(tree_filter)]
         search = form['dasearch']
         if tree_filter2 == '_id':
-               search = ObjectId(search)
-        print("FIlter is:", tree_filter2, " paylod is:", search)
+            search = ObjectId(search)
         try:   
             dbConfirm = db.ingredients.find({tree_filter2: search})
             dbData = list(dbConfirm)
+            #To Do: 👩🏾‍💻This whole logic tree might go away with a better html element
             if len(dbData) == 1:
                 for doc in dbData:
                     doc['_id'] = str(doc['_id'])
@@ -157,7 +198,6 @@ def read_ingredient_search():
             elif len(dbData) >1 :
                 for doc in dbData:
                     doc['_id'] = str(doc['_id'])
-                print(dbData)
                 return Response(
                     response = json.dumps({"message": "query made successfuly, returning array of ingredients"f"{dbData}"}),
                         status = 200,
@@ -168,28 +208,28 @@ def read_ingredient_search():
     return render_template('read_ingredient_search.html')
 
 ##Search against USGov DB (file)
-
-#👁‍🗨*****Note forcing U&D routes access via the front end (unless you want to remember ids)
-
-##############Update Routes 🚅
+##########################################Update Routes 🚅
 #Standard update Route ✅ [FE finish]
 @app.route('/ingredient/update/<id>', methods = ['GET', 'POST'])
 def update_ingredient(id):
     form = Ingredient(request.form)
+    #Form Binding -Sets data in the form oject attributes to what's already in the database so when html template presents you see the previous data
     dbAction_findrecord = db.ingredients.find_one({"_id": ObjectId(id)})
-    #Set data data in the form oject attributes to what's already in the database
-        #so when html template presents you see the previous data
     form.name.data = dbAction_findrecord['title']
     form.description.data = dbAction_findrecord['description']
     form.state.data = dbAction_findrecord['state']
-    form.type.data = dbAction_findrecord['type']
+    form.type.data = dbAction_findrecord['type']  
+    old_IMG_URI = dbAction_findrecord['img_URI']
+
     if request.method == 'POST':
+        # print(request.form.keys())
         try:
             #create variable placeholders to take any changes you make to the request.form object
             title = request.form['name']
             description = request.form['description']
             state = request.form['state']
             type_ingredient = request.form['type']
+            f = request.files['file'] # get the file from the files object
             form.img_URI = uploadfile(str(id))
             dbAction = db.ingredients.update_one(
                 {"_id": ObjectId(id)},
@@ -205,15 +245,15 @@ def update_ingredient(id):
             )
             flash('Ingredient Updated', 'success')
             return Response(
-                response = json.dumps({"message": "query made successfuly, updated ingredient"}),
+                response = json.dumps({"message": "query made successfuly, updated ingredient " f"{title}"}),
                 status = 200,
                 mimetype='application/json'
             ) and redirect('/ingredient/'f"{id}")
         except Exception as ex:
             return ("Couldn't Update Document")
-    return render_template('/update_ingredient.html', form=form)
+    return render_template('/update_ingredient.html', form=form, current_state = form.state.data, current_type = dbAction_findrecord['type'])
 
-#Delete Route 🚮
+###########################################Delete Route 🚮
 @app.route('/ingredient/delete/<id>', methods = ['GET', 'POST'])
 def delete_ingredient(id):
     if request.method == 'GET':
@@ -227,7 +267,8 @@ def delete_ingredient(id):
                 os.chdir(os.getcwd()+ '/static')
             flash('Ingredient Deleted', 'success')
             for file in os.listdir(os.getcwd()):
-                img_search = file[0: file.find("-")]
+                img_search = file[file.find("_")+1: file.find("-")]
+                # print(img_search)
                 if (img_search == id):
                     os.remove(file)
             flash('Ingredient and image Deleted', 'success')
@@ -621,6 +662,7 @@ def update_groceries(id):
                 id_for_search = ObjectId(id_for_search)
                 db_pull = db.ingredients.find_one({"_id": id_for_search})
                 final_ingredients.append(db_pull)
+                title = request.form['title']
                 # types.append(dict(db_pull['type']))
                 if db_pull != None:
                    types.append(db_pull['type'])
@@ -628,7 +670,7 @@ def update_groceries(id):
                 print((form.title.data))
         dbAction_groceries = db.groceries.update_one(
             {"_id": ObjectId(id)},
-            {"$set": {"ingredients": final_ingredients, "title": form.title.data, "date": form.date_created}}
+            {"$set": {"ingredients": final_ingredients, "title": title, "date": form.date_created}}
             )
         types = list(set(types))     
         # dbCheck = db.groceries.find_one({"_id": dbAction.inserted_id})

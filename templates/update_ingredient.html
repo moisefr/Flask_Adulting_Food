@@ -10,11 +10,37 @@
     <div class="form-group">
       {{render_field(form.description, class_="form-control")}}
     </div>
+    <div>
+      <ul>
+        <li>{{current_state}}</li>
+        <li>{{current_type}}</li>
+      </ul>
+    </div>
+    
     <div class="form-group">
-        {{render_field(form.state, class_="form-control")}}
+      <label for="state">State of Matter: </label>
+      <select id="state" name="state">
+        <option value="solid">Solid</option>
+        <option value="liquid">Liquid</option>
+        <option value="paste">Paste</option>
+        <option value="other">Other</option>
+      </select>
     </div>
     <div class="form-group">
-        {{render_field(form.type, class_="form-control")}}
+      <label for="type">Type of Ingredient: </label>
+      <select id="type" name="type">
+        <option value="Seasoning">Solid</option>
+        <option value="Meat">Animal Protein</option>
+        <option value="Non-Meat">Non-Animal Protein (bean, nuts, legumes)</option>
+        <option value="Fish">Fish</option>
+        <option value="Vegetable">Vegetable</option>
+        <option value="Fruit">Fruit</option>
+        <option value="Grain">Grain</option>
+        <option value="Sweetener">Sweetener</option>
+        <option value="Dairy">Dairy</option>
+        <option value="Lipid">Oil/Fat</option>
+        <option value="other">Other</option>
+      </select>
     </div>
     <div class="form-group"><p><input type="file" name="file" /></p></div>
     <p><input type="submit" class="btn btn-primary" value="Submit"></p>
