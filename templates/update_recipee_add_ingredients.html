@@ -1,17 +1,19 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<h1>Current Ingredients</h1>
-    <div class="ya">
+
+<form method="POST" enctype="multipart/form-data" action="">
+  <h1>Current Ingredients</h1>
+    <div class="form-group">
       <ol>
         {% for stuff in current_ingredients %}
-          <li>{{stuff.title}}</li>
+          <li><input type="checkbox" checked name="{{stuff.title}}" id = {{stuff._id}} value = "{{stuff.title}}"/>
+            <label for={{stuff._id}}> {{stuff.title}}</label><br></li>
         {% endfor %}
       </ol>
       <h1>Add Ingredients</h1>
-    </div>
-<form method="POST" enctype="multipart/form-data" action="">
-    <div class="form-group">
+    </div>  
+  <div class="form-group">
       {% for ingredient in ingredients%}
         <input type="checkbox" name="{{ingredient.title}}" id = {{ingredient._id}} value = "{{ingredient.title}}"/>
         <label for={{ingredient._id}}> {{ingredient.title}}</label><br>

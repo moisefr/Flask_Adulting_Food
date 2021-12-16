@@ -14,11 +14,12 @@
         {{render_field(form.cuisine, class_="form-control")}}
     </div>
     <h1>Add Ingredients</h1>
-    <div class="form-group">
+    <div class="form-group" id = "container2">
       {% for ingredient in ingredients%}
-        <input type="checkbox" name="{{ingredient.title}}" id = {{ingredient._id}} value = "{{ingredient.title}}"/>
         <label for={{ingredient._id}}> {{ingredient.title}}</label><br>
         <img src ={{ url_for('static', filename=ingredient.img_URI)}} height="100" width="100" />
+        <input type="checkbox" name="{{ingredient.title}}" id = {{ingredient._id}} value = "{{ingredient.title}}"/>
+        
         {% endfor %}
     </div>
     <h1>Add Instructions</h1>
@@ -30,6 +31,24 @@
     <div class="form-group"><p><input type="file" name="file" /></p></div>
     <p><input type="submit" class="btn btn-primary" value="Submit"></p>
   </form>
+  <style>
+    #container2 {
+      display: grid; 
+      grid-template-columns: 1fr 1fr 1fr 1fr; 
+      grid-template-rows: 1fr 1fr 1fr 1fr; 
+      gap: 0px 0px; 
+      grid-template-areas: 
+        ". . . "
+        ". . . "
+        ". . . "
+        ". . . "; 
+      justify-content: start; 
+      align-content: center; 
+      justify-items: start; 
+      align-items: center;    
+  }
+
+  </style>
   <script>
     var counter = 0;
     var inst = document.getElementById("holder");

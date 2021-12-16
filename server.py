@@ -32,10 +32,10 @@ if not os.path.exists(upload_folder):
 app.config['UPLOAD_FOLDER'] = upload_folder
 app.secret_key = 'whatitiscuhwhatisup'
 #######################Handles File Uploads
-#Ingredients
-def uploadfile(id):
+def uploadfile(id, route_indicator):
     if request.method == 'POST':
         f = request.files['file'] # get the file from the files object
+        print("File Name Entered: "+f.filename)
         if os.getcwd().find("static") < 0:
             os.chdir(os.getcwd()+ '/static')
         if f.filename =="":
@@ -43,65 +43,34 @@ def uploadfile(id):
             #👁‍🗨Edit string slicing
                 img_search = file[file.find("_")+1: file.find("-")]
                 handle = file[0: file.find("_")]
-                if (img_search == id and handle == "Ingredient"):
-                    flash('Picture was not updated', 'info')
+                if (img_search == id and handle == route_indicator):
                     return file
                 else:
-                     return f
+                     return " "
         else:
             for file in os.listdir(os.getcwd()):
                 #👁‍🗨Edit string slicing
                 img_search = file[file.find("_")+1: file.find("-")]
                 handle = file[0: file.find("_")]
-                if (img_search == id and handle == "Ingredient"):
+                if (img_search == id and handle == route_indicator):
                     os.remove(file)
                     flash('Old Picture Deleted upload new picture', 'success')
         if os.getcwd().find("static") < 0:
             os.chdir(os.getcwd()+ '/static')
         # Saving the file in the required destination
         #👁‍🗨Edit string slicing
-        f.save(secure_filename("Ingredient_"+ id + "-" + f.filename))
+        f.save(secure_filename(route_indicator+"_"+ id + "-" + f.filename))
       #Get file path from the folder
         if os.getcwd().find("static") < 0:
             os.chdir(os.getcwd()+ '/static')
         for file in os.listdir(os.getcwd()):
             handle = file[0: file.find("_")]
             img_search = file[file.find("_")+1: file.find("-")]
-            if (img_search == id and handle == 'Ingredient'):
+            if (img_search == id and handle == route_indicator):
                 img_file = file
+                # print(img_file)
         return img_file
 
-#Recipes
-def upload_recipe_file(id):
-    if request.method == 'GET':
-        if os.getcwd().find("static") < 0:
-            os.chdir(os.getcwd()+ '/static')
-        for file in os.listdir(os.getcwd()):
-            #👁‍🗨Edit string slicing
-            img_search = file[file.find("_")+1: file.find("-")]
-            handle = file[0: file.find("_")]
-            if (img_search == id and handle == 'Recipe'):
-                os.remove(file)
-                flash('Old Picture Deleted upload new picture', 'success')
-                return ''
-    if request.method == 'POST':
-        f = request.files['file'] # get the file from the files object
-        if os.getcwd().find("static") < 0:
-            os.chdir(os.getcwd()+ '/static')
-        # Saving the file in the required destination
-        #👁‍🗨Edit string slicing
-        f.save(secure_filename("Recipe_"+ id + "-" + f.filename))
-      #Get file path from the folder
-        if os.getcwd().find("static") < 0:
-            os.chdir(os.getcwd()+ '/static')
-        
-        for file in os.listdir(os.getcwd()):
-            handle = file[0: file.find("_")]
-            img_search = file[file.find("_")+1: file.find("-")]
-            if (img_search == id and handle == 'Recipe'):
-                img_file = file
-        return img_file
-    
 ##############********************************Routes 🧳****************#####################
 #Home Route ✅[FE finish]
 @app.route("/", methods = ["GET", "POST"])
@@ -122,7 +91,7 @@ def create_ingredient():
     if request.method == "POST" and form.validate():
         try:    
             dbAction = db.ingredients.insert_one(form.export())
-            form.img_URI = uploadfile(str(dbAction.inserted_id))
+            form.img_URI = uploadfile(str(dbAction.inserted_id), 'Ingredient')
             dbUpdate_image = db.ingredients.update_one({"_id": dbAction.inserted_id},{'$set':{'img_URI': form.img_URI}})
             flash("Ingredient Added!", 'success')
             return Response(
@@ -163,7 +132,8 @@ def read_ingredient_search():
     form = request.form
     if request.method == 'GET':
         try:
-            all_ingredients = db.ingredients.find({})
+            all_ingredients = list(db.ingredients.find({}))
+            print(all_ingredients)
             return Response(
                     response = json.dumps(
                             {"message": "here are all the ingredients"
@@ -219,8 +189,6 @@ def update_ingredient(id):
     form.description.data = dbAction_findrecord['description']
     form.state.data = dbAction_findrecord['state']
     form.type.data = dbAction_findrecord['type']  
-    old_IMG_URI = dbAction_findrecord['img_URI']
-
     if request.method == 'POST':
         # print(request.form.keys())
         try:
@@ -228,9 +196,10 @@ def update_ingredient(id):
             title = request.form['name']
             description = request.form['description']
             state = request.form['state']
-            type_ingredient = request.form['type']
-            f = request.files['file'] # get the file from the files object
-            form.img_URI = uploadfile(str(id))
+            type_ingredient = str(request.form['type'])
+            new_IMG_URI = uploadfile(str(id), "Ingredient")
+            if new_IMG_URI == " ":
+                new_IMG_URI = dbAction_findrecord['img_URI']
             dbAction = db.ingredients.update_one(
                 {"_id": ObjectId(id)},
                 {"$set": 
@@ -239,7 +208,7 @@ def update_ingredient(id):
                     "description": description,
                     "state": state,
                     "type": type_ingredient,
-                    "img_URI": form.img_URI
+                    "img_URI": new_IMG_URI
                     }
                 }
             )
@@ -250,7 +219,7 @@ def update_ingredient(id):
                 mimetype='application/json'
             ) and redirect('/ingredient/'f"{id}")
         except Exception as ex:
-            return ("Couldn't Update Document")
+            return ("Couldn't Update Ingredient")
     return render_template('/update_ingredient.html', form=form, current_state = form.state.data, current_type = dbAction_findrecord['type'])
 
 ###########################################Delete Route 🚮
@@ -286,9 +255,9 @@ def delete_ingredient(id):
 
 #############********************************************************************Recipes 🧾
 from Models_Plan import Recipe
-##############Create Routes 🦾
+##########################################Create Routes 🦾
 #Create Recipee => ✅ [FE finish]
-@app.route("/add_recipe", methods = ["GET", "POST"])
+@app.route("/recipe", methods = ["GET", "POST"])
 def create_recipe():
     form = Recipe(request.form)
     ingredients = list(db.ingredients.find({}))
@@ -310,11 +279,10 @@ def create_recipe():
             {"$set": {
                 "ingredients": selected_ingredients,
                 "instructions": instructions,
-                "img_URI": uploadfile(str(dbAction.inserted_id))
+                "img_URI": uploadfile(str(dbAction.inserted_id), "Recipe")
                 }}
             )
             redirector = "/recipe/"f"{dbAction.inserted_id}"
-            flash('Recipe Created', 'sucess') 
             return Response(
                 response = json.dumps(
                         {"message": "Recipee created", 
@@ -327,24 +295,27 @@ def create_recipe():
             return("Couldn't create recipee")
     return render_template('create_recipe.html', form=form, ingredients=ingredients)
 
-##############Read/Search Routes 📚
+######################################Read/Search Routes 📚
 #Standard Read by ID route ✅[FE finish]
 @app.route('/recipe/<id>', methods = ['GET'])
-def read_recipe_standard(id):
+def read_recipe(id):
     if request.method == 'GET':
-        flash("Recipe Added!", 'success')
+        flash("Recipe Created!", 'success')
+        ingredients =[]
         try:
             dbConfirm = db.recipes.find_one({"_id": ObjectId(id)})
             for target in dbConfirm:
                 if target == 'ingredients':
-                    ingredients = dbConfirm[target]
-                    # 
+                    ingredients.extend(dbConfirm[target])
+                    # print(ingredients)
             types = [target['type'] for target in ingredients]
-            print(types)
+            
             types2 = []
             for item in types:
-                if (item not in types2):
+                if (item != ""):
                     types2.append(item)
+            types2 = list(set(types2))
+            print(types2)
             return Response(
                         response = json.dumps(
                                 {"message": "Recipee found", 
@@ -353,7 +324,7 @@ def read_recipe_standard(id):
                                 }),
                             status = 200,
                             mimetype='application/json'
-                    ) and render_template('read_recipe_standard.html', recipe = dbConfirm, ingredient_type= types2)
+                    ) and render_template('read_recipe.html', recipe = dbConfirm, ingredient_type= types2)
         except Exception as ex:
             return("Unable to retrieve Recipe")
     return "/"
@@ -367,6 +338,7 @@ def read_recipe_search():
     if request.method == 'GET':
         dbConfirm = db.recipes.find()
         dbData = list(dbConfirm)
+        print(dbConfirm)
         return Response(
             response = json.dumps(
                     {"message": "recipe found", 
@@ -430,7 +402,7 @@ def read_recipe_search():
 
 #*****Note forcing U&D routes access via the front end (unless you want to remember ids)
 
-##############Update Routes 🚅
+##########################################Update Routes 🚅
 #Standard update Route ✅ [FE finish]
 @app.route('/recipe/update/<id>', methods = ['GET', 'POST'])
 def update_recipe(id):
@@ -443,6 +415,9 @@ def update_recipe(id):
     form.ingredients = dbAction_findrecord['ingredients']
     form.instructions = dbAction_findrecord['instructions']
     if request.method == 'POST':
+        newURI = uploadfile(id, 'Recipe')
+        if newURI == " ":
+            newURI = form.img_URI
         try:
             #create variable placeholders to take any changes you make to the request.form object
             title = request.form['title']
@@ -455,7 +430,7 @@ def update_recipe(id):
                     "title": title,
                     "description": description,
                     "cuisine": state,
-                    "img_URI": uploadfile(id)
+                    "img_URI": newURI
                     }
                 }
             )
@@ -479,12 +454,15 @@ def update_recipee_ingredients(id):
     if request.method == "POST":
         selected_ingredients = [db.ingredients.find_one({"title": target_ingredient}) for target_ingredient in list(request.form.keys())] 
         try:
-            current_ingredients.extend(selected_ingredients)
+            # print("current ingredients " f"{current_ingredients}")
+            # print("selected ingredients " f"{selected_ingredients}")
+            for ingredient in selected_ingredients:
+                if ingredient not in current_ingredients:
+                    current_ingredients.append(ingredient)
             dbAction = db.recipes.update_one(
             {"_id": ObjectId(id)},
             {"$set": {"ingredients": current_ingredients}}
             )
-            print(current_recipe['ingredients'])
             flash('Ingredients Added', 'success')
             return Response(
                     response = json.dumps(
@@ -542,7 +520,7 @@ def update_recipee_instructions(id):
         except Exception as ex:
             return ("unable to add instructions")
 
-#Delete Route 🚮
+############################################Delete Route 🚮
 @app.route('/recipe/delete/<id>', methods = ['GET', 'POST'])
 def delete_recipe(id):
     if request.method == 'GET':
@@ -574,7 +552,7 @@ def delete_recipe(id):
 
 #############********************************************************************Grocceries 🛒
 from Models_Plan import Grocerries
-#Create Routes 👀
+##########################################Create Routes 🦾
 #👽Create Grocerries 
 @app.route("/groceries", methods = ["GET", "POST"])
 def create_grocerries():
@@ -613,8 +591,9 @@ def create_grocerries():
         # dbCheck = db.groceries.find_one({"_id": dbAction.inserted_id})
         # print(dbCheck) 
         return render_template('read_groceries.html', ingredients = final_ingredients, types = types)
-    return render_template('add_groceries.html', recipes = recipes, ingredients = ingrdients, form=form)
-#Read Routes 👀
+    return render_template('create_groceries.html', recipes = recipes, ingredients = ingrdients, form=form)
+
+###########################################Read Routes 👀
 #Singe Read ✅ [FE finish]
 @app.route('/groceries/<id>', methods = ["GET"])
 def groceries(id):
@@ -625,7 +604,7 @@ def groceries(id):
             print(dbAction)
         except Exception as ex:
             print("That shit dind't work, can't see all ingredeints")
-    return render_template("see_grocery.html", ingredients = dbAction['ingredients'], identifier = dbAction['title'] + "-" + dbAction['date'])
+    return render_template("read_grocery.html", ingredients = dbAction['ingredients'], identifier = dbAction['title'] + "-" + dbAction['date'])
 #Read All ✅ [FE finish]
 @app.route("/groceries/all", methods = ["GET"])
 def all_groceries():
@@ -637,7 +616,7 @@ def all_groceries():
             print("That shit dind't work, can't see all ingredeints")
     return render_template("read_all_groceries.html", groceries = groceries)
 
-#Update Routes 🚅
+###########################################Update Routes 🚅
 #Standard update Route ✅ [FE finish]
 @app.route("/groceries/update/<id>",  methods = ["GET", "POST"])
 def update_groceries(id):
@@ -672,14 +651,11 @@ def update_groceries(id):
             {"_id": ObjectId(id)},
             {"$set": {"ingredients": final_ingredients, "title": title, "date": form.date_created}}
             )
-        types = list(set(types))     
-        # dbCheck = db.groceries.find_one({"_id": dbAction.inserted_id})
-        # print(dbCheck) 
-        # return "Hello"
+        types = list(set(types))
         return render_template('read_groceries.html', ingredients = final_ingredients, types = types)
     return render_template("update_groceries.html", form = form, types = types, ingredients = dbAction2, recipes = dbAction )
 
-#Delete Routes 🚮
+###########################################Delete Routes 🚮
 @app.route("/groceries/delete/<id>", methods =  ['POST', 'GET'])
 def delete_groceries(id): 
     if request.method == "GET":
@@ -699,14 +675,6 @@ def delete_groceries(id):
             return ("unable to find key grocery for this grocerry list")
     
     return redirect("/")
-
-
-
-
-
-
-
-
 
 if __name__ == "__main__":
     app.run(port = 5000, debug=True)
