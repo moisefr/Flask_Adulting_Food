@@ -41,3 +41,16 @@ File uploads 😥😐😑 this is where OS and request.files is clutch
 
 11/18/21
 
+<!-- Profile DropDown -->
+            <!-- <div class="dropdown">
+                <a class=" dropdown-toggle" style="color:rgba(255, 255, 255, 0.55)" id="dropdownMenuLink"
+                   data-bs-toggle="dropdown" aria-expanded="false">
+                    UserID: {{g.user.profile.firstName}}
+                </a>
+
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                    <li><a class="dropdown-item" href="{{url_for('userprofile')}}">Profile</a></li>
+                   
+
+                </ul>
+            </div> -->

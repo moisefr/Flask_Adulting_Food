@@ -5,16 +5,21 @@
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="/">Home</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/login">Other</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/login">Log-In</a>
-              </li>
+            <ul class="nav navbar-nav">
+              <li><a href="/" class="btn btn-success">Home</a></li>
+              <li><form method="get" action="login" class="navbar-form navbar-right">
+                <button id="login-button" type="submit" class="btn btn-primary">Login</button>
+            </form></li>
+              {% if current_user.is_authenticated %}
+              <li><a id="profile-button" href="{{ url_for("profile") }}" class="btn btn-secondary">My Profile</a></li>
+              {% endif %}
+          </ul>
+            {% if current_user.is_authenticated %}
+            <form method="post" action="{{ url_for("logout") }}" class="navbar-form navbar-right">
+                <button id="logout-button" type="submit" class="btn btn-danger">Logout</button>
+            </form>
+            {% endif %}
+
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                   Ingredients
@@ -52,7 +57,6 @@
                 </ul>
               </li>
             </ul>
-            <a href="/register" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Create an Account</a>
           </div>
         </div>
       </nav>

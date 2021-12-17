@@ -1,15 +1,41 @@
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, FileField
 from datetime import date
+from flask_login import UserMixin
 
-class User(Form):
-    username = StringField('Name', [validators.Length(min=1, max=50)])
-    email = StringField('lastName', [validators.Length(min=4, max=25)])
-    #password = PasswordField('password', [v])
+class User(UserMixin):
+    
+    """Custom User class."""
 
+    def __init__(self, id_, name, email, preferred_username, given_name, family_name):
+        self.id = id_
+        self.name = name
+        self.email = email
+        self.displayname = preferred_username
+        self.firstName = given_name
+        self.lastName = family_name
+
+
+    def claims(self):
+        """Use this method to render all assigned claims on profile page."""
+        return {
+                'name': self.name,
+                'email': self.email}.items()
+
+    # @staticmethod
+    # def get(user_id):
+    #     return USERS_DB.get(user_id)
+    # @staticmethod
     def export(self):
         return (
-            {"name": self.name, 
-            "lastName": self.lastName
+            {
+            'name': self.name,
+            'OKTAid': self.id,
+            'email': self.email,
+            'displayname': self.displayname,
+            'firstName': self.firstName,
+            'lastName': self.lastName,
+            'profile': {},
+            'favorite_food': ''
             }
         )
 

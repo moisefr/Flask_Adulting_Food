@@ -1,15 +1,151 @@
 ##########################################SET UP 🙏🏾#################################################
 #Import Key Libraries: os, flask(response, request), pymango, json, bson.objectid objectid
-import os, sys, stat
+import os, sys, stat, requests
 from flask import Flask, Response, request, render_template, flash, redirect, url_for
 from werkzeug.utils import secure_filename
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators
 import pymongo
 import json
 from bson.objectid import ObjectId
+from flask_login import (
+    LoginManager,
+    current_user,
+    login_required,
+    login_user,
+    logout_user,
+)
+
+from jwt_okta_middleware import is_access_token_valid, is_id_token_valid, config
+
 #Instantiate app
 app = Flask(__name__)
 
+#Identity and Access Mangement
+#Creating, Loging In, Validating a User
+from Models_Plan import User
+app.config.update({'SECRET_KEY': 'SomethingNotEntirelySecret'}) #used to sign off on tokens
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+
+APP_STATE = 'ApplicationState'
+NONCE = 'SampleNonce'
+
+@login_manager.user_loader
+def load_user(user_id):
+    dbAction = db.users.find_one({"OKTAid": user_id})
+    unique_id = dbAction["OKTAid"]
+    user_email = dbAction["email"]
+    user_firstName = dbAction["firstName"]
+    user_lastName = dbAction["lastName"]
+    user_displayname = dbAction["displayname"]
+    user_fullName = dbAction["name"]
+    #Write to Users Database
+    user = User(
+        id_= unique_id,
+        name = user_fullName,
+        email = user_email,
+        preferred_username= user_displayname,
+        given_name= user_firstName,
+        family_name= user_lastName
+    )
+    return user
+
+# Authorization Code Request to/authorize, redirect to the Okta Widget, then enter credentials for AuthN!
+@app.route("/login")
+def login():
+    # get request params
+    query_params = {'client_id': config["web"]["client_id"],
+                    'redirect_uri': config["web"]["redirect_uri"],
+                    'scope': "openid email profile",
+                    'state': APP_STATE,
+                    'nonce': NONCE,
+                    'response_type': 'code',
+                    'response_mode': 'query'}
+
+    # build request_uri
+    request_uri = "{base_url}?{query_params}".format(
+        base_url=config["web"]["auth_uri"],
+        query_params=requests.compat.urlencode(query_params)
+    )
+    return redirect(request_uri) #Redirect to OKTA
+
+##############Steps 4-6 OIDC Token Exchange  i
+#you get redirect to this endpoint from OKTA to begin token exchange
+@app.route("/authorization-code/callback")  # Step 4 Redirect to authentication prompt
+def callback():
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    code = request.args.get("code") #Step 4 AuthZ code response
+    if not code:
+        return "The code was not returned or is not accessible", 403
+    query_params = {'grant_type': 'authorization_code',
+                    'code': code,
+                    'redirect_uri': request.base_url
+                    }
+    query_params = requests.compat.urlencode(query_params)
+    #This is where the token exchange begins, we send in the token URI from the app
+    #pass in wuth credentials (client ID and secret)
+    #OKTA hoepfully sends back access and ID tokens
+    exchange = requests.post(
+        config["web"]["token_uri"],
+        headers=headers,
+        data=query_params,
+        auth=(config["web"]["client_id"], config["web"]["client_secret"]),
+    ).json() ##############STEP 5 sending credentials to toekn endpoint
+
+    # Get tokens and validate
+    if not exchange.get("token_type"):
+        return "Unsupported token type. Should be 'Bearer'.", 403
+    access_token = exchange["access_token"]  
+    id_token = exchange["id_token"]
+    print("#access TOKEN - 🟢: \n"f"{access_token}\n" +  " #identity TOKEN - 🔵: \n"f"{id_token}")
+    if not is_access_token_valid(access_token, config["web"]["issuer"]):
+        return "Access token is invalid", 403
+    if not is_id_token_valid(id_token, config["web"]["issuer"], config["web"]["client_id"], NONCE):
+        return "ID token is invalid", 403
+    
+    #If tokens are exhcnages successfully then we get user credentials
+    # Authorization flow successful, get userinfo and login user
+    userinfo_response = requests.get(config["web"]["userinfo_uri"],  headers={'Authorization': f'Bearer {access_token}'}).json()
+    unique_id = userinfo_response["sub"]
+    user_email = userinfo_response["email"]
+    user_firstName = userinfo_response["given_name"]
+    user_lastName = userinfo_response["family_name"]
+    user_displayname = userinfo_response["preferred_username"]
+    user_fullName = userinfo_response["name"]
+    #Write to Users Database
+    user = User(
+        id_= unique_id,
+        name = user_fullName,
+        email = user_email,
+        preferred_username= user_displayname,
+        given_name= user_firstName,
+        family_name= user_lastName
+    )
+    # print(user.export())
+    find_already = db.users.find_one({"OKTAid": unique_id})
+    print("found already? "f"{find_already}")
+    if find_already is None:
+        print("User not already found goind to insert one")
+        dbAction = db.users.insert_one(user.export())
+        print(dbAction)
+
+
+    login_user(user)
+
+    return redirect(url_for("profile"))
+#presents the profile endpoint from your app
+@app.route("/profile")
+@login_required
+def profile():
+    return render_template("profile.html", user=current_user)
+    
+@app.route("/logout", methods=["GET", "POST"])
+@login_required
+def logout():
+    logout_user()
+    return redirect("/")
 #Rules of the road
 #**** forcing U&D routes access via the front end only (unless you want to remember ids)
 

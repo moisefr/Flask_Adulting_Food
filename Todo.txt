@@ -41,3 +41,9 @@ tests ingredients for =>state, id,type
 Updates
 Ingredients FE and BE v1 complete
     V2 will search against an established API or us Gov text db
+
+
+
+dict_keys(['sub', 'name', 'locale', 'email', 'preferred_username', 'given_name', 'family_name', 'zoneinfo', 'updated_at', 'email_verified'])
+
+dict_values([00u3cqzhe7TjFgjVK5d7 , Test Tester, en_US, test@gmail.com, test@gmail.com, Test, Tester, America/Los_Angeles, 1639712714, True])
