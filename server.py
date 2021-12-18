@@ -1,7 +1,7 @@
 ##########################################SET UP 🙏🏾#################################################
 #Import Key Libraries: os, flask(response, request), pymango, json, bson.objectid objectid
 import os, sys, stat, requests
-from flask import Flask, Response, request, render_template, flash, redirect, url_for
+from flask import Flask, Response, request, render_template, flash, redirect, url_for, session, logging
 from werkzeug.utils import secure_filename
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators
 import pymongo
@@ -20,6 +20,17 @@ from jwt_okta_middleware import is_access_token_valid, is_id_token_valid, config
 #Instantiate app
 app = Flask(__name__)
 
+#****************DB Connection 🌍**************
+connection_string = 'mongodb+srv://default_test:yYDiCDe9AJmEXkrF@cluster0.oxeo8.mongodb.net/Adulting_Food?retryWrites=true&w=majority'
+client = pymongo.MongoClient(connection_string, serverSelectionTimeoutMS=15000)
+##Check if the connection was made to the DB
+try:
+    # This code will show the client info, use to test connectivity
+    db = client.Adulting_Food
+    print("Connected to Mongo Database  😁: ", "availible data collections are - ", db.list_collection_names() )
+except Exception:
+    print("Unable to connect to the server.")
+
 #Identity and Access Mangement
 #Creating, Loging In, Validating a User
 from Models_Plan import User
@@ -28,9 +39,9 @@ app.config.update({'SECRET_KEY': 'SomethingNotEntirelySecret'}) #used to sign of
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-
 APP_STATE = 'ApplicationState'
 NONCE = 'SampleNonce'
+app.config["SESSION_PERMANENT"] = False
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -149,18 +160,6 @@ def logout():
 #Rules of the road
 #**** forcing U&D routes access via the front end only (unless you want to remember ids)
 
-#****************DB Connection 🌍**************
-connection_string = 'mongodb+srv://default_test:yYDiCDe9AJmEXkrF@cluster0.oxeo8.mongodb.net/Adulting_Food?retryWrites=true&w=majority'
-client = pymongo.MongoClient(connection_string, serverSelectionTimeoutMS=15000)
-##Check if the connection was made to the DB
-try:
-    # This code will show the client info, use to test connectivity
-    db = client.Adulting_Food
-    print("Connected to Mongo Database  😁: ", "availible data collections are - ", db.list_collection_names() )
-except Exception:
-    print("Unable to connect to the server.")
-    # print(client)
-
 #****************Configuration for File Uploads 📂**************
 upload_folder = "static/"
 if not os.path.exists(upload_folder):
@@ -218,7 +217,9 @@ from Models_Plan import Ingredient
 
 ##########################################Create Routes 🦾
 #Create  an Ingredient ✅[FE finish]
+
 @app.route("/ingredient", methods=["GET","POST"])
+@login_required
 def create_ingredient():
     #this binds form entries to the object class, it's like saying all the 
     #let the data entered in the form or postman map to the attributes defined in the class
@@ -410,6 +411,7 @@ def create_recipe():
                         selected_ingredients.append(ingre)
             instructions = [request.form[stuff] for stuff in request.form.keys() if(stuff.__contains__('instruct'))]
             instructions = [instruction for instruction in instructions if(instruction != "")]
+            
             dbAction_ingredients = db.recipes.update_one(
             {"_id": dbAction.inserted_id},
             {"$set": {
@@ -418,6 +420,10 @@ def create_recipe():
                 "img_URI": uploadfile(str(dbAction.inserted_id), "Recipe")
                 }}
             )
+            # dbsearch = db.recipes.find_one({"_id": dbAction.inserted_id})
+            # print(list(dbsearch))
+            # # author = load_user(dbsearch['OKTAid'])
+            # # print(author)
             redirector = "/recipe/"f"{dbAction.inserted_id}"
             return Response(
                 response = json.dumps(

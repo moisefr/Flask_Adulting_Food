@@ -63,6 +63,7 @@ class Recipe(Form):
     instructions =  []
     ingredients = []
     date_created = str(date.today())
+    author = ''
     def export(self):
         return (
             {
@@ -72,7 +73,8 @@ class Recipe(Form):
                 "cuisine": self.cuisine.data,
                 "ingredients": self.ingredients,
                 "instructions": self.instructions,
-                "date_created": self.date_created
+                "date_created": self.date_created,
+                "author": self.author
             }
         )
 class Grocerries(Form):
