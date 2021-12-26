@@ -64,3 +64,22 @@ Krogger Location called{"data":[{"locationId":"09790273","chain":"BP","address":
     {"locationId":"09790273","chain":"BP","address":{"addressLine1":"3608 W CHESTER PIKE","city":"NEWTOWN SQUARE","state":"PA","zipCode":"19073"},"geolocation":{"latitude":39.986509,"longitude":-75.400145,"latLng":"39.986509,-75.400145"},"name":"BP","departments":[{"departmentId":"10","name":"Gas Station"}]},
     {"locationId":"70200835","chain":"JEWELRY","address":{"addressLine1":"502 Christiana Mall","city":"Newark","state":"DE","zipCode":"19702","county":"NEW CASTLE COUNTY"},"geolocation":{"latitude":39.678008,"longitude":-75.652355,"latLng":"39.678008,-75.652355"},"name":"Littman Jewelers - Christiana Mall","hours":{"timezone":"America/New_York","gmtOffset":"(UTC-05:00) Eastern Time (US Canada)","open24":false,"monday":{"open":"10:00","close":"21:00","open24":false},"tuesday":{"open":"10:00","close":"21:00","open24":false},"wednesday":{"open":"10:00","close":"21:00","open24":false},"thursday":{"open":"10:00","close":"21:00","open24":false},"friday":{"open":"10:00","close":"21:00","open24":false},"saturday":{"open":"10:00","close":"21:00","open24":false},"sunday":{"open":"11:00","close":"18:00","open24":false}},"phone":"3023667555"},{"locationId":"70200869","chain":"JEWELRY","address":{"addressLine1":"4403 Black Horse Pike #1096","city":"Mays Landing","state":"NJ","zipCode":"08330","county":"ATLANTIC COUNTY"},"geolocation":{"latitude":39.453913,"longitude":-74.643055,"latLng":"39.453913,-74.643055"},"name":"Littman Jewelers - Hamilton Mall","hours":{"timezone":"America/New_York","gmtOffset":"(UTC-05:00) Eastern Time (US Canada)","open24":false,"monday":{"open":"10:00","close":"21:00","open24":false},"tuesday":{"open":"10:00","close":"21:00","open24":false},"wednesday":{"open":"10:00","close":"21:00","open24":false},"thursday":{"open":"10:00","close":"21:00","open24":false},"friday":{"open":"10:00","close":"21:00","open24":false},"saturday":{"open":"10:00","close":"21:00","open24":false},"sunday":{"open":"11:00","close":"18:00","open24":false}},"phone":"6096419111"},{"locationId":"70200931","chain":"JEWELRY","address":{"addressLine1":"132 Palmer Park Mall","city":"Easton","state":"PA","zipCode":"18045","county":"NORTHAMPTON COUNTY"},"geolocation":{"latitude":40.696598,"longitude":-75.258791,"latLng":"40.696598,-75.258791"},"name":"Littman Jewelers - Palmer Park Mall","hours":{"timezone":"America/New_York","gmtOffset":"(UTC-05:00) Eastern Time (US Canada)","open24":false,"monday":{"open":"10:00","close":"21:00","open24":false},"tuesday":{"open":"10:00","close":"21:00","open24":false},"wednesday":{"open":"10:00","close":"21:00","open24":false},"thursday":{"open":"10:00","close":"21:00","open24":false},"friday":{"open":"10:00","close":"21:00","open24":false},"saturday":{"open":"10:00","close":"21:00","open24":false},"sunday":{"open":"11:00","close":"18:00","open24":false}},"phone":"6102537465"},
     {"locationId":"09790443","chain":"BP","address":{"addressLine1":"1001 PULASKI HWY","city":"HAVRE DE GRACE","state":"MD","zipCode":"21078"},"geolocation":{"latitude":39.54622,"longitude":-76.10734,"latLng":"39.54622,-76.10734"},"name":"BP","departments":[{"departmentId":"10","name":"Gas Station"}]}],"meta":{"pagination":{"start":1,"limit":5,"total":5}}}
+
+
+    <form method="POST"  action="">
+    <div class="form-group">
+        <div class="col"><input type="search" placeholder="Search" aria-label="Search" name = "dasearch"></div>
+    </div>
+    <!-- <div class="form-group">
+      <label for="ingredients">Search for Ingredient</label>
+      <input list="ingredients" name="ingredients" id="ingredients">
+      <datalist id="ingredients">
+        {% for ingredient in ingredients % }
+          <option value="{{ingredients.title}}">
+          <option value="{{ingredients.state}}">
+          <option value="{{ingredients.type}}">
+        {% endfor % }
+      </datalist> 
+    </div> -->
+    <p><input type="submit" class="btn btn-primary" value="Submit"></p>
+  </form>

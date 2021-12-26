@@ -16,28 +16,5 @@
     </div>
     <p><input type="submit" class="btn btn-primary" value="Submit"></p>
   </form>
-  <div>
-    <h1>All Ingredients </h1>
-    <table class="table table-dark">
-        <thead>
-          <tr>
-            <td class="tg-0lax">Title</td>
-            <td class="tg-0lax">image</td>
-            <td class="tg-0lax">Link</td>
-            <td class="tg-0lax">Actions</td>
-
-          </tr>
-          {% for ingredient in ingredients%}
-            <tr>
-                <td class="tg-0lax">{{ingredient.title}}</td>
-                <td class="tg-0lax"><img src={{ url_for('static', filename=ingredient.img_URI) }} alt=”Bananas width="50" height="50"></td>
-                <td class="tg-0lax"><a href="/ingredient/{{ingredient._id}}">{{ingredient.title}}</a></td>
-                <td class="tg-0lax"><a  href="update/{{ingredient._id}}">Update</a><p>    </p><a href="delete/{{ingredient._id}}">Delete</a></td>
-            </tr>
-            
-          {% endfor %}
-        </thead>
-    </table>
-</div>
 
 {% endblock %}

@@ -279,23 +279,26 @@ def read_ingredient_standard(id):
             return("Unable to retrieve Ingredient")
     return redirect("/")
 
-#Search against MongoDB✅   [FE finish]
-@app.route('/ingredient/search',  methods = ['GET', 'POST'])
-def read_ingredient_search():
-    form = request.form
+#✅See All Ingredients in the DB
+@app.route('/ingredient/all', methods = ['GET'])
+def read_ingredients():
     if request.method == 'GET':
         try:
             all_ingredients = list(db.ingredients.find({}))
-            print(all_ingredients)
             return Response(
                     response = json.dumps(
                             {"message": "here are all the ingredients"
                             }),
                         status = 200,
                         mimetype='application/json'
-                ) and render_template('read_ingredient_search.html', ingredients = all_ingredients)
+                ) and render_template('read_ingredient_all.html', ingredients = all_ingredients)
         except  Exception as ex:
             return('Unable to return all ingredients')
+
+#Search against MongoDB✅   [FE finish]
+@app.route('/ingredient/search_complex',  methods = ['GET', 'POST'])
+def read_ingredient_search():
+    form = request.form
     if request.method == 'POST':
         tree_filter = form['diselecta']
         tree_filter2 = tree_filter[tree_filter.find("by")+3: len(tree_filter)]
@@ -305,7 +308,6 @@ def read_ingredient_search():
         try:   
             dbConfirm = db.ingredients.find({tree_filter2: search})
             dbData = list(dbConfirm)
-            #To Do: 👩🏾‍💻This whole logic tree might go away with a better html element
             if len(dbData) == 1:
                 for doc in dbData:
                     doc['_id'] = str(doc['_id'])
@@ -329,6 +331,35 @@ def read_ingredient_search():
         except Exception as ex:
             return ("that shit didn't work")
     return render_template('read_ingredient_search.html')
+
+#Search against MongoDB✅   [FE finish]
+@app.route('/ingredient/search_simple',  methods = ['GET', 'POST'])
+def read_ingredient_search2():
+    form = request.form
+    if request.method == 'GET':
+        try:
+            all_ingredients = list(db.ingredients.find({}))
+            return Response(
+                    response = json.dumps(
+                            {"message": "here are all the ingredients"
+                            }),
+                        status = 200,
+                        mimetype='application/json'
+                ) and render_template('read_ingredient_search2.html', ingredients = all_ingredients)
+        except  Exception as ex:
+            return('Unable to return all ingredients')
+    if request.method == 'POST':
+        try:
+            hold = form.to_dict()
+            searcher = hold['ingredients']
+            dbAction = db.ingredients.find_one({"title": searcher})
+            ingredient_id = dbAction["_id"]
+            return redirect("/ingredient/"f"{ingredient_id}")
+            # return list(dbAction)
+        except Exception as ex:
+            return ("that shit didn't work")
+    return render_template('read_ingredient_search.html')
+
 
 ##Search against USGov DB (file)
 ##########################################Update Routes 🚅
