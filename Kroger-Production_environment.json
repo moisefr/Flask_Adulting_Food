@@ -1,0 +1,11 @@
+{"web": {
+  "id": "bbd44bc4-5f3c-44b8-b806-aa94f2b2ba42",
+  "name": "Kroger - Production",
+  "kroger-tokenUrl": "https://api.kroger.com/v1/connect/oauth2/token",
+  "kroger-authorizationUrl": "https://api.kroger.com/v1/connect/oauth2/authorize",
+  "kroger-redirectUrl": "https://localhost:5000/",
+  "kroger-scopes": "product.compact",
+  "kroger-clientId": "flaskadultingfood-9032108c4e1c750b754e95eaaa2ab7671998664197981776426",
+  "kroger-baseUrl": "https://api.kroger.com/v1",
+  "kroger-clientSecret": "k0L5z80Q0gGI726LTxYm0kTN1CNoOr40dH0XRT74"
+}}

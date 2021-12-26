@@ -2,6 +2,7 @@
 #Import Key Libraries: os, flask(response, request), pymango, json, bson.objectid objectid
 import os, sys, stat, requests
 from flask import Flask, Response, request, render_template, flash, redirect, url_for, session, logging
+from requests.api import get
 from werkzeug.utils import secure_filename
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators
 import pymongo
@@ -119,6 +120,8 @@ def callback():
     #If tokens are exhcnages successfully then we get user credentials
     # Authorization flow successful, get userinfo and login user
     userinfo_response = requests.get(config["web"]["userinfo_uri"],  headers={'Authorization': f'Bearer {access_token}'}).json()
+    # for item in userinfo_response.keys():
+    #     print(userinfo_response.keys())
     unique_id = userinfo_response["sub"]
     user_email = userinfo_response["email"]
     user_firstName = userinfo_response["given_name"]
@@ -150,7 +153,7 @@ def callback():
 @app.route("/profile")
 @login_required
 def profile():
-    return render_template("profile.html", user=current_user)
+    return render_template("profile.html", user = current_user)
     
 @app.route("/logout", methods=["GET", "POST"])
 @login_required
@@ -159,6 +162,19 @@ def logout():
     return redirect("/")
 #Rules of the road
 #**** forcing U&D routes access via the front end only (unless you want to remember ids)
+
+###Testing Prices Middleware => will add feature to groceriy table
+from krogger_middleware import get_zip_code, configuration_var, Engine, authorize, store_locator, product_price
+@app.route("/price", methods = ['GET'])
+def tester():
+    bearer = authorize()
+    zip_code = get_zip_code()
+    locationids = store_locator(zip_code, bearer)
+    product_price("milk", bearer, 70200931)
+    # for location in locationids:
+    #     product_price("milk", bearer,70200931)
+    return "Done"
+
 
 #****************Configuration for File Uploads 📂**************
 upload_folder = "static/"
@@ -318,6 +334,7 @@ def read_ingredient_search():
 ##########################################Update Routes 🚅
 #Standard update Route ✅ [FE finish]
 @app.route('/ingredient/update/<id>', methods = ['GET', 'POST'])
+@login_required
 def update_ingredient(id):
     form = Ingredient(request.form)
     #Form Binding -Sets data in the form oject attributes to what's already in the database so when html template presents you see the previous data
@@ -361,6 +378,7 @@ def update_ingredient(id):
 
 ###########################################Delete Route 🚮
 @app.route('/ingredient/delete/<id>', methods = ['GET', 'POST'])
+@login_required
 def delete_ingredient(id):
     if request.method == 'GET':
         print("Ammount of documents before deletion:" f"{db.ingredients.count_documents({})}")
@@ -395,6 +413,7 @@ from Models_Plan import Recipe
 ##########################################Create Routes 🦾
 #Create Recipee => ✅ [FE finish]
 @app.route("/recipe", methods = ["GET", "POST"])
+@login_required
 def create_recipe():
     form = Recipe(request.form)
     ingredients = list(db.ingredients.find({}))
@@ -547,6 +566,7 @@ def read_recipe_search():
 ##########################################Update Routes 🚅
 #Standard update Route ✅ [FE finish]
 @app.route('/recipe/update/<id>', methods = ['GET', 'POST'])
+@login_required
 def update_recipe(id):
     form = Recipe(request.form)
     dbAction_findrecord = db.recipes.find_one({"_id": ObjectId(id)})
@@ -588,6 +608,7 @@ def update_recipe(id):
 
 #Update Recipee => Add Ingredients ✅ [FE finish]
 @app.route("/recipe/update/ingredients/<id>", methods = ["PUT", "POST", "GET"])
+@login_required
 def update_recipee_ingredients(id):
     form = Recipe(request.form)
     ingredients = list(db.ingredients.find({}))
@@ -625,6 +646,7 @@ def update_recipee_ingredients(id):
 
 #Update Recipee => Add Instructions ✅ [FE finish]
 @app.route("/recipe/update/instructions/<id>", methods = ["PUT", "POST", "GET"])
+@login_required
 def update_recipee_instructions(id):
     # form = Recipe(request.form)
     current_recipe = db.recipes.find_one({"_id": ObjectId(id)})
@@ -664,6 +686,7 @@ def update_recipee_instructions(id):
 
 ############################################Delete Route 🚮
 @app.route('/recipe/delete/<id>', methods = ['GET', 'POST'])
+@login_required
 def delete_recipe(id):
     if request.method == 'GET':
         print("Ammount of recipees BEFORE deletion:" f"{db.ingredients.count_documents({})}")
@@ -738,6 +761,7 @@ def create_grocerries():
 ###########################################Read Routes 👀
 #Singe Read ✅ [FE finish]
 @app.route('/groceries/<id>', methods = ["GET"])
+
 def groceries(id):
     types = []
     if request.method == "GET":
@@ -761,6 +785,7 @@ def all_groceries():
 ###########################################Update Routes 🚅
 #Standard update Route ✅ [FE finish]
 @app.route("/groceries/update/<id>",  methods = ["GET", "POST"])
+@login_required
 def update_groceries(id):
     form = Grocerries(request.form)
     if request.method == 'GET':
@@ -799,6 +824,7 @@ def update_groceries(id):
 
 ###########################################Delete Routes 🚮
 @app.route("/groceries/delete/<id>", methods =  ['POST', 'GET'])
+@login_required
 def delete_groceries(id): 
     if request.method == "GET":
         try:
