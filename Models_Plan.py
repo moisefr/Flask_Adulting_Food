@@ -60,7 +60,7 @@ class Recipe(Form):
     description = TextAreaField('description', [validators.Length(min=4, max=2500)])
     img_URI =''
     cuisine = StringField('Recipee Type')
-    instructions =  []
+    instructions =  {'prep': [], 'execution': []}
     ingredients = []
     date_created = str(date.today())
     author = ''

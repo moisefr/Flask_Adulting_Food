@@ -13,60 +13,185 @@
     <div class="form-group">
         {{render_field(form.cuisine, class_="form-control")}}
     </div>
+    <div class="form-group"><p><input type="file" name="file" />Add a picture</p></div>
     <h1>Add Ingredients</h1>
-    <div class="form-group" id = "container2">
-      {% for ingredient in ingredients%}
-        <label for={{ingredient._id}}> {{ingredient.title}}</label><br>
-        <img src ={{ url_for('static', filename=ingredient.img_URI)}} height="100" width="100" />
-        <input type="checkbox" name="{{ingredient.title}}" id = {{ingredient._id}} value = "{{ingredient.title}}"/>
-        
-        {% endfor %}
+    <div>
+      {% for type in types %}
+            <button class="accordion">{{type}}</button>
+            <div class="panel">
+            <div class="form-group" id = "container2"></div> 
+            {% for ingredient in ingredients%}
+              {% if type == ingredient.type %}
+                <input type="checkbox" name="{{ingredient.title}}" id = {{ingredient._id}} value = "{{ingredient.title}}"/>
+                <label for={{ingredient._id}}> {{ingredient.title}}</label><br>
+                <img src ={{ url_for('static', filename=ingredient.img_URI)}} height="200" width="200" id="ingredient-image" />
+                <input type="number" id="quantity" name="quantity" min="1">
+                <!-- <label for="unit" id = "unit-label">Unit:</label> -->
+                <select name="unit" id="unit">
+                  <optgroup label="Metric">
+                    <option value="of them">Count</option>
+                    <option value="g">grams</option>
+                    <option value="kg">kilograms</option>
+                    <option value="ml">milliliters</option>
+                    <option value="L">Liters</option>
+                  </optgroup>
+                  <optgroup label="That Other Fuck Shit">
+                    <option value="lb">pounds</option>
+                    <option value="oz">ounces</option>
+                    <option value="fl oz">fluid ounces</option>
+                    <option value="cups">cups</option>
+                  </optgroup>
+                </select>
+                <!-- <br><br> -->
+              {% endif %}
+            {% endfor %}
+            </div>
+      {% endfor %}
     </div>
     <h1>Add Instructions</h1>
-    <div id ="holder">
-      <div class="form-group" id ="instructions">
-        <!-- Used Javascript to populate the inside -->
-       </div>
+    <div class="container3">
+      <div id ="holder-prep">
+        <h3>Prep</h3>
+        <div class="form-group" id ="prep">
+          <!-- Used Javascript to populate the inside -->
+         </div>
+      </div>
+      <div id ="holder-execute">
+        <h3>Execution</h3>
+        <div class="form-group" id ="execution">
+          <!-- Used Javascript to populate the inside -->
+         </div>
+      </div>
     </div>
-    <div class="form-group"><p><input type="file" name="file" /></p></div>
     <p><input type="submit" class="btn btn-primary" value="Submit"></p>
   </form>
+
+  <!-- Instructions Finnesse -->
   <style>
     #container2 {
+      margin-left: 20%;
       display: grid; 
-      grid-template-columns: 1fr 1fr 1fr 1fr; 
+      grid-template-columns: min-content auto auto auto min-content 1fr; 
       grid-template-rows: 1fr 1fr 1fr 1fr; 
-      gap: 0px 0px; 
+      gap: 0% 3%; 
       grid-template-areas: 
-        ". . . "
-        ". . . "
-        ". . . "
-        ". . . "; 
+        ". . . . . . "
+        ". . . . . . "
+        ". . . . . . "
+        ". . . . . . "; 
       justify-content: start; 
       align-content: center; 
       justify-items: start; 
       align-items: center;    
   }
-
+    /* #quantity {
+      width: 50%;
+  } */
+  #ingredient-image{
+    padding-bottom: 5%;
+  }
+  #unit{
+    width: 30%;
+  }
+  .container3 {  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr 1fr;
+  gap: 0% 0%;
+  grid-auto-flow: row;
+  justify-content: start;
+  align-content: center;
+  justify-items: start;
+  align-items: center;
+  grid-template-areas:
+    ". ."
+    ". ."
+    ". ."
+    ". .";
+}
   </style>
   <script>
     var counter = 0;
-    var inst = document.getElementById("holder");
-    label = "<label for = 'inst_element'>Instruction </label>";
-    button = "<button id = 'inst_button' onmouseover = 'myFunction()'>Hover Here</button>";
-    function myFunction() {
+    var counter2 = 0;
+    var prep = document.getElementById("holder-prep");
+    var execution = document.getElementById("holder-execute");
+    label = "<label for = 'prep_element'>Prep </label>";
+    prep_button = "<button id = 'inst_button' onmouseover = 'prep_instructions()'>Hover Here</button>";
+    label2 ="<label for = 'execution_element'>Execution </label>";
+    execution_button = "<button id = 'inst_button' onmouseover = 'execution_instructions()'>Hover Here</button>";
+    function prep_instructions() {
       counter = counter +1
       var newbie = document.createElement("DIV");
       newbie.className = 'form-group';
-      newbie.id = 'instructions'
-      input = "<input type='text' name='instruct"+counter+"'"+"  id = 'inst_element'>";
-      newbie.innerHTML = label + input + button;
+      newbie.id = 'prep';
+      input = "<input type='text' name='prep"+counter+"'"+"  id = 'prep_element'>";
+      newbie.innerHTML = label + input + prep_button;
       console.log(newbie.innerHTML)
-      inst.appendChild(newbie);
+      prep.appendChild(newbie);
+    }
+    function execution_instructions() {
+      counter2 = counter2 +1
+      var newbie = document.createElement("DIV");
+      newbie.className = 'form-group';
+      newbie.id = 'execution';
+      input = "<input type='text' name='execution"+counter2+"'"+"  id = 'execution_element'>";
+      newbie.innerHTML = label2 + input + execution_button;
+      console.log(newbie.innerHTML)
+      execution.appendChild(newbie);
     }
     // window.addEventListener("load", myFunction())
     // e.preventDefault();
     // window.onload(
-      myFunction()
+      prep_instructions()
+      execution_instructions()
   </script>
+
+  <!-- Ingredients Finnesse -->
+  <style>
+    /* Style the buttons that are used to open and close the accordion panel */
+  .accordion {
+  background-color: #eee;
+  color: #444;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  outline: none;
+  transition: 0.4s;
+  }
+
+  /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+  .active, .accordion:hover {
+  background-color: #ccc;
+  }
+
+  /* Style the accordion panel. Note: hidden by default */
+  .panel {
+  padding: 0 18px;
+  background-color: white;
+  display: none;
+  overflow: hidden;
+  }
+</style>
+<script>
+  var acc = document.getElementsByClassName("accordion");
+  var i;
+
+  for (i = 0; i < acc.length; i++) {
+  acc[i].addEventListener("click", function(event) {
+      /* Toggle between adding and removing the "active" class,
+      to highlight the button that controls the panel */
+      this.classList.toggle("active");
+
+      /* Toggle between hiding and showing the active panel */
+      var panel = this.nextElementSibling;
+      if (panel.style.display === "block") {
+      panel.style.display = "none";
+      } else {
+      panel.style.display = "block";
+      }
+      event.preventDefault();
+  });
+  }
+</script>
 {% endblock %}

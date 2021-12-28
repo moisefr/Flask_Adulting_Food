@@ -1,37 +1,84 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<head>
+<!-- <head>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/recipe_standard.css') }}">
-</head>
+</head> -->
 <div>
     <h1>{{recipe.title}}</h1>
     <div><img src={{ url_for('static', filename=recipe.img_URI) }} alt=”Bananas”  width="60" height="60"></div>
     <p>{{recipe.description}}</p>
     <h1>Ingredients</h1>
-        
         <div class="main-area">
-            {% for type in ingredient_type %}
             <div class="grid-container">
+                {% for type in ingredient_type %}
                 <div class="grid-item-standard">
                     <div class = "type-area"> {{type}} </div>
                         {% for ingredient in recipe.ingredients %}
-                            {% if ingredient.type == type %}
-                            <ul><li class = "ingredient-area">{{ingredient.title}}</li></ul>
+                            {% if ingredient.ingredient.type == type %}
+                            <div class = "ingredient-area"> <h5>{{ingredient.ingredient.title}}</h5> <h5>- {{ingredient.quantity}} {{ingredient.unit_of_measure}}</h5> </div>
                             {% endif %}
                         {% endfor %}
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
-        
     <div>
         <h1>Instructions</h1>
-        {% for instruction in recipe.instructions %}
-            <ul><li>{{instruction}}</li></ul>
-        {% endfor %}
+        <div class="instruct">
+            <div class="instruct-item"> <h2>Prep</h2>
+                {% for prep in recipe.instructions.prep %}
+                    <ul><li>{{prep}}</li></ul>
+                {% endfor %}
+            </div>
+            <div class="grid-item"> <h2>Execution</h2>
+                {% for exec in recipe.instructions.execution %}
+                    <ul><li>{{exec}}</li></ul>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 </div>
-
-
+<style>
+    .grid-container {
+        display: grid; 
+        grid-template-columns: 1fr 1fr 1fr; 
+        grid-template-rows: 1fr 1fr 1fr; 
+        gap: 0% 0%; 
+        grid-template-areas: 
+        ". . ."
+        ". . ."
+        ". . ."; 
+        justify-content: start; 
+        align-content: center; 
+        justify-items: start; 
+        align-items: center; 
+    }
+    .grid-item-standard {
+        background-color: #f7793e;
+        padding: 20px;
+        font-size: 30px;
+        text-align: center;
+        width: 75%;
+    }
+    .main-area {
+        margin: 0 7.5% -10%  7.5%;
+    }
+    .type-area{
+        font-size: x-large;
+    }
+    .ingredient-area{
+        display: flex;
+    }
+    .instruct {  
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0% 0%;
+        grid-auto-flow: row;
+        justify-content: start;
+        align-content: center;
+        justify-items: start;
+        align-items: center;
+    }
+</style>
 {% endblock %}
