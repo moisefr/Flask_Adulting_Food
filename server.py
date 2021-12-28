@@ -924,6 +924,9 @@ def delete_groceries(id):
 #Testing Area
 @app.route("/test", methods = ['GET', 'POST'])
 def test_route():
+    if request.method == 'POST':
+        form = request.form
+        print(request.form.to_dict())
     return render_template("test.html")
 
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0

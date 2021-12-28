@@ -15,14 +15,18 @@
     <ul id = 'instruction_raw'>hello</ul>
 </div>
 <form method="POST" enctype="multipart/form-data" action="">
+    <div class="headers_instructions">
+        <h1>Prep</h1>
+        <h1>Execution</h1>
+    </div>
     <div id="outer-grid">
-        <div class="holder" id="inner-grid">
-            <div class="holder2">2</div>
-            <div>3</div>
+        <div class="Prep-Area" id="inner-grid">
+            <div class="Order-Prep"><h2>Order</h2></div>
+            <div class="Landing-Prep"><h3>Prep Instructions</h3></div>
         </div>
-        <div id="inner-grid">
-          <div>5</div>
-          <div>6</div>
+        <div class="Execution-Area" id="inner-grid">
+          <div class="Order-Execution"><h2>Order</h2></div>
+          <div class="Landing-Execution"><h3>Execution Instructions</h3></div>
         </div>
       </div>
     <p><input type="submit" class="btn btn-primary" value="Submit"></p>
@@ -50,6 +54,18 @@
     background: lightgreen;
     padding: 8px;
     height: max-content;
+    }
+    .headers_instructions{
+        display: grid; 
+        grid-template-columns: 1fr 1fr; 
+        grid-template-rows: 1fr; 
+        gap: 0% 0%; 
+        grid-template-areas: 
+            ". ."; 
+        justify-content: start; 
+        align-content: center; 
+        justify-items: start; 
+        align-items: center; 
     }
 </style>
 {% endblock %}
