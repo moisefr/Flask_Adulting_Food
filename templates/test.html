@@ -14,16 +14,43 @@
     </div>
     <ul id = 'instruction_raw'>hello</ul>
 </div>
-<!-- <div class="contianer2">
-    <hr>
-</div>
-<div class="instructions-area">
-    <div class="prep-order-holder"><h1>Holder</h1></div>
-    <div class="prep-placement-area"><h1>Placement</h1></div>
-</div> -->
+<form method="POST" enctype="multipart/form-data" action="">
+    <div id="outer-grid">
+        <div class="holder" id="inner-grid">
+            <div class="holder2">2</div>
+            <div>3</div>
+        </div>
+        <div id="inner-grid">
+          <div>5</div>
+          <div>6</div>
+        </div>
+      </div>
+    <p><input type="submit" class="btn btn-primary" value="Submit"></p>
+</form>
 
+<style>
+    #outer-grid {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 8px;
+    }
+    #outer-grid > div {
+    background-color: limegreen;
+    color: white;
+    font-size: 4vw;
+    padding: 8px;
+    }
+    #inner-grid {
+    display: grid;
+    grid-template-columns: 0.3fr 1.7fr;
+    grid-gap: 5px;
+    }
+    #inner-grid > div {
+    background: lightgreen;
+    padding: 8px;
+    height: max-content;
+    }
+</style>
 {% endblock %}
 
-<styles>
-
-</styles>
