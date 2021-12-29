@@ -458,39 +458,42 @@ def create_recipe():
             types2.append(item)
     types2 = list(set(types2))
     if request.method =="POST" and form.validate():
+        recipe_ingredients = []
+        recipe_prep = []
+        recipe_execution = []
         try:
             #Create Recipe Shell
             dbAction = db.recipes.insert_one(form.export())
-            form_array = list(request.form.values())
-            for item in form_array:
-                for ingre in ingredients:
-                    if (item ==ingre['title']):
-                        new_ingredient_object = {"ingredient": ingre, 
-                                                "quantity": request.form["quantity"], 
-                                                "unit_of_measure": request.form["unit"]
-                                                }
-                        selected_ingredients.append(new_ingredient_object)
-            daKeys = request.form.keys()
-            prep = []
-            execution = []
-            for key in daKeys:
-                if key.find('prep')>=0 and request.form[key] !='' :
-                    prep.append(request.form[key])
-                if key.find('execution')>=0 and request.form[key] !='':
-                    execution.append(request.form[key])
-            instructions = {'prep': prep, 'execution': execution}
+            form_dict = request.form.to_dict().items() #Parse The Form, convert request.form to dictionary then to list of Tuples
+            # print(form_dict)
+            all_ingredients =db.ingredients.find({})
+            all_ingredients = list(all_ingredients)
+            for key,value in form_dict:
+                #Show
+                print(key+':'+value)
+                #Handle Ingredients
+                for ingredient in all_ingredients:
+                    if key.find(ingredient['title'])>=0:
+                        recipe_ingredients.append(ingredient)
+                #Handle Instructions
+                if value !='':
+                    if key.find("prep")>=0:
+                        recipe_prep.append({key:value})
+                    elif key.find("execution")>=0:
+                        recipe_execution.append({key:value})
+            instructions = {'prep': recipe_prep, 'execution': recipe_execution}
             dbAction_ingredients = db.recipes.update_one(
             {"_id": dbAction.inserted_id},
             {"$set": {
-                "ingredients": selected_ingredients,
+                "ingredients": recipe_ingredients,
                 "instructions": instructions,
                 "img_URI": uploadfile(str(dbAction.inserted_id), "Recipe")
                 }}
             )
-            dbsearch = db.recipes.find_one({"_id": dbAction.inserted_id})
-            flash("Recipe Created!", 'success')
+            # dbsearch = db.recipes.find_one({"_id": dbAction.inserted_id})
             # author = load_user(dbsearch['OKTAid'])
             # print(author)
+            flash("Recipe Created!", 'success')
             redirector = "/recipe/"f"{dbAction.inserted_id}"
             return Response(
                 response = json.dumps(
@@ -500,7 +503,6 @@ def create_recipe():
                     status = 200,
                     mimetype='application/json'
             )  and redirect(redirector)
-            # redirect(redirector)
         except Exception as ex:
             return("Couldn't create recipee")
     return render_template('create_recipe.html', form=form, ingredients=ingredients, types = types2)
@@ -512,9 +514,6 @@ def read_recipe(id):
         ingredients =[]
         try:
             dbConfirm = db.recipes.find_one({"_id": ObjectId(id)})
-            for target in dbConfirm:
-                if target == 'ingredients':
-                    ingredients.extend(dbConfirm[target])
             types = [target['ingredient']['type'] for target in ingredients]
             types2 = []
             for item in types:
@@ -926,7 +925,18 @@ def delete_groceries(id):
 def test_route():
     if request.method == 'POST':
         form = request.form
-        print(request.form.to_dict())
+        prep = []
+        execution = []
+        for key,value in request.form.to_dict().items():
+            # print(key +": "+value + "\n")
+            print(value)
+            if value !='':
+                if key.find("prep")>=0:
+                    prep.append({key:value})
+                elif key.find("execution")>=0:
+                    execution.append({key:value})
+        print(prep)
+        print(execution)
     return render_template("test.html")
 
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0

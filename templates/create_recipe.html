@@ -25,7 +25,7 @@
                 <input type="checkbox" name="{{ingredient.title}}" id = {{ingredient._id}} value = "{{ingredient.title}}"/>
                 <label for={{ingredient._id}}> {{ingredient.title}}</label><br>
                 <img src ={{ url_for('static', filename=ingredient.img_URI)}} height="200" width="200" id="ingredient-image" />
-                <input type="number" id="quantity" name="quantity" min="1">
+                <input type="number" id='quantity' name="quantity" min="1">
                 <!-- <label for="unit" id = "unit-label">Unit:</label> -->
                 <select name="unit" id="unit">
                   <optgroup label="Metric">
@@ -49,101 +49,39 @@
       {% endfor %}
     </div>
     <h1>Add Instructions</h1>
-    <div class="container3">
-      <div id ="holder-prep">
-        <h3>Prep</h3>
-        <div class="form-group" id ="prep">
-          <!-- Used Javascript to populate the inside -->
+    <h3>Click Add Instructions Button To generate a draggable list item</h3>
+    <h3>Drag these list items to your preferred ordered in the Prep and Execution Columns</h3>
+    <h4>Hovering Over the Green Boxes will generate a new Droppable List Input, Drag and Drop and watch the maigc!</h4>
+    <div>
+      <p><input type="submit" class="btn btn-primary" value="Submit"></p>
+      <div class="continer">
+        <div class="input-area">
+            <label for = 'element'>Instruction</label>
+            <input type="text" name = 'Instruction' id="input-holder">
+            <button id='inst_button' type="button">Click To Add Instruction List Item</button>
          </div>
+         <ul id = 'instruction_raw'></ul>
       </div>
-      <div id ="holder-execute">
-        <h3>Execution</h3>
-        <div class="form-group" id ="execution">
-          <!-- Used Javascript to populate the inside -->
-         </div>
+      
+      <div class="form-group">
+        <div class="headers_instructions">
+          <h1>Prep</h1>
+          <h1>Execution</h1>
+      </div>
+      <div id="outer-grid">
+          <div  id="inner-grid">
+              <div class="Order-Prep"><h2>Order</h2></div>
+              <div class = "Landing-Prep" ><h2>Prep Instructions</h2></div>
+          </div>
+          <div class="form-group" id="inner-grid">
+            <div class="Order-Execution"><h2>Order</h2></div>
+            <div class="Landing-Execution"><h3>Execution Instructions</h3></div>
+          </div>
+        </div>
       </div>
     </div>
-    <p><input type="submit" class="btn btn-primary" value="Submit"></p>
   </form>
 
-  <!-- Instructions Finnesse -->
-  <style>
-    #container2 {
-      margin-left: 20%;
-      display: grid; 
-      grid-template-columns: min-content auto auto auto min-content 1fr; 
-      grid-template-rows: 1fr 1fr 1fr 1fr; 
-      gap: 0% 3%; 
-      grid-template-areas: 
-        ". . . . . . "
-        ". . . . . . "
-        ". . . . . . "
-        ". . . . . . "; 
-      justify-content: start; 
-      align-content: center; 
-      justify-items: start; 
-      align-items: center;    
-  }
-    /* #quantity {
-      width: 50%;
-  } */
-  #ingredient-image{
-    padding-bottom: 5%;
-  }
-  #unit{
-    width: 30%;
-  }
-  .container3 {  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr 1fr 1fr;
-  gap: 0% 0%;
-  grid-auto-flow: row;
-  justify-content: start;
-  align-content: center;
-  justify-items: start;
-  align-items: center;
-  grid-template-areas:
-    ". ."
-    ". ."
-    ". ."
-    ". .";
-}
-  </style>
-  <script>
-    var counter = 0;
-    var counter2 = 0;
-    var prep = document.getElementById("holder-prep");
-    var execution = document.getElementById("holder-execute");
-    label = "<label for = 'prep_element'>Prep </label>";
-    prep_button = "<button id = 'inst_button' onmouseover = 'prep_instructions()'>Hover Here</button>";
-    label2 ="<label for = 'execution_element'>Execution </label>";
-    execution_button = "<button id = 'inst_button' onmouseover = 'execution_instructions()'>Hover Here</button>";
-    function prep_instructions() {
-      counter = counter +1
-      var newbie = document.createElement("DIV");
-      newbie.className = 'form-group';
-      newbie.id = 'prep';
-      input = "<input type='text' name='prep"+counter+"'"+"  id = 'prep_element'>";
-      newbie.innerHTML = label + input + prep_button;
-      console.log(newbie.innerHTML)
-      prep.appendChild(newbie);
-    }
-    function execution_instructions() {
-      counter2 = counter2 +1
-      var newbie = document.createElement("DIV");
-      newbie.className = 'form-group';
-      newbie.id = 'execution';
-      input = "<input type='text' name='execution"+counter2+"'"+"  id = 'execution_element'>";
-      newbie.innerHTML = label2 + input + execution_button;
-      console.log(newbie.innerHTML)
-      execution.appendChild(newbie);
-    }
-    // window.addEventListener("load", myFunction())
-    // e.preventDefault();
-    // window.onload(
-      prep_instructions()
-      execution_instructions()
-  </script>
 
   <!-- Ingredients Finnesse -->
   <style>
@@ -194,4 +132,42 @@
   });
   }
 </script>
+
+  <!-- Instructions Finnesse 2 -->
+<style>
+  #outer-grid {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 8px;
+  }
+  #outer-grid > div {
+  background-color: limegreen;
+  color: white;
+  font-size: 4vw;
+  padding: 8px;
+  }
+  #inner-grid {
+  display: grid;
+  grid-template-columns: 0.2fr 1.8fr;
+  grid-gap: 5px;
+  }
+  #inner-grid > div {
+  background: lightgreen;
+  padding: 8px;
+  height: max-content;
+  }
+  .headers_instructions{
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      grid-template-rows: 1fr; 
+      gap: 0% 0%; 
+      grid-template-areas: 
+          ". ."; 
+      justify-content: start; 
+      align-content: center; 
+      justify-items: start; 
+      align-items: center; 
+  }
+</style>
 {% endblock %}

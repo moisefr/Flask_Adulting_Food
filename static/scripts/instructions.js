@@ -1,33 +1,46 @@
-// $(function(){
-//     $("#instruction_raw").draggable()
-//     // jQuery methods go here...
-// });
-
 $(function(){
     var counter = 0;
-    $("#inst_button").click(function(){
-        // e.preventDefault()
-        
+    var prelim_instruction;
+    // window.onload($(function(){
+    //     $("#instruction_raw").prepend("Drag Each List Item in order of instruction");
+    // }))
+    // Insturction Generator
+    $("#inst_button").click(function(e){
         value = $("#input-holder").val()
-        // new_input = "<div class='input-area'>" + label + input + button +"</div>"
-        new_input = "<li>" + value +"</li>"
+        new_input = "<li id ='prelim_instruction'>" + value +"</li>"
         $("#instruction_raw").append(new_input);
-        $("li").draggable()
-        // console.log(counter)
-       
-        // window.alert("huh")
+        // Draggable Instructions
+        $("li").draggable({
+            cursor: "move",
+            drag: function( event, ui ) {
+                prelim_instruction = $(this).text();
+                $(this).css({
+                    "background-color": "yellow", 
+                    "font-size": "125%",
+                    "list-style-type": "none",
+                    "width": "10%",
+                    "height":" 35px"
+                });
+             }
+        });
+        e.preventDefault()
       });
+    //  Form Landing Sites
     $("#outer-grid").hover(function(){
         counter = counter + 1;
-        // window.alert(counter)
-        // counting = "<div class= 'form-group'>" + "<input type='text' name='execution"+counter2+"'"+"  id = 'execution_element'>"+counter+"</div>"
-        $(".Order-Prep").append("<div class= 'form-group'><h3><label for ='hold'>"+counter+"</label><input type='text' style='display:none' name='hold'></h3></div>");
-        $(".Landing-Prep").append("<div class= 'form-group'><h3><input type='text' name='prep" +counter+"'"+"></h3></div>");
-        $(".Order-Execution").append("<div class= 'form-group'><h3><label for ='execution"+ counter+"'>"+counter+"</label><input type='text' style='display:none' name='execution" +counter+"'"+"></h3></div>");
-        $(".Landing-Execution").append("<div class = 'form-group'><h2/></div>")
-        
-
-        // window.alert('ya')
+        $(".Order-Prep").append("<div class= 'form-group'><h2><label for ='hold'>"+counter+"</label><input type='text' style='display:none' name='hold'></h2></div>");
+        $(".Landing-Prep").append("<div class= 'form-group'><h4><input  type='text' name='prep" +counter+"'"+"></h4></div>");
+        $(".Order-Execution").append("<div class= 'form-group'><h2><label for ='hold'>"+counter+"</label><input type='text' style='display:none' name='hold'></h2></div>");
+        $(".Landing-Execution").append("<div class= 'form-group'><h4><input  type='text' name='execution" +counter+"'"+"></h4></div>");
+        $("input").droppable({
+            activeClass: "active",
+            hoverClass:  "hover",
+            drop: function( event, ui ) {
+               $( this ).addClass( "ui-state-highlight" );
+               $( this ).addClass( "ui-widget-header" );
+               $( this ).val(prelim_instruction);
+            }
+         });
     });
     // jQuery methods go here...
     // $("#inner-grid").droppable()

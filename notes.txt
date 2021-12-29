@@ -83,3 +83,6 @@ Krogger Location called{"data":[{"locationId":"09790273","chain":"BP","address":
     </div> -->
     <p><input type="submit" class="btn btn-primary" value="Submit"></p>
   </form>
+
+
+  div id = "draggable" class = "ui-widget-content"
