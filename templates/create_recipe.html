@@ -18,14 +18,14 @@
     <div>
       {% for type in types %}
             <button class="accordion">{{type}}</button>
-            <div class="panel">
+            <div class="panel"> <br><br>
             {% for ingredient in ingredients%}
               {% if type == ingredient.type %}
                 <div class="form-group">
                   <input type="checkbox" name="{{ingredient.title}}" id = {{ingredient._id}} value = "{{ingredient.title}}"/>
-                  <label for={{ingredient._id}}> {{ingredient.title}}</label>
+                  <label for={{ingredient._id}} style="width: 15%;"> {{ingredient.title}}</label>
                   <img src ={{ url_for('static', filename=ingredient.img_URI)}} height="200" width="200" id="ingredient-image" />
-                  <input type="number" id='quantity' name="quantity_{{ingredient.title}}" min="1">
+                  <input type="number" id='quantity' name="quantity_{{ingredient.title}}" min="1"> 
                   <select name="unit_{{ingredient.title}}" id="unit">
                     <optgroup label="Metric">
                       <option value="of them">Count</option>
@@ -41,7 +41,7 @@
                       <option value="cups">cups</option>
                     </optgroup>
                   </select>
-                  <!-- <br><br> -->
+                  <br><br>
                 </div>
               {% endif %}
             {% endfor %}
