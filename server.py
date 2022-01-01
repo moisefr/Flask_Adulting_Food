@@ -653,10 +653,9 @@ def read_recipe_search2():
 #*****Note forcing U&D routes access via the front end (unless you want to remember ids)
 
 ##########################################Update Routes 🚅
-
-@app.route('/recipe/update2/<id>', methods = ['GET', 'POST'])
+@app.route('/recipe/update/<id>', methods = ['GET', 'POST'])
 @login_required
-def update_recipe2(id):
+def update_recipe(id):
     form = Recipe(request.form)
     #Pulling Data from DB so we can show it
     dbAction_findrecord = db.recipes.find_one({"_id": ObjectId(id)})
@@ -769,135 +768,6 @@ def update_recipe2(id):
         except Exception as ex:
             return ("Couldn't Update Document")
     
-
-
-#Standard update Route ✅ [FE finish]
-@app.route('/recipe/update/<id>', methods = ['GET', 'POST'])
-@login_required
-def update_recipe(id):
-    form = Recipe(request.form)
-    #Pulling Data from DB so we can show it
-    dbAction_findrecord = db.recipes.find_one({"_id": ObjectId(id)})
-    form.title.data = dbAction_findrecord['title']
-    form.description.data = dbAction_findrecord['description']
-    form.cuisine.data = dbAction_findrecord['cuisine']
-    form.img_URI = dbAction_findrecord['img_URI']
-    form.ingredients = dbAction_findrecord['ingredients']
-    form.instructions = dbAction_findrecord['instructions']
-    if request.method == 'POST':
-        newURI = uploadfile(id, 'Recipe')
-        if newURI == " ":
-            newURI = form.img_URI
-        try:
-            #create variable placeholders to take any changes you make to the request.form object
-            title = request.form['title']
-            description = request.form['description']
-            state = request.form['cuisine']
-            dbAction = db.recipes.update_one(
-                {"_id": ObjectId(id)},
-                {"$set": 
-                    {
-                    "title": title,
-                    "description": description,
-                    "cuisine": state,
-                    "img_URI": newURI
-                    }
-                }
-            )
-            flash('Recipe Updated', 'success')
-            return Response(
-                response = json.dumps({"message": "query made successfuly, updated ingredient"}),
-                status = 200,
-                mimetype='application/json'
-            ) and redirect('/recipe/update/ingredients/'f"{id}")
-        except Exception as ex:
-            return ("Couldn't Update Document")
-    return render_template('/update_recipe.html', form=form)
-
-#Update Recipee => Add Ingredients ✅ [FE finish]
-@app.route("/recipe/update/ingredients/<id>", methods = ["PUT", "POST", "GET"])
-@login_required
-def update_recipee_ingredients(id):
-    form = Recipe(request.form)
-    ingredients = list(db.ingredients.find({}))
-    current_recipe = db.recipes.find_one({"_id": ObjectId(id)})
-    current_ingredients = current_recipe['ingredients']
-    if request.method == "POST":
-        selected_ingredients = [db.ingredients.find_one({"title": target_ingredient}) for target_ingredient in list(request.form.keys())] 
-        try:
-            for ingredient in selected_ingredients:
-                if ingredient not in current_ingredients:
-                    current_ingredients.append(ingredient)
-            dbAction = db.recipes.update_one(
-            {"_id": ObjectId(id)},
-            {"$set": {"ingredients": current_ingredients}}
-            )
-            flash('Ingredients Added', 'success')
-            return Response(
-                    response = json.dumps(
-                        {"message": "Recipee ingridients added"}),
-                        status = 200,
-                        mimetype='application/json'
-                ) and redirect("/recipe/update/instructions/"f"{id}")
-        except Exception as ex:
-            return ("unable to add the ingredients")   
-    if request.method == 'GET':
-        types = [target['type'] for target in ingredients]
-        types2 = []
-        for item in types:
-            if (item != ""):
-                types2.append(item)
-        types2 = list(set(types2))
-        titles = [item['title'] for item in current_ingredients ]
-        return Response(
-                    response = json.dumps(
-                            {"message": "Inside the Create Recipee Add Ingredients psection", 
-                            "id": f"{id}"
-                            }),
-                        status = 200,
-                        mimetype='application/json'
-                ) and render_template('update_recipee_add_ingredients.html', ingredients = ingredients, id = id, current_ingredients = current_ingredients, types = types2, titles = titles)
-
-#Update Recipee => Add Instructions ✅ [FE finish]
-@app.route("/recipe/update/instructions/<id>", methods = ["PUT", "POST", "GET"])
-@login_required
-def update_recipee_instructions(id):
-    # form = Recipe(request.form)
-    current_recipe = db.recipes.find_one({"_id": ObjectId(id)})
-    current_instructions = current_recipe['instructions']
-    # form.instructions.append(request.form.get("instructions"))
-    if request.method == 'GET':
-        print(current_instructions)
-        return Response(
-            response = json.dumps(
-                    {"message": "Inside the Create Recipee Add Instructions section", 
-                    "id": id
-                    }),
-                status = 200,
-                mimetype='application/json'
-        ) and render_template('update_recipee_add_instructions.html', current_recipe = current_recipe)
-
-    if request.method == "POST":
-        print("Request form: " f"{list(request.form.keys())}" + "id: ", id)
-        new_instructions = list(request.form.values())
-        current_instructions.extend(new_instructions)
-        final_instructions = [item for item in current_instructions if item != '']
-        try:
-            dbAction = db.recipes.update_one(
-            {"_id": ObjectId(id)},
-            {"$set": {"instructions": final_instructions}}
-            )
-            return Response(
-                    response = json.dumps(
-                            {"message": "Recipee Instructions added", 
-                            "id": id
-                            }),
-                        status = 200,
-                        mimetype='application/json'
-                ) and redirect("/recipe/"f"{id}")
-        except Exception as ex:
-            return ("unable to add instructions")
-
 ############################################Delete Route 🚮
 @app.route('/recipe/delete/<id>', methods = ['GET', 'POST'])
 @login_required
