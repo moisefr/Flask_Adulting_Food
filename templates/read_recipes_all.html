@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<head>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/read_recipe_search.css') }}">
+</head>
+
+<div>
+  <h1>Here are all the availible recipes </h1>
+  <div class="grid-container">
+      {% for recipe in recipes%}
+      <div class= grid-item>
+          <h4><a href="/recipe/{{recipe._id}}">{{recipe.title}}</a></h4>
+          <div class="image-area"><img src={{ url_for('static', filename=recipe.img_URI) }} alt=”Bananas width="100" height="100"></div>
+          <div class="description-area"><p>{{recipe.description}}</p></div>
+          <div class="options-area"><p><a  href="update/{{recipe._id}}">Update</a></p><p><a href="delete/{{recipe._id}}">Delete</a></p></div>
+      </div>
+      {% endfor %}
+  </div>
+
+{% endblock %}

@@ -1,4 +1,4 @@
-##########################################SET UP 🙏🏾#################################################
+######################################################################********************************SET UP 🙏🏾********************************#################################################
 #Import Key Libraries: os, flask(response, request), pymango, json, bson.objectid objectid
 import os, sys, stat, requests
 from flask import Flask, Response, request, render_template, flash, redirect, url_for, session, logging
@@ -18,8 +18,7 @@ from flask_login import (
 from jwt_okta_middleware import is_access_token_valid, is_id_token_valid, config
 #Instantiate app
 app = Flask(__name__)
-
-#****************DB Connection 🌍**************
+#************************************************DB Connection 🌍**********************************************
 connection_string = 'mongodb+srv://default_test:yYDiCDe9AJmEXkrF@cluster0.oxeo8.mongodb.net/Adulting_Food?retryWrites=true&w=majority'
 client = pymongo.MongoClient(connection_string, serverSelectionTimeoutMS=15000)
 ##Check if the connection was made to the DB
@@ -171,13 +170,13 @@ def tester():
     #     product_price("milk", bearer,70200931)
     return "Done"
 
-#****************Configuration for File Uploads 📂**************
+#************************************************Configuration for File Uploads 📂**************
 upload_folder = "static/"
 if not os.path.exists(upload_folder):
    os.mkdir(upload_folder)
 app.config['UPLOAD_FOLDER'] = upload_folder
 app.secret_key = 'whatitiscuhwhatisup'
-#######################Handles File Uploads
+#######################********************************Handles File Uploads ⬆
 def uploadfile(id, route_indicator):
     if request.method == 'POST':
         f = request.files['file'] # get the file from the files object
@@ -217,7 +216,7 @@ def uploadfile(id, route_indicator):
                 # print(img_file)
         return img_file
 
-##############********************************Routes 🧳****************#####################
+######################################################################********************************Routes 🧳****************#################################################
 #Home Route ✅[FE finish]
 @app.route("/", methods = ["GET", "POST"])
 def landing():
@@ -228,7 +227,6 @@ from Models_Plan import Ingredient
 
 ##########################################Create Routes 🦾
 #Create  an Ingredient ✅[FE finish]
-
 @app.route("/ingredient", methods=["GET","POST"])
 @login_required
 def create_ingredient():
@@ -290,7 +288,7 @@ def read_ingredients():
         except  Exception as ex:
             return('Unable to return all ingredients')
 
-#Search against MongoDB✅   [FE finish]
+#Complex Search against MongoDB✅   [FE finish]
 @app.route('/ingredient/search_complex',  methods = ['GET', 'POST'])
 def read_ingredient_search():
     form = request.form
@@ -314,7 +312,7 @@ def read_ingredient_search():
                             }),
                         status = 200,
                         mimetype='application/json'
-                ) and render_template('read_ingredient_search_display.html', ingredients = dbData, type_search = tree_filter2)
+                ) and render_template('read_ingredient_search.html', ingredients = dbData, type_search = tree_filter2)
             elif len(dbData) >1 :
                 for doc in dbData:
                     doc['_id'] = str(doc['_id'])
@@ -322,12 +320,12 @@ def read_ingredient_search():
                     response = json.dumps({"message": "query made successfuly, returning array of ingredients"f"{dbData}"}),
                         status = 200,
                         mimetype='application/json'
-                ) and render_template('read_ingredient_search_display.html', ingredients = dbData, type_search = tree_filter2)
+                ) and render_template('read_ingredient_search.html', ingredients = dbData, type_search = tree_filter2)
         except Exception as ex:
             return ("that shit didn't work")
     return render_template('read_ingredient_search.html')
-
-#Search against MongoDB✅   [FE finish]
+   
+#Simple Search against MongoDB✅   [FE finish]
 @app.route('/ingredient/search_simple',  methods = ['GET', 'POST'])
 def read_ingredient_search2():
     form = request.form
@@ -353,7 +351,6 @@ def read_ingredient_search2():
             # return list(dbAction)
         except Exception as ex:
             return ("that shit didn't work")
-    return render_template('read_ingredient_search.html')
 
 ##Search against USGov DB (file)
 
@@ -552,44 +549,44 @@ def read_recipe(id):
         except Exception as ex:
             return("Unable to retrieve Recipe")
 
+#Standard show all recipes ✅[FE finish]
+@app.route('/recipe/all', methods = ['GET'])
+def read_recipes():
+    if request.method == 'GET':
+        try:
+            all_recipes = list(db.recipes.find({}))
+            return Response(
+                    response = json.dumps(
+                            {"message": "here are all the recipes"
+                            }),
+                        status = 200,
+                        mimetype='application/json'
+                ) and render_template('read_recipes_all.html', recipes = all_recipes)
+        except  Exception as ex:
+            return('Unable to return all ingredients')
+
 ##Search against MongoDB✅ [FE finish]
 @app.route('/recipe/search_complex',  methods = ['GET', 'POST'])
 def read_recipe_search():
     form = request.form
     #Do Get Landing Request that sends back the table of all posible recipes?
     if request.method == 'GET':
-        dbConfirm = db.recipes.find({})
-        dbData = list(dbConfirm)
-        print(dbConfirm)
-        return Response(
-            response = json.dumps(
-                    {"message": "recipe found", 
-                    "id": f"{dbData[0]['_id']}",
-                    "name": f"{dbData[0]['title']}",
-                    }),
-                status = 200,
-                mimetype='application/json'
-        ) and render_template('read_recipe_search.html', recipes = dbData)
+        return render_template('read_recipe_search.html')
     if request.method == 'POST':
         tree_filter = form['diselecta']
         tree_filter2 = tree_filter[tree_filter.find("by")+3: len(tree_filter)]
         search = form['dasearch']
         if tree_filter2 == '_id':
-               search = ObjectId(search)
-        print("FIlter is:", tree_filter2, " paylod is:", search)
+            search = ObjectId(search)
         try:   
-            dbConfirm =  db.recipes.find({tree_filter2: search})
-            # dbConfirm = db.recipes.find_one({tree_filter2: search})
+            dbConfirm = db.recipes.find({tree_filter2: search})
             dbData = list(dbConfirm)
-            print("DB Data: "f"{dbData}")
-            #Search by Ingredient
             if len(dbData) == 0:
                 stringer = tree_filter2+".title"
                 new_cur = db.recipes.find({stringer: search})
                 new_list = list(new_cur)
                 for doc in new_list:
                     doc['_id'] = str(doc['_id'])
-                print(new_list)
                 return Response(
                     response = json.dumps(
                             {"message": "recipe found", 
@@ -598,11 +595,10 @@ def read_recipe_search():
                             }),
                         status = 200,
                         mimetype='application/json'
-                ) and render_template('read_recipe_search_display.html', recipes = new_list, type_search = tree_filter2)        
+                ) and render_template('read_recipe_search.html', recipes = new_list, type_search = tree_filter2)        
             elif len(dbData) == 1:
                 for doc in dbData:
                     doc['_id'] = str(doc['_id'])
-                print (dbData)
                 return Response(
                     response = json.dumps(
                             {"message": "recipe found", 
@@ -611,23 +607,22 @@ def read_recipe_search():
                             }),
                         status = 200,
                         mimetype='application/json'
-                ) and render_template('read_ingredient_search_display.html', ingredients = dbData, type_search = tree_filter2)
-            elif len(dbData) >1 :
+                ) and render_template('read_recipe_search.html', recipes = dbData, type_search = tree_filter2)
+            elif len(dbData) > 1 :
                 for doc in dbData:
                     doc['_id'] = str(doc['_id'])
                 return Response(
                     response = json.dumps({"message": "query made successfuly, returning array of recipes"f"{dbData}"}),
                         status = 200,
                         mimetype='application/json'
-                ) and render_template('read_recipe_search_display.html', recipes = dbData, type_search = tree_filter2)
+                ) and render_template('read_recipe_search.html', recipes = dbData, type_search = tree_filter2)
         except Exception as ex:
             return Response(
                     response = json.dumps(
                         {"message": "no Recipes Found"}),
                         status = 401,
                         mimetype='application/json'
-                ) 
-    return render_template('read_recipe_search.html')
+                )
 
 @app.route('/recipe/search_simple',  methods = ['GET', 'POST'])
 def read_recipe_search2():
