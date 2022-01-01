@@ -487,7 +487,6 @@ def create_recipe():
                             if item['title'] == title and unit !='':
                                 formmatted_data.append({'ingredient': item, 'quantity': quantity, "unit": unit})
             #Get rid of ingredients with empty unit attributes and push to final array
-            recipe_ingredients = []
             for stuff in formmatted_data:
                if stuff['unit'].find('-')<=0:
                     recipe_ingredients.append(stuff)
@@ -654,11 +653,130 @@ def read_recipe_search2():
 #*****Note forcing U&D routes access via the front end (unless you want to remember ids)
 
 ##########################################Update Routes 🚅
+
+@app.route('/recipe/update2/<id>', methods = ['GET', 'POST'])
+@login_required
+def update_recipe2(id):
+    form = Recipe(request.form)
+    #Pulling Data from DB so we can show it
+    dbAction_findrecord = db.recipes.find_one({"_id": ObjectId(id)})
+    prep_array = []
+    execution_array = []
+    if request.method == 'GET':
+        #Data already in the object
+        form.title.data = dbAction_findrecord['title']
+        form.description.data = dbAction_findrecord['description']
+        form.cuisine.data = dbAction_findrecord['cuisine']
+        form.img_URI = dbAction_findrecord['img_URI']
+        #Update Ingredients
+        ingredients = list(db.ingredients.find({}))
+        current_ingredients = dbAction_findrecord['ingredients']
+        types = [target['type'] for target in ingredients]
+        types2 = []
+        for item in types:
+            if (item != ""):
+                types2.append(item)
+        types2 = list(set(types2))
+        titles = [item['ingredient']['title'] for item in current_ingredients ]
+        #Update Instructions
+        for item in dbAction_findrecord['instructions']['prep']:
+            holder = str(item.keys())
+            key = holder[holder.find("[")+2:holder.find("]")-1]
+            prep_array.append(item[key])
+        for item in dbAction_findrecord['instructions']['execution']:
+            holder = str(item.keys())
+            key = holder[holder.find("[")+2:holder.find("]")-1]
+            execution_array.append(item[key])
+        return render_template('/update_recipe2.html', form=form, ingredients = ingredients, types = types2, titles = titles, prep = prep_array, execution = execution_array)
+    if request.method == 'POST':
+        newURI = uploadfile(id, 'Recipe')
+        if newURI == "":
+            newURI = form.img_URI
+        form_dict = request.form.to_dict() #Parse The Form, convert request.form to dictionary then to list of Tuples
+        all_ingredients = db.ingredients.find({})
+        all_ingredients = list(all_ingredients)
+        ingredient_array = []
+        rest_of_paylod = []
+        formmatted_data =[]
+        # recipe_prep = []
+        # recipe_execution = []
+        try:
+            #create variable placeholders to take any changes you make to the request.form object
+            title = request.form['title']
+            description = request.form['description']
+            state = request.form['cuisine']
+             #Get raw ingredient, quantity and unit information
+            for key in form_dict.keys():
+                true_value = form_dict[key]
+                for ingredient in all_ingredients:
+                    if true_value == ingredient["title"]:
+                        ingredient_array.append(ingredient)
+                    if key.find(ingredient["title"]) >=1 and true_value != "" :
+                        rest_of_paylod.append(key + "-" + true_value)
+            titles = [stuff['title'] for stuff in ingredient_array]
+            unit = ''
+            quantity = 0
+            #Format raw ingredient information to strip away quantity and unit attributes
+            for stuff in rest_of_paylod:
+                parser = stuff[stuff.find("_")+1: stuff.find("-")]
+                for title in titles:
+                    if title == parser:
+                        quantity = stuff[stuff.find("quantity_")+len(title)+10: len(stuff)]
+                        if quantity.isdigit():
+                            quantity = int(quantity)
+                        unit = stuff[stuff.find("unit_")+len(title)+6: len(stuff)]
+                        if unit.isdigit()== False:
+                            unit = str(unit)
+                        for item in ingredient_array:
+                            if item['title'] == title and unit !='':
+                                formmatted_data.append({'ingredient': item, 'quantity': quantity, "unit": unit})
+            #Get rid of ingredients with empty unit attributes and push to final array
+            recipe_ingredients = []
+            for stuff in formmatted_data:
+               if stuff['unit'].find('-')<=0:
+                    recipe_ingredients.append(stuff)
+            #Handle Instructions
+            recipe_prep = prep_array
+            recipe_execution = execution_array
+            for key,value in form_dict.items():
+                if value !='':
+                    if key.find("prep")>=0:
+                        recipe_prep.append({key:value})
+                    elif key.find("execution")>=0:
+                        recipe_execution.append({key:value})
+            instructions = {'prep': recipe_prep, 'execution': recipe_execution}
+            print("title is " + title)
+            dbAction = db.recipes.update_one(
+                {"_id": ObjectId(id)},
+                {"$set": 
+                    {
+                    "title": title,
+                    "description": description,
+                    "cuisine": state,
+                    "img_URI": newURI,
+                    "ingredients": recipe_ingredients,
+                    "instructions": instructions
+                    }
+                }
+            )
+            flash('Recipe Updated', 'success')
+            # return("Updating Update Recipe Endpoint")
+            return Response(
+                response = json.dumps({"message": "query made successfuly, updated recipe"}),
+                status = 200,
+                mimetype='application/json'
+            ) and redirect('/recipe/'f"{id}")
+        except Exception as ex:
+            return ("Couldn't Update Document")
+    
+
+
 #Standard update Route ✅ [FE finish]
 @app.route('/recipe/update/<id>', methods = ['GET', 'POST'])
 @login_required
 def update_recipe(id):
     form = Recipe(request.form)
+    #Pulling Data from DB so we can show it
     dbAction_findrecord = db.recipes.find_one({"_id": ObjectId(id)})
     form.title.data = dbAction_findrecord['title']
     form.description.data = dbAction_findrecord['description']
@@ -707,8 +825,6 @@ def update_recipee_ingredients(id):
     if request.method == "POST":
         selected_ingredients = [db.ingredients.find_one({"title": target_ingredient}) for target_ingredient in list(request.form.keys())] 
         try:
-            # print("current ingredients " f"{current_ingredients}")
-            # print("selected ingredients " f"{selected_ingredients}")
             for ingredient in selected_ingredients:
                 if ingredient not in current_ingredients:
                     current_ingredients.append(ingredient)
@@ -725,14 +841,22 @@ def update_recipee_ingredients(id):
                 ) and redirect("/recipe/update/instructions/"f"{id}")
         except Exception as ex:
             return ("unable to add the ingredients")   
-    return Response(
-                response = json.dumps(
-                        {"message": "Inside the Create Recipee Add Ingredients psection", 
-                        "id": f"{id}"
-                        }),
-                    status = 200,
-                    mimetype='application/json'
-            ) and render_template('update_recipee_add_ingredients.html', ingredients = ingredients, id = id, current_ingredients = current_ingredients)
+    if request.method == 'GET':
+        types = [target['type'] for target in ingredients]
+        types2 = []
+        for item in types:
+            if (item != ""):
+                types2.append(item)
+        types2 = list(set(types2))
+        titles = [item['title'] for item in current_ingredients ]
+        return Response(
+                    response = json.dumps(
+                            {"message": "Inside the Create Recipee Add Ingredients psection", 
+                            "id": f"{id}"
+                            }),
+                        status = 200,
+                        mimetype='application/json'
+                ) and render_template('update_recipee_add_ingredients.html', ingredients = ingredients, id = id, current_ingredients = current_ingredients, types = types2, titles = titles)
 
 #Update Recipee => Add Instructions ✅ [FE finish]
 @app.route("/recipe/update/instructions/<id>", methods = ["PUT", "POST", "GET"])

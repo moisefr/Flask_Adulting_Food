@@ -29,9 +29,9 @@ $(function(){
     $("#outer-grid").hover(function(){
         counter = counter + 1;
         $(".Order-Prep").append("<div class= 'form-group'><h2><label for ='hold'>"+counter+"</label><input type='text' style='display:none' name='hold'></h2></div>");
-        $(".Landing-Prep").append("<div class= 'form-group'><h4><input  type='text' name='prep" +counter+"'"+"></h4></div>");
+        $(".Landing-Prep").append("<div class= 'form-group'><h4><input style='font-size:x-large' type='text' name='prep" +counter+"'"+"></h4></div>");
         $(".Order-Execution").append("<div class= 'form-group'><h2><label for ='hold'>"+counter+"</label><input type='text' style='display:none' name='hold'></h2></div>");
-        $(".Landing-Execution").append("<div class= 'form-group'><h4><input  type='text' name='execution" +counter+"'"+"></h4></div>");
+        $(".Landing-Execution").append("<div class= 'form-group'><h4><input  type='text' style='font-size:x-large' name='execution" +counter+"'"+"></h4></div>");
         $("input").droppable({
             activeClass: "active",
             hoverClass:  "hover",
