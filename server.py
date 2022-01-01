@@ -15,9 +15,7 @@ from flask_login import (
     login_user,
     logout_user,
 )
-
 from jwt_okta_middleware import is_access_token_valid, is_id_token_valid, config
-
 #Instantiate app
 app = Flask(__name__)
 
@@ -32,14 +30,12 @@ try:
 except Exception:
     print("Unable to connect to the server.")
 
-#Identity and Access Mangement
+#Identity and Access Mangement - LOGIN and LOGOUT 🚪
 #Creating, Loging In, Validating a User
 from Models_Plan import User
 app.config.update({'SECRET_KEY': 'SomethingNotEntirelySecret'}) #used to sign off on tokens
-
 login_manager = LoginManager()
 login_manager.init_app(app)
-
 APP_STATE = 'ApplicationState'
 NONCE = 'SampleNonce'
 app.config["SESSION_PERMANENT"] = False
@@ -175,7 +171,6 @@ def tester():
     #     product_price("milk", bearer,70200931)
     return "Done"
 
-
 #****************Configuration for File Uploads 📂**************
 upload_folder = "static/"
 if not os.path.exists(upload_folder):
@@ -226,7 +221,6 @@ def uploadfile(id, route_indicator):
 #Home Route ✅[FE finish]
 @app.route("/", methods = ["GET", "POST"])
 def landing():
-    print()
     return render_template("home.html")
 
 #############********************************************************************Ingridients 🍍
@@ -361,8 +355,8 @@ def read_ingredient_search2():
             return ("that shit didn't work")
     return render_template('read_ingredient_search.html')
 
-
 ##Search against USGov DB (file)
+
 ##########################################Update Routes 🚅
 #Standard update Route ✅ [FE finish]
 @app.route('/ingredient/update/<id>', methods = ['GET', 'POST'])
@@ -662,7 +656,6 @@ def read_recipe_search2():
         except Exception as ex:
             return ("that shit didn't work")
 
-
 #*****Note forcing U&D routes access via the front end (unless you want to remember ids)
 
 ##########################################Update Routes 🚅
@@ -863,7 +856,6 @@ def create_grocerries():
 ###########################################Read Routes 👀
 #Singe Read ✅ [FE finish]
 @app.route('/groceries/<id>', methods = ["GET"])
-
 def groceries(id):
     types = []
     if request.method == "GET":
@@ -873,6 +865,7 @@ def groceries(id):
         except Exception as ex:
             print("That shit dind't work, can't see all ingredeints")
     return render_template("read_grocery.html", ingredients = dbAction['ingredients'], identifier = dbAction['title'] + "-" + dbAction['date'])
+
 #Read All ✅ [FE finish]
 @app.route("/groceries/all", methods = ["GET"])
 def all_groceries():
@@ -947,24 +940,6 @@ def delete_groceries(id):
     return redirect("/")
 
 #Testing Area
-@app.route("/test", methods = ['GET', 'POST'])
-def test_route():
-    if request.method == 'POST':
-        form = request.form
-        prep = []
-        execution = []
-        for key,value in request.form.to_dict().items():
-            # print(key +": "+value + "\n")
-            print(value)
-            if value !='':
-                if key.find("prep")>=0:
-                    prep.append({key:value})
-                elif key.find("execution")>=0:
-                    execution.append({key:value})
-        print(prep)
-        print(execution)
-    return render_template("test.html")
-
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 if __name__ == "__main__":
     app.run(port = 5000, debug=True)
