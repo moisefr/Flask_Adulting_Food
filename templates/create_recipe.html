@@ -19,30 +19,30 @@
       {% for type in types %}
             <button class="accordion">{{type}}</button>
             <div class="panel">
-            <div class="form-group" id = "container2"></div> 
             {% for ingredient in ingredients%}
               {% if type == ingredient.type %}
-                <input type="checkbox" name="{{ingredient.title}}" id = {{ingredient._id}} value = "{{ingredient.title}}"/>
-                <label for={{ingredient._id}}> {{ingredient.title}}</label><br>
-                <img src ={{ url_for('static', filename=ingredient.img_URI)}} height="200" width="200" id="ingredient-image" />
-                <input type="number" id='quantity' name="quantity" min="1">
-                <!-- <label for="unit" id = "unit-label">Unit:</label> -->
-                <select name="unit" id="unit">
-                  <optgroup label="Metric">
-                    <option value="of them">Count</option>
-                    <option value="g">grams</option>
-                    <option value="kg">kilograms</option>
-                    <option value="ml">milliliters</option>
-                    <option value="L">Liters</option>
-                  </optgroup>
-                  <optgroup label="That Other Fuck Shit">
-                    <option value="lb">pounds</option>
-                    <option value="oz">ounces</option>
-                    <option value="fl oz">fluid ounces</option>
-                    <option value="cups">cups</option>
-                  </optgroup>
-                </select>
-                <!-- <br><br> -->
+                <div class="form-group">
+                  <input type="checkbox" name="{{ingredient.title}}" id = {{ingredient._id}} value = "{{ingredient.title}}"/>
+                  <label for={{ingredient._id}}> {{ingredient.title}}</label>
+                  <img src ={{ url_for('static', filename=ingredient.img_URI)}} height="200" width="200" id="ingredient-image" />
+                  <input type="number" id='quantity' name="quantity_{{ingredient.title}}" min="1">
+                  <select name="unit_{{ingredient.title}}" id="unit">
+                    <optgroup label="Metric">
+                      <option value="of them">Count</option>
+                      <option value="g">grams</option>
+                      <option value="kg">kilograms</option>
+                      <option value="ml">milliliters</option>
+                      <option value="L">Liters</option>
+                    </optgroup>
+                    <optgroup label="That Other Fuck Shit">
+                      <option value="lb">pounds</option>
+                      <option value="oz">ounces</option>
+                      <option value="fl oz">fluid ounces</option>
+                      <option value="cups">cups</option>
+                    </optgroup>
+                  </select>
+                  <!-- <br><br> -->
+                </div>
               {% endif %}
             {% endfor %}
             </div>
@@ -104,7 +104,7 @@
   }
 
   /* Style the accordion panel. Note: hidden by default */
-  .panel {
+  #panel {
   padding: 0 18px;
   background-color: white;
   display: none;

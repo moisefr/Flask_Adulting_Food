@@ -464,18 +464,44 @@ def create_recipe():
         try:
             #Create Recipe Shell
             dbAction = db.recipes.insert_one(form.export())
-            form_dict = request.form.to_dict().items() #Parse The Form, convert request.form to dictionary then to list of Tuples
-            # print(form_dict)
-            all_ingredients =db.ingredients.find({})
+            form_dict = request.form.to_dict() #Parse The Form, convert request.form to dictionary then to list of Tuples
+            all_ingredients = db.ingredients.find({})
             all_ingredients = list(all_ingredients)
-            for key,value in form_dict:
-                #Show
-                print(key+':'+value)
-                #Handle Ingredients
+            ingredient_array = []
+            rest_of_paylod = []
+            formmatted_data =[]
+            #Get ray ingredient, quantity and unit information
+            for key in form_dict.keys():
+                true_value = form_dict[key]
                 for ingredient in all_ingredients:
-                    if key.find(ingredient['title'])>=0:
-                        recipe_ingredients.append(ingredient)
-                #Handle Instructions
+                    if true_value == ingredient["title"]:
+                        ingredient_array.append(ingredient)
+                    if key.find(ingredient["title"]) >=1 and true_value != "" :
+                        rest_of_paylod.append(key + "-" + true_value)
+            titles = [stuff['title'] for stuff in ingredient_array]
+            unit = ''
+            quantity = 0
+            #Format raw ingredient information to strip away quantity and unit attributes
+            for stuff in rest_of_paylod:
+                parser = stuff[stuff.find("_")+1: stuff.find("-")]
+                for title in titles:
+                    if title == parser:
+                        quantity = stuff[stuff.find("quantity_")+len(title)+10: len(stuff)]
+                        if quantity.isdigit():
+                            quantity = int(quantity)
+                        unit = stuff[stuff.find("unit_")+len(title)+6: len(stuff)]
+                        if unit.isdigit()== False:
+                            unit = str(unit)
+                        for item in ingredient_array:
+                            if item['title'] == title and unit !='':
+                                formmatted_data.append({'ingredient': item, 'quantity': quantity, "unit": unit})
+            #Get rid of ingredients with empty unit attributes and push to final array
+            recipe_ingredients = []
+            for stuff in formmatted_data:
+               if stuff['unit'].find('-')<=0:
+                    recipe_ingredients.append(stuff)
+            #Handle Instructions
+            for key,value in form_dict.items():
                 if value !='':
                     if key.find("prep")>=0:
                         recipe_prep.append({key:value})
