@@ -12,14 +12,20 @@
         <div class="main-area">
             <div class="grid-container">
                 {% for type in ingredient_type %}
-                <div class="grid-item-standard">
-                    <div class = "type-area"> {{type}} </div>
-                        {% for ingredient in recipe.ingredients %}
-                            {% if ingredient.ingredient.type == type %}
-                            <div class = "ingredient-area"> <h5>{{ingredient.ingredient.title}}</h5> <h5>- {{ingredient.quantity}} {{ingredient.unit_of_measure}}</h5> </div>
-                            {% endif %}
-                        {% endfor %}
-                </div>
+                    <div>
+                        {{type}}
+                        <div>
+                            {%for ingredient in recipe.ingredients%}
+                                {%if ingredient.ingredient.type == type%}
+                                    <ul>
+                                        <li>
+                                            {{ingredient.ingredient.title}} - {{ingredient.quantity}} {{ingredient.unit}}
+                                        </li>
+                                    </ul>
+                                {%endif%}
+                            {%endfor%}
+                        </div>
+                    </div>
                 {% endfor %}
             </div>
         </div>
@@ -27,14 +33,18 @@
         <h1>Instructions</h1>
         <div class="instruct">
             <div class="instruct-item"> <h2>Prep</h2>
-                {% for prep in recipe.instructions.prep %}
-                    <ul><li>{{prep}}</li></ul>
+                <ol>
+                {% for item in prep %}
+                    <li>{{item}}</li>
                 {% endfor %}
+                </ol>
             </div>
             <div class="grid-item"> <h2>Execution</h2>
-                {% for exec in recipe.instructions.execution %}
-                    <ul><li>{{exec}}</li></ul>
+                <ol>
+                {% for exec in execution %}
+                    <li>{{exec}}</li>
                 {% endfor %}
+                </ol>
             </div>
         </div>
     </div>
@@ -62,7 +72,6 @@
         width: 75%;
     }
     .main-area {
-        margin: 0 7.5% -10%  7.5%;
     }
     .type-area{
         font-size: x-large;

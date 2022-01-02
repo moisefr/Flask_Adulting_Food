@@ -180,7 +180,7 @@ app.secret_key = 'whatitiscuhwhatisup'
 def uploadfile(id, route_indicator):
     if request.method == 'POST':
         f = request.files['file'] # get the file from the files object
-        print("File Name Entered: "+f.filename)
+        uploaded_image_name =f.filename[f.filename.find("-")+1: f.filename.find(".")]
         if os.getcwd().find("static") < 0:
             os.chdir(os.getcwd()+ '/static')
         if f.filename =="":
@@ -195,9 +195,10 @@ def uploadfile(id, route_indicator):
         else:
             for file in os.listdir(os.getcwd()):
                 #👁‍🗨Edit string slicing
-                img_search = file[file.find("_")+1: file.find("-")]
+                img_search = file[file.find("-")+1: file.find(".")]
                 handle = file[0: file.find("_")]
-                if (img_search == id and handle == route_indicator):
+                # print(uploaded_image_name + " : "+ handle + " : " + img_search)
+                if (img_search == uploaded_image_name and handle == route_indicator):
                     os.remove(file)
                     flash('Old Picture Deleted upload new picture', 'success')
         if os.getcwd().find("static") < 0:
@@ -213,7 +214,6 @@ def uploadfile(id, route_indicator):
             img_search = file[file.find("_")+1: file.find("-")]
             if (img_search == id and handle == route_indicator):
                 img_file = file
-                # print(img_file)
         return img_file
 
 ######################################################################********************************Routes 🧳****************#################################################
@@ -460,8 +460,9 @@ def create_recipe():
             all_ingredients = list(all_ingredients)
             ingredient_array = []
             rest_of_paylod = []
-            formmatted_data =[]
-            #Get ray ingredient, quantity and unit information
+            final_recipe_ingredients =[]
+            ###Handle Ingredients
+            #Get raw ingredient, quantity and unit information from the request
             for key in form_dict.keys():
                 true_value = form_dict[key]
                 for ingredient in all_ingredients:
@@ -470,27 +471,28 @@ def create_recipe():
                     if key.find(ingredient["title"]) >=1 and true_value != "" :
                         rest_of_paylod.append(key + "-" + true_value)
             titles = [stuff['title'] for stuff in ingredient_array]
-            unit = ''
-            quantity = 0
-            #Format raw ingredient information to strip away quantity and unit attributes
+            #Format raw ingredient information store ingredient, quantity and unit in seperate arrays
+            quantity_array = []
+            unit_array=[]
+            holder_ingredients_array=[]
             for stuff in rest_of_paylod:
                 parser = stuff[stuff.find("_")+1: stuff.find("-")]
-                for title in titles:
-                    if title == parser:
-                        quantity = stuff[stuff.find("quantity_")+len(title)+10: len(stuff)]
-                        if quantity.isdigit():
-                            quantity = int(quantity)
-                        unit = stuff[stuff.find("unit_")+len(title)+6: len(stuff)]
-                        if unit.isdigit()== False:
-                            unit = str(unit)
-                        for item in ingredient_array:
-                            if item['title'] == title and unit !='':
-                                formmatted_data.append({'ingredient': item, 'quantity': quantity, "unit": unit})
-            #Get rid of ingredients with empty unit attributes and push to final array
-            for stuff in formmatted_data:
-               if stuff['unit'].find('-')<=0:
-                    recipe_ingredients.append(stuff)
-            #Handle Instructions
+                if parser in titles:
+                    title = stuff[stuff.find("_")+1:stuff.find("-")]
+                    if db.ingredients.find_one({"title":title}) not in holder_ingredients_array:
+                     holder_ingredients_array.append(db.ingredients.find_one({"title":title}))
+                    quantity = stuff[stuff.find("quantity_")+len(title)+10: len(stuff)]
+                    if quantity.isdigit():
+                        quantity = int(quantity)
+                        quantity_array.append(quantity)
+                    unit = stuff[stuff.find("unit_")+len(title)+6: len(stuff)]
+                    if unit[-1].isdigit() == False:
+                        unit = str(unit)
+                        unit_array.append(unit)
+            #Consolidate these arrays to full recipe ingredient objects and append to recipe_ingredients final array
+            for x in range(0,len(holder_ingredients_array)):
+                final_recipe_ingredients.append({"ingredient": holder_ingredients_array[x], "quantity":quantity_array[x], "unit": unit_array[x]})
+            #Handle Instructions using prep and execution handles then create instructions object
             for key,value in form_dict.items():
                 if value !='':
                     if key.find("prep")>=0:
@@ -501,7 +503,7 @@ def create_recipe():
             dbAction_ingredients = db.recipes.update_one(
             {"_id": dbAction.inserted_id},
             {"$set": {
-                "ingredients": recipe_ingredients,
+                "ingredients": final_recipe_ingredients,
                 "instructions": instructions,
                 "img_URI": uploadfile(str(dbAction.inserted_id), "Recipe")
                 }}
@@ -520,7 +522,13 @@ def create_recipe():
                     mimetype='application/json'
             )  and redirect(redirector)
         except Exception as ex:
-            return("Couldn't create recipee")
+            return Response(
+                response = json.dumps(
+                        {"message": "Couldn't create recipee",
+                        }),
+                    status = 401,
+                    mimetype='application/json'
+            )
     return render_template('create_recipe.html', form=form, ingredients=ingredients, types = types2)
 ######################################Read/Search Routes 📚
 #Standard Read by ID route ✅[FE finish]
@@ -530,12 +538,29 @@ def read_recipe(id):
         ingredients =[]
         try:
             dbConfirm = db.recipes.find_one({"_id": ObjectId(id)})
-            types = [target['ingredient']['type'] for target in ingredients]
+            # print(dbConfirm['ingredients']['ingredient'])
+            # for ingredient in dbConfirm['ingredients']:
+            #     print (ingredient['ingredient']['type'])
+            types = [target['ingredient']['type'] for target in dbConfirm['ingredients']]
+            # print(types)
             types2 = []
             for item in types:
                 if (item != ""):
                     types2.append(item)
             types2 = list(set(types2))
+            # print(types2)
+            prep = []
+            execution = []
+            for item in dbConfirm['instructions']['prep']:
+                value_holder = str(item.values())
+                final_value = value_holder[value_holder.find("[")+2:value_holder.find("]")-1]
+                prep.append(final_value)
+            for item in dbConfirm['instructions']['execution']:
+                value_holder = str(item.values())
+                final_value = value_holder[value_holder.find("[")+2:value_holder.find("]")-1]
+                execution.append(final_value)
+            print(prep)
+            print(execution)
             return Response(
                         response = json.dumps(
                                 {"message": "Recipee found", 
@@ -544,9 +569,14 @@ def read_recipe(id):
                                 }),
                             status = 200,
                             mimetype='application/json'
-                    ) and render_template('read_recipe.html', recipe = dbConfirm, ingredient_type= types2)
+                    ) and render_template('read_recipe.html', recipe = dbConfirm, ingredient_type= types2, prep=prep, execution=execution)
         except Exception as ex:
-            return("Unable to retrieve Recipe")
+            return Response(
+                        response = json.dumps(
+                                {"message": "Unable to retrieve Recipe"}),
+                            status = 401,
+                            mimetype='application/json'
+                    )
 
 #Standard show all recipes ✅[FE finish]
 @app.route('/recipe/all', methods = ['GET'])
@@ -667,7 +697,7 @@ def update_recipe(id):
         form.description.data = dbAction_findrecord['description']
         form.cuisine.data = dbAction_findrecord['cuisine']
         form.img_URI = dbAction_findrecord['img_URI']
-        #Update Ingredients
+        #Display Current Ingredients
         ingredients = list(db.ingredients.find({}))
         current_ingredients = dbAction_findrecord['ingredients']
         types = [target['type'] for target in ingredients]
@@ -677,7 +707,7 @@ def update_recipe(id):
                 types2.append(item)
         types2 = list(set(types2))
         titles = [item['ingredient']['title'] for item in current_ingredients ]
-        #Update Instructions
+        #Display Current Instructions
         for item in dbAction_findrecord['instructions']['prep']:
             holder = str(item.keys())
             key = holder[holder.find("[")+2:holder.find("]")-1]
@@ -686,7 +716,7 @@ def update_recipe(id):
             holder = str(item.keys())
             key = holder[holder.find("[")+2:holder.find("]")-1]
             execution_array.append(item[key])
-        return render_template('/update_recipe2.html', form=form, ingredients = ingredients, types = types2, titles = titles, prep = prep_array, execution = execution_array)
+        return render_template('/update_recipe.html', form=form, ingredients = ingredients, types = types2, titles = titles, prep = prep_array, execution = execution_array, current_ingredients=current_ingredients)
     if request.method == 'POST':
         newURI = uploadfile(id, 'Recipe')
         if newURI == "":
@@ -697,14 +727,20 @@ def update_recipe(id):
         ingredient_array = []
         rest_of_paylod = []
         formmatted_data =[]
-        # recipe_prep = []
-        # recipe_execution = []
+        quantity_array = []
+        unit_array=[]
         try:
             #create variable placeholders to take any changes you make to the request.form object
             title = request.form['title']
             description = request.form['description']
             state = request.form['cuisine']
-             #Get raw ingredient, quantity and unit information
+            form_dict = request.form.to_dict() #Parse The Form, convert request.form to dictionary then to list of Tuples
+            all_ingredients = db.ingredients.find({})
+            all_ingredients = list(all_ingredients)
+            ingredient_array = []
+            rest_of_paylod = []
+            final_recipe_ingredients = []
+            #Get raw ingredient, quantity and unit information from the request
             for key in form_dict.keys():
                 true_value = form_dict[key]
                 for ingredient in all_ingredients:
@@ -713,30 +749,27 @@ def update_recipe(id):
                     if key.find(ingredient["title"]) >=1 and true_value != "" :
                         rest_of_paylod.append(key + "-" + true_value)
             titles = [stuff['title'] for stuff in ingredient_array]
-            unit = ''
-            quantity = 0
-            #Format raw ingredient information to strip away quantity and unit attributes
+            #Format raw ingredient information store ingredient, quantity and unit in seperate arrays
+            holder_ingredients_array=[]
             for stuff in rest_of_paylod:
                 parser = stuff[stuff.find("_")+1: stuff.find("-")]
-                for title in titles:
-                    if title == parser:
-                        quantity = stuff[stuff.find("quantity_")+len(title)+10: len(stuff)]
-                        if quantity.isdigit():
-                            quantity = int(quantity)
-                        unit = stuff[stuff.find("unit_")+len(title)+6: len(stuff)]
-                        if unit.isdigit()== False:
-                            unit = str(unit)
-                        for item in ingredient_array:
-                            if item['title'] == title and unit !='':
-                                formmatted_data.append({'ingredient': item, 'quantity': quantity, "unit": unit})
-            #Get rid of ingredients with empty unit attributes and push to final array
-            recipe_ingredients = []
-            for stuff in formmatted_data:
-               if stuff['unit'].find('-')<=0:
-                    recipe_ingredients.append(stuff)
+                if parser in titles:
+                    if db.ingredients.find_one({"title":parser}) not in holder_ingredients_array:
+                        holder_ingredients_array.append(db.ingredients.find_one({"title":parser}))
+                    quantity = stuff[stuff.find("quantity_")+len(parser)+10: len(stuff)]
+                    if quantity.isdigit():
+                        quantity2 = int(quantity)
+                        quantity_array.append(quantity2)
+                    unit = stuff[stuff.find("unit_")+len(parser)+6: len(stuff)]
+                    if unit[-1].isdigit() == False:
+                        unit = str(unit)
+                        unit_array.append(unit)
+            #Consolidate these arrays to full recipe ingredient objects and append to recipe_ingredients final array
+            for x in range(0,len(holder_ingredients_array)):
+                final_recipe_ingredients.append({"ingredient": holder_ingredients_array[x], "quantity":quantity_array[x], "unit": unit_array[x]})
             #Handle Instructions
-            recipe_prep = prep_array
-            recipe_execution = execution_array
+            recipe_prep = []
+            recipe_execution = []
             for key,value in form_dict.items():
                 if value !='':
                     if key.find("prep")>=0:
@@ -744,7 +777,6 @@ def update_recipe(id):
                     elif key.find("execution")>=0:
                         recipe_execution.append({key:value})
             instructions = {'prep': recipe_prep, 'execution': recipe_execution}
-            print("title is " + title)
             dbAction = db.recipes.update_one(
                 {"_id": ObjectId(id)},
                 {"$set": 
@@ -753,13 +785,12 @@ def update_recipe(id):
                     "description": description,
                     "cuisine": state,
                     "img_URI": newURI,
-                    "ingredients": recipe_ingredients,
+                    "ingredients": final_recipe_ingredients,
                     "instructions": instructions
                     }
                 }
             )
             flash('Recipe Updated', 'success')
-            # return("Updating Update Recipe Endpoint")
             return Response(
                 response = json.dumps({"message": "query made successfuly, updated recipe"}),
                 status = 200,
@@ -794,7 +825,7 @@ def delete_recipe(id):
                             }),
                         status = 200,
                         mimetype='application/json'
-            ) and redirect(url_for('read_recipe_search'))
+            ) and redirect('/recipe/all')
         except Exception as ex:
             return("Delete Operation didn't Work")
     return render_template("home.html")
