@@ -19,8 +19,15 @@ from jwt_okta_middleware import is_access_token_valid, is_id_token_valid, config
 #Instantiate app
 app = Flask(__name__)
 #************************************************DB Connection 🌍**********************************************
-connection_string = 'mongodb+srv://default_test:yYDiCDe9AJmEXkrF@cluster0.oxeo8.mongodb.net/Adulting_Food?retryWrites=true&w=majority'
-client = pymongo.MongoClient(connection_string, serverSelectionTimeoutMS=15000)
+#Pull DB Config for NoSQL and SQL
+db_config_data = None
+with open('db_credentials.json') as f:
+    db_config_data = json.load(f)
+
+####NoSQL - MONGO DB
+connection_string_array = [db_config_data['mongodb'][key] for key in db_config_data['mongodb'].keys()]
+connection_string_NoSQL = "".join(connection_string_array)
+client = pymongo.MongoClient(connection_string_NoSQL, serverSelectionTimeoutMS=15000)
 ##Check if the connection was made to the DB
 try:
     # This code will show the client info, use to test connectivity
@@ -28,6 +35,11 @@ try:
     print("Connected to Mongo Database  😁: ", "availible data collections are - ", db.list_collection_names() )
 except Exception:
     print("Unable to connect to the server.")
+
+#####SQL - MySQL DB
+
+# MYSQL_ADDON_URI=mysql://uhb2v2fxtwzgtlch:48YH4pt2BLNElfh2YNhH@bfepsfnuhtayaivwmxtl-mysql.services.clever-cloud.com:3306/bfepsfnuhtayaivwmxtl
+
 
 #Identity and Access Mangement - LOGIN and LOGOUT 🚪
 #Creating, Loging In, Validating a User
