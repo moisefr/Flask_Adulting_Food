@@ -6,6 +6,11 @@ from requests.api import get
 from werkzeug.utils import secure_filename
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators
 import pymongo
+from flask_mysqldb import MySQL
+from getpass import getpass
+import mysql.connector
+from mysql.connector import connect, Error
+
 import json
 from bson.objectid import ObjectId
 from flask_login import (
@@ -24,21 +29,30 @@ db_config_data = None
 with open('db_credentials.json') as f:
     db_config_data = json.load(f)
 
-####NoSQL - MONGO DB
+#Prepping NoSQL Connection string
 connection_string_array = [db_config_data['mongodb'][key] for key in db_config_data['mongodb'].keys()]
 connection_string_NoSQL = "".join(connection_string_array)
 client = pymongo.MongoClient(connection_string_NoSQL, serverSelectionTimeoutMS=15000)
-##Check if the connection was made to the DB
+##Check if the connection was made to the DBs
 try:
-    # This code will show the client info, use to test connectivity
+    # Check for NoSQL connection
     db = client.Adulting_Food
     print("Connected to Mongo Database  😁: ", "availible data collections are - ", db.list_collection_names() )
+    #Prep SQL Connection
+    mysqldb = mysql.connector.connect(
+    host=db_config_data['mysql']['MYSQL_ADDON_HOST'],
+    user=db_config_data['mysql']['MYSQL_ADDON_USER'],
+    password=db_config_data['mysql']['MYSQL_ADDON_PASSWORD'],
+    database = db_config_data['mysql']['MYSQL_ADDON_DB']
+    )
+    mycursor = mysqldb.cursor()
+    mycursor.execute("SHOW TABLES")
+    print("SQL DB Connection Successful, tables below 😁: ")
+    for x in mycursor:
+        print (x)
 except Exception:
     print("Unable to connect to the server.")
 
-#####SQL - MySQL DB
-
-# MYSQL_ADDON_URI=mysql://uhb2v2fxtwzgtlch:48YH4pt2BLNElfh2YNhH@bfepsfnuhtayaivwmxtl-mysql.services.clever-cloud.com:3306/bfepsfnuhtayaivwmxtl
 
 
 #Identity and Access Mangement - LOGIN and LOGOUT 🚪
@@ -878,11 +892,19 @@ def create_grocerries():
                     types.append(ingredient['type'])
             else:
                 print((form.title.data))
-        dbAction_groceries = db.groceries.insert_one({"ingredients": final_ingredients, "title": form.title.data, "date": form.date_created})
-        types = list(set(types))     
-        # dbCheck = db.groceries.find_one({"_id": dbAction.inserted_id})
-        # print(dbCheck) 
-        return render_template('read_groceries.html', ingredients = final_ingredients, types = types)
+        # SQL Committ
+        # sql = "INSERT INTO test2 (Ingredient, Type, Quantity) VALUES (%s, %s, %s)"
+        # val = ('chicken', 'Meat', '4')
+        # mycursor.execute(sql, val)
+        # mysqldb.commit()
+
+        # print(mycursor.rowcount, "record inserted.")
+        return ("Updating Grocery Route")
+        # dbAction_groceries = db.groceries.insert_one({"ingredients": final_ingredients, "title": form.title.data, "date": form.date_created})
+        # types = list(set(types))     
+        # # dbCheck = db.groceries.find_one({"_id": dbAction.inserted_id})
+        # # print(dbCheck) 
+        # return render_template('read_groceries.html', ingredients = final_ingredients, types = types)
     return render_template('create_groceries.html', recipes = recipes, ingredients = ingrdients, form=form)
 
 ###########################################Read Routes 👀
