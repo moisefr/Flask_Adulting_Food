@@ -869,29 +869,38 @@ def create_grocerries():
         try:
             recipes = list(dbAction)
             ingrdients = list(dbAction2)
+            types = [target['type'] for target in ingrdients]
+            types2 = []
+            for item in types:
+                if (item != ""):
+                    types2.append(item)
+            types2 = list(set(types2))
         except Exception as ex:
             return("That shit didn't work")
     if request.method == "POST":
         final_ingredients = []
         types = []
-        for item in request.form.keys():
-            if (item.find("title")>0):
-                id_for_search = item[item.find("id")+15:item.find("title")-5]
-                id_for_search = ObjectId(id_for_search)
-                db_pull = db.ingredients.find_one({"_id": id_for_search})
-                final_ingredients.append(db_pull)
-                types.append(db_pull['type'])
-            elif (item.find("title")):
-                print("title leaf: " + item)
-                id_for_search = item[item.find("id")+15:item.find("title")-5]
-                id_for_search = ObjectId(item)
-                db_pull_recipe = db.recipes.find_one({"_id": id_for_search})
-                db_pull_recipe = dict(db_pull_recipe)
-                for ingredient in db_pull_recipe['ingredients']:
-                    final_ingredients.append(ingredient)
-                    types.append(ingredient['type'])
-            else:
-                print((form.title.data))
+        form_dict = request.form.to_dict()
+        print(form_dict)
+        #Old Code to Handle Ingredients
+        # for item in request.form.keys():
+        #     if (item.find("title")>0):
+        #         id_for_search = item[item.find("id")+15:item.find("title")-5]
+        #         id_for_search = ObjectId(id_for_search)
+        #         db_pull = db.ingredients.find_one({"_id": id_for_search})
+        #         final_ingredients.append(db_pull)
+        #         types.append(db_pull['type'])
+        #     elif (item.find("title")):
+        #         print("title leaf: " + item)
+        #         id_for_search = item[item.find("id")+15:item.find("title")-5]
+        #         id_for_search = ObjectId(item)
+        #         db_pull_recipe = db.recipes.find_one({"_id": id_for_search})
+        #         db_pull_recipe = dict(db_pull_recipe)
+        #         for ingredient in db_pull_recipe['ingredients']:
+        #             final_ingredients.append(ingredient)
+        #             types.append(ingredient['type'])
+        #     else:
+        #         print((form.title.data))
         # SQL Committ
         # sql = "INSERT INTO test2 (Ingredient, Type, Quantity) VALUES (%s, %s, %s)"
         # val = ('chicken', 'Meat', '4')
@@ -899,13 +908,13 @@ def create_grocerries():
         # mysqldb.commit()
 
         # print(mycursor.rowcount, "record inserted.")
-        return ("Updating Grocery Route")
+        return ("Updating Create Grocery Route")
         # dbAction_groceries = db.groceries.insert_one({"ingredients": final_ingredients, "title": form.title.data, "date": form.date_created})
         # types = list(set(types))     
         # # dbCheck = db.groceries.find_one({"_id": dbAction.inserted_id})
         # # print(dbCheck) 
         # return render_template('read_groceries.html', ingredients = final_ingredients, types = types)
-    return render_template('create_groceries.html', recipes = recipes, ingredients = ingrdients, form=form)
+    return render_template('create_groceries.html', recipes = recipes, ingredients = ingrdients, form=form, types = types2)
 
 ###########################################Read Routes 👀
 #Singe Read ✅ [FE finish]

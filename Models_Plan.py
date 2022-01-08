@@ -79,11 +79,13 @@ class Recipe(Form):
         )
 class Grocerries(Form):
     title = StringField('Title', [validators.Length(min=1, max=50)])
+    notes = TextAreaField('Notes', [validators.Length(min=4, max=2500)])
     ingredients = []
     date_created = str(date.today())
     def export(self):
         return (
             {"title": self.title.data, 
+            "notes": self.notes.data,
             "ingredients": self.ingredients,
             "date": self.date_created
             }

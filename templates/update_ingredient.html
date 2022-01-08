@@ -10,16 +10,11 @@
     <div class="form-group">
       {{render_field(form.description, class_="form-control")}}
     </div>
-    <div>
-      <ul>
-        <li>{{current_state}}</li>
-        <li>{{current_type}}</li>
-      </ul>
-    </div>
-    
+        
     <div class="form-group">
       <label for="state">State of Matter: </label>
-      <select id="state" name="state">
+      <select id="state" name="state" >
+        <option value="{{current_state}}" selected>{{current_state}}</option>
         <option value="solid">Solid</option>
         <option value="liquid">Liquid</option>
         <option value="paste">Paste</option>
@@ -29,6 +24,7 @@
     <div class="form-group">
       <label for="type">Type of Ingredient: </label>
       <select id="type" name="type">
+        <option value="{{current_type}}" selected>{{current_type}}</option>
         <option value="Seasoning">Seasoning</option>
         <option value="Meat">Animal Protein</option>
         <option value="Non-Meat">Non-Animal Protein (bean, nuts, legumes)</option>
