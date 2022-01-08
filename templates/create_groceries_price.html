@@ -1,0 +1,131 @@
+{% extends 'layout.html' %}
+{% block body %} 
+<form method="POST"  action="/groceries/{{id}}">
+    <p><input type="submit" class="btn btn-primary" value="Submit"></p>
+    <div class="container2">
+        <div class="form-group">
+            <h2>Recipe Ingredients</h2>
+        {%for type in types%}
+            <table>
+                <thead>
+                    <tr>
+                        <th colspan= "5">{{type}}</th>
+                        <tr>
+                            <td class="tg-0lax">Select</td>
+                            <td class="tg-0lax">Ingredient</td>
+                            <td class="tg-0lax">Image</td>
+                            <td class="tg-0lax">Quanity</td>
+                            <td class="tg-0lax">Unit</td>
+                            <td class="tg-0lax">Price</td>
+                        </tr>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ingredient in recipes_ingredients%}
+                    {% if type == ingredient.ingredient.type %}
+                    <tr>
+                        <td><input checked type="checkbox" name="ingredient_{{ingredient.ingredient.title}}" id = {{ingredient.ingredient_id}} value = "{{ingredient.ingredient.title}}"/></td>
+                        <td class="tg-0lax"><a href="/ingredient/{{ingredient.ingredient._id}}">{{ingredient.ingredient.title}}</a></td>
+                        <td class="tg-0lax"><img src ={{ url_for('static', filename=ingredient.ingredient.img_URI)}} height="50" width="50" id="ingredient-image" /></td>
+                        <td class="tg-0lax"><input type="number" id='quantity' name="quantity_{{ingredient.ingredient.title}}" min="1" style="width: 85%;" step=0.1 value="{{ingredient.quantity}}"></td>
+                        <td class="tg-0lax">
+                            <select name="unit_{{ingredient.ingredient.title}}" id="unit" style="width: 100px;">
+                                <optgroup label="Metric">
+                                <option value="{{ingredient.unit}}">{{ingredient.unit}}</option>
+                                <option value="of them">Count</option>
+                                <option value="g">grams</option>
+                                <option value="kg">kilograms</option>
+                                <option value="ml">milliliters</option>
+                                <option value="L">Liters</option>
+                                </optgroup>
+                                <optgroup label="That Other Fuck Shit">
+                                <option value="lb">pounds</option>
+                                <option value="oz">ounces</option>
+                                <option value="fl oz">fluid ounces</option>
+                                <option value="cups">cups</option>
+                                </optgroup>
+                            </select>
+                        </td>
+                        <td class="tg-0lax"><input type="number" id='price' name="price_{{ingredient.ingredient.title}}" min="1" style="width: 85%;" step=0.1 min="-9999"></td>
+                            {%endif%}
+                        {%endfor%}
+                    </tr>
+                    
+                </tbody>
+            </table>
+        {% endfor %}
+        </div>
+        
+        <div class="form-group">
+            <h2>Add Hoc Ingredients</h2>
+            {%for type in types%}
+            <table>
+                <thead>
+                    <tr>
+                        <th colspan= "5">{{type}}</th>
+                    </tr>
+                    <tr>
+                        <td class="tg-0lax">Select</td>
+                        <td class="tg-0lax">Ingredient</td>
+                        <td class="tg-0lax">Image</td>
+                        <td class="tg-0lax">Quanity</td>
+                        <td class="tg-0lax">Unit</td>
+                        <td class="tg-0lax">Price</td>
+                    </tr>
+                </thead>
+                <!-- If Conditional by ingredient type here -->
+                <tbody>
+                    {% for ingredient in adhoc%}
+                    {% if type == ingredient.ingredient.type %}
+                    <tr>
+                        <td><input checked type="checkbox" name="ingredient_{{ingredient.ingredient.title}}" id = {{ingredient._id}} value = "{{ingredient.title}}"/></td>
+                        <td class="tg-0lax"><a href="/ingredient/{{ingredient.ingredient._id}}">{{ingredient.ingredient.title}}</a></td>
+                        <td class="tg-0lax"><img src ={{ url_for('static', filename=ingredient.ingredient.img_URI)}} height="50" width="50" id="ingredient-image" /></td>
+                        <td class="tg-0lax"><input type="number" id='quantity' name="quantity_{{ingredient.ingredient.title}}" min="1" style="width: 85%;" step=0.1 value="{{ingredient.quantity}}"></td>
+                        <td class="tg-0lax">
+                            <select name="unit_{{ingredient.ingredient.title}}" id="unit" style="width: 100px;">
+                                <optgroup label="Metric">
+                                <option value="{{ingredient.unit}}">{{ingredient.unit}}</option>
+                                <option value="of them">Count</option>
+                                <option value="g">grams</option>
+                                <option value="kg">kilograms</option>
+                                <option value="ml">milliliters</option>
+                                <option value="L">Liters</option>
+                                </optgroup>
+                                <optgroup label="That Other Fuck Shit">
+                                <option value="lb">pounds</option>
+                                <option value="oz">ounces</option>
+                                <option value="fl oz">fluid ounces</option>
+                                <option value="cups">cups</option>
+                                </optgroup>
+                            </select>
+                        </td>
+                        <td class="tg-0lax"><input type="number" id='price' name="price_{{ingredient.ingredient.title}}" min="1" style="width: 85%;" step=0.1></td>
+                            {%endif%}
+                        {%endfor%}
+                    </tr>
+                </tbody>
+            </table>
+        {% endfor %}
+        </div>
+
+    </div>
+</form>
+<style>
+    .container2 {  display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr;
+        gap: 0% 6%;
+        grid-auto-flow: row;
+        justify-content: start;
+        align-content: center;
+        justify-items: start;
+        align-items: center;
+        grid-template-areas:
+          ". .";
+        width: 100%;
+      }
+      
+</style>
+
+{% endblock %}

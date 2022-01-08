@@ -4,7 +4,7 @@ import os, sys, stat, requests
 from flask import Flask, Response, request, render_template, flash, redirect, url_for, session, logging
 from requests.api import get
 from werkzeug.utils import secure_filename
-from wtforms import Form, StringField, TextAreaField, PasswordField, validators
+from wtforms import Form, StringField, TextAreaField, PasswordField, form, validators
 import pymongo
 from flask_mysqldb import MySQL
 from getpass import getpass
@@ -878,37 +878,65 @@ def create_grocerries():
         except Exception as ex:
             return("That shit didn't work")
     if request.method == "POST":
-        final_ingredients = []
         types = []
+        nonrecipe_ingredient_titles = []
+        nonrecipe_ingredients = []
+        quantity_array = []
+        unit_array = []
+        recipes_ingredients2D = []
+        recipes_ingredients = []
         form_dict = request.form.to_dict()
-        print(form_dict)
-        #Old Code to Handle Ingredients
-        # for item in request.form.keys():
-        #     if (item.find("title")>0):
-        #         id_for_search = item[item.find("id")+15:item.find("title")-5]
-        #         id_for_search = ObjectId(id_for_search)
-        #         db_pull = db.ingredients.find_one({"_id": id_for_search})
-        #         final_ingredients.append(db_pull)
-        #         types.append(db_pull['type'])
-        #     elif (item.find("title")):
-        #         print("title leaf: " + item)
-        #         id_for_search = item[item.find("id")+15:item.find("title")-5]
-        #         id_for_search = ObjectId(item)
-        #         db_pull_recipe = db.recipes.find_one({"_id": id_for_search})
-        #         db_pull_recipe = dict(db_pull_recipe)
-        #         for ingredient in db_pull_recipe['ingredients']:
-        #             final_ingredients.append(ingredient)
-        #             types.append(ingredient['type'])
-        #     else:
-        #         print((form.title.data))
-        # SQL Committ
-        # sql = "INSERT INTO test2 (Ingredient, Type, Quantity) VALUES (%s, %s, %s)"
-        # val = ('chicken', 'Meat', '4')
-        # mycursor.execute(sql, val)
-        # mysqldb.commit()
-
-        # print(mycursor.rowcount, "record inserted.")
-        return ("Updating Create Grocery Route")
+        recipe_titles = []
+        for key in form_dict.keys():
+            if key.find("title")>=0:
+                title = form_dict[key]
+            if key.find("notes")>=0:
+                notes = form_dict[key]
+            if key.find("recipe")>=0:
+                searcher = ObjectId(form_dict[key])
+                dbAction = db.recipes.find_one({"_id": searcher})
+                recipes_ingredients2D.append(dbAction['ingredients']) 
+                recipe_titles.append(dbAction['title'])
+            if key.find('ingredient')>=0:
+                nonrecipe_ingredient_titles.append(form_dict[key])
+            elif key.find("quantity")>=0 and form_dict[key] !='':
+                quantity_array.append(form_dict[key])
+            elif key.find("unit")>=0 and form_dict[key] !='':
+                unit_array.append(form_dict[key])
+        for x in range(0, len(recipes_ingredients2D)):
+            for target in recipes_ingredients2D[x]:
+                if target['ingredient']['title'] not in nonrecipe_ingredient_titles:
+                    recipes_ingredients.append(target)
+        #Put Ingredients Data from Ingredients form
+        for x in range(0, len(nonrecipe_ingredient_titles)):
+            ingredient = db.ingredients.find_one({"title": nonrecipe_ingredient_titles[x]})
+            quantity = quantity_array[x]
+            unit = unit_array[x]
+            ingredient_holder = {"ingredient": ingredient, "quantity": quantity, "unit": unit }
+            nonrecipe_ingredients.append(ingredient_holder)
+        # print(recipes_ingredients + nonrecipe_ingredients)
+        final_ingredients = []
+        # print(f"recipe ti")
+        # for r_ingr in recipes_ingredients:
+        #     if r_ingr['ingredient']['title'] not in nonrecipe_ingredient_titles:
+        #         final_ingredients.append(recipes_ingredients[x])
+        # print(final_ingredients)
+        groceries_list = {
+            "title": title, 
+            "notes": notes,
+            "ingredients": recipes_ingredients + nonrecipe_ingredients,
+            "recipes": recipe_titles,
+        }
+        dbAction = db.groceries.insert_one(groceries_list)
+        ugh = recipes_ingredients + nonrecipe_ingredients
+        types = [target['ingredient']['type'] for target in ugh]
+        types2 = []
+        for item in types:
+            if (item != ""):
+                types2.append(item)
+        types2 = list(set(types2))
+        
+        return (render_template("create_groceries_price.html", grocery_list_NoSQL = dbAction, recipes_ingredients = recipes_ingredients, adhoc = nonrecipe_ingredients, types = types2, id=dbAction.inserted_id))
         # dbAction_groceries = db.groceries.insert_one({"ingredients": final_ingredients, "title": form.title.data, "date": form.date_created})
         # types = list(set(types))     
         # # dbCheck = db.groceries.find_one({"_id": dbAction.inserted_id})
@@ -918,7 +946,7 @@ def create_grocerries():
 
 ###########################################Read Routes 👀
 #Singe Read ✅ [FE finish]
-@app.route('/groceries/<id>', methods = ["GET"])
+@app.route('/groceries/<id>', methods = ["GET", "POST"])
 def groceries(id):
     types = []
     if request.method == "GET":
@@ -927,8 +955,26 @@ def groceries(id):
             print(dbAction)
         except Exception as ex:
             print("That shit dind't work, can't see all ingredeints")
-    return render_template("read_grocery.html", ingredients = dbAction['ingredients'], identifier = dbAction['title'] + "-" + dbAction['date'])
+    if request.method == "POST":
+        form_dict = request.form.to_dict()
+        print(form_dict)
+        #Now pull out price and format the data
 
+        #Then Write to SQL
+        #Create table and append the grocerry list id
+            #Get table schema
+            #try a test committ
+        
+        # SQL Committ
+        # sql = "INSERT INTO test2 (Ingredient, Type, Quantity) VALUES (%s, %s, %s)"
+        # val = ('chicken', 'Meat', '4')
+        # mycursor.execute(sql, val)
+        # mysqldb.commit()
+
+        # print(mycursor.rowcount, "record inserted.")
+        return("Yay")
+    return render_template("read_grocery.html", ingredients = dbAction['ingredients'], identifier = dbAction['title'] + "-" + dbAction['date'])
+    
 #Read All ✅ [FE finish]
 @app.route("/groceries/all", methods = ["GET"])
 def all_groceries():
