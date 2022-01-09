@@ -957,21 +957,34 @@ def groceries(id):
             print("That shit dind't work, can't see all ingredeints")
     if request.method == "POST":
         form_dict = request.form.to_dict()
-        print(form_dict)
         #Now pull out price and format the data
-
-        #Then Write to SQL
-        #Create table and append the grocerry list id
-            #Get table schema
-            #try a test committ
-        
-        # SQL Committ
-        # sql = "INSERT INTO test2 (Ingredient, Type, Quantity) VALUES (%s, %s, %s)"
-        # val = ('chicken', 'Meat', '4')
-        # mycursor.execute(sql, val)
-        # mysqldb.commit()
-
-        # print(mycursor.rowcount, "record inserted.")
+        types = []
+        quantity_array = []
+        unit_array = []
+        ingredients_array = []
+        price_array = []
+        recipe_titles = []
+        for key in form_dict.keys():
+            if key.find('ingredient')>=0:
+                ingredient_id = key[key.find("_")+1: len(key)]
+                dbAction_findIngredeint = db.ingredients.find_one({"_id":ObjectId(ingredient_id) })
+                ingredients_array.append(dbAction_findIngredeint)
+            elif key.find("quantity")>=0 and form_dict[key] !='':
+                quantity_array.append(form_dict[key])
+            elif key.find("unit")>=0 and form_dict[key] !='':
+                unit_array.append(form_dict[key])
+            elif key.find("price")>=0 and form_dict[key] !='':
+                price_array.append(form_dict[key])
+            elif key.find("price")>=0 and form_dict[key] =='':
+                price_array.append(0)
+        #SQL DB Write!
+        mycursor = mysqldb.cursor()
+        mycursor.execute(f"CREATE TABLE {id} (Ingredient_id VARCHAR(255) PRIMARY KEY, Ingredient_title VARCHAR(255), quantity INT, unit VARCHAR(255), price decimal (5,2))")
+        sql = f"INSERT INTO {id} (Ingredient_id, Ingredient_title, quantity, unit, price) VALUES (%s, %s, %s, %s, %s)"
+        for x in range(0,len(ingredients_array)):
+            val = (str(ingredients_array[x]['_id']), ingredients_array[x]['title'], quantity_array[x], unit_array[x], price_array[x])
+            mycursor.execute(sql, val)
+        mysqldb.commit()
         return("Yay")
     return render_template("read_grocery.html", ingredients = dbAction['ingredients'], identifier = dbAction['title'] + "-" + dbAction['date'])
     

@@ -24,7 +24,7 @@
                     {% for ingredient in recipes_ingredients%}
                     {% if type == ingredient.ingredient.type %}
                     <tr>
-                        <td><input checked type="checkbox" name="ingredient_{{ingredient.ingredient.title}}" id = {{ingredient.ingredient_id}} value = "{{ingredient.ingredient.title}}"/></td>
+                        <td><input checked type="checkbox" name="ingredient_{{ingredient.ingredient._id}}" id = {{ingredient.ingredient_id}} value = "{{ingredient.ingredient.title}}"/></td>
                         <td class="tg-0lax"><a href="/ingredient/{{ingredient.ingredient._id}}">{{ingredient.ingredient.title}}</a></td>
                         <td class="tg-0lax"><img src ={{ url_for('static', filename=ingredient.ingredient.img_URI)}} height="50" width="50" id="ingredient-image" /></td>
                         <td class="tg-0lax"><input type="number" id='quantity' name="quantity_{{ingredient.ingredient.title}}" min="1" style="width: 85%;" step=0.1 value="{{ingredient.quantity}}"></td>
@@ -46,7 +46,7 @@
                                 </optgroup>
                             </select>
                         </td>
-                        <td class="tg-0lax"><input type="number" id='price' name="price_{{ingredient.ingredient.title}}" min="1" style="width: 85%;" step=0.1 min="-9999"></td>
+                        <td class="tg-0lax"><input type="number" id='price' name="price_{{ingredient.ingredient.title}}" min="1" style="width: 85%;" step=0.01 min="-9999"></td>
                             {%endif%}
                         {%endfor%}
                     </tr>
@@ -78,7 +78,7 @@
                     {% for ingredient in adhoc%}
                     {% if type == ingredient.ingredient.type %}
                     <tr>
-                        <td><input checked type="checkbox" name="ingredient_{{ingredient.ingredient.title}}" id = {{ingredient._id}} value = "{{ingredient.title}}"/></td>
+                        <td><input checked type="checkbox" name="ingredient_{{ingredient.ingredient._id}}" id = {{ingredient._id}} value = "{{ingredient.title}}"/></td>
                         <td class="tg-0lax"><a href="/ingredient/{{ingredient.ingredient._id}}">{{ingredient.ingredient.title}}</a></td>
                         <td class="tg-0lax"><img src ={{ url_for('static', filename=ingredient.ingredient.img_URI)}} height="50" width="50" id="ingredient-image" /></td>
                         <td class="tg-0lax"><input type="number" id='quantity' name="quantity_{{ingredient.ingredient.title}}" min="1" style="width: 85%;" step=0.1 value="{{ingredient.quantity}}"></td>

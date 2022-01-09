@@ -86,3 +86,22 @@ Krogger Location called{"data":[{"locationId":"09790273","chain":"BP","address":
 
 
   div id = "draggable" class = "ui-widget-content"
+
+
+
+  SQL switch
+  Example form Response
+  {'ingredient_Pink Atlantic Salmon': 'on', 'quantity_Pink Atlantic Salmon': '1', 'unit_Pink Atlantic Salmon': 'lb', 
+  'price_Pink Atlantic Salmon': '2.2', 'ingredient_cheddar cheese': 'on', 'quantity_cheddar cheese': '1', 'unit_cheddar cheese': 'lb', 
+  'price_cheddar cheese': '2.2', 'ingredient_tomato sauce': 'on', 'quantity_tomato sauce': '4', 'unit_tomato sauce': 'oz', 
+  'price_tomato sauce': '2.2', 'ingredient_soft taco shell': 'on', 'quantity_soft taco shell': '12', 'unit_soft taco shell': 'of them', 
+  'price_soft taco shell': '2.2', 'ingredient_Garlic': 'on', 'quantity_Garlic': '12', 'unit_Garlic': 'of them', 'price_Garlic': '2.2', 
+  'ingredient_sweet onion': 'on', 'quantity_sweet onion': '3', 'unit_sweet onion': 'of them', 'price_sweet onion': '2.2', 'ingredient_Green Bell Pepper': 'on', 
+  'quantity_Green Bell Pepper': '4', 'unit_Green Bell Pepper': 'of them', 'price_Green Bell Pepper': '2.2', 'ingredient_Beef Broth': 'on', 'quantity_Beef Broth': '1', 
+  'unit_Beef Broth': 'L', 'price_Beef Broth': '2.2', 'ingredient_Ground Beef': 'on', 'quantity_Ground Beef': '1', 'unit_Ground Beef': 'lb', 'price_Ground Beef': '2.2', 
+  'ingredient_ground turkey': 'on', 'quantity_ground turkey': '1', 'unit_ground turkey': 'lb', 'price_ground turkey': '2.2', 'ingredient_maggi cube': 'on', 'quantity_maggi cube': '3', 
+  'unit_maggi cube': 'of them', 'price_maggi cube': '2.2', 'ingredient_Ginger Root': 'on', 'quantity_Ginger Root': '3', 'unit_Ginger Root': 'g', 'price_Ginger Root': '2.2', 
+  'ingredient_cinnamon sticks': 'on', 'quantity_cinnamon sticks': '3', 'unit_cinnamon sticks': 'of them', 'price_cinnamon sticks': '2.2', 'ingredient_Sazon': 'on', 'quantity_Sazon': '3', 
+  'unit_Sazon': 'of them', 'price_Sazon': '2.2', 'ingredient_maggi beef bouillon': 'on', 'quantity_maggi beef bouillon': '2', 'unit_maggi beef bouillon': 'of them', '
+  price_maggi beef bouillon': '2.2', 'ingredient_parika': 'on', 'quantity_parika': '5', 'unit_parika': 'g', 'price_parika': '2.2', 'ingredient_Star Anise': 'on', 'quantity_Star Anise': '3', 'unit_Star Anise': 'of them', 
+  'price_Star Anise': '2.2', 'ingredient_goya bouillon solid': 'on', 'quantity_goya bouillon solid': '1', 'unit_goya bouillon solid': 'of them', 'price_goya bouillon solid': '2.2', 'ingredient_Red RockEye Salmon': 'on', 'quantity_Red RockEye Salmon': '2', 'unit_Red RockEye Salmon': 'lb', 'price_Red RockEye Salmon': '2.2', 'ingredient_Boneless Skinless Chicken Thighs': 'on', 'quantity_Boneless Skinless Chicken Thighs': '1', 'unit_Boneless Skinless Chicken Thighs': 'lb', 'price_Boneless Skinless Chicken Thighs': '2.2', 'ingredient_ground black pepper': 'on', 'quantity_ground black pepper': '10', 'unit_ground black pepper': 'g', 'price_ground black pepper': '2.2', 'ingredient_salt': 'on', 'quantity_salt': '1', 'unit_salt': 'g', 'price_salt': '2.2'}
