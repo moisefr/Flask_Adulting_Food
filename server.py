@@ -2,7 +2,7 @@
 #Import Key Libraries: os, flask(response, request), pymango, json, bson.objectid objectid
 import os, sys, stat, requests
 from flask import Flask, Response, request, render_template, flash, redirect, url_for, session, logging
-from requests.api import get
+from datetime import date
 from werkzeug.utils import secure_filename
 from wtforms import Form, StringField, TextAreaField, PasswordField, form, validators
 import pymongo
@@ -28,7 +28,6 @@ app = Flask(__name__)
 db_config_data = None
 with open('db_credentials.json') as f:
     db_config_data = json.load(f)
-
 #Prepping NoSQL Connection string
 connection_string_array = [db_config_data['mongodb'][key] for key in db_config_data['mongodb'].keys()]
 connection_string_NoSQL = "".join(connection_string_array)
@@ -37,7 +36,7 @@ client = pymongo.MongoClient(connection_string_NoSQL, serverSelectionTimeoutMS=1
 try:
     # Check for NoSQL connection
     db = client.Adulting_Food
-    print("Connected to Mongo Database  😁: ", "availible data collections are - ", db.list_collection_names() )
+    print("Connected to Admin/Dev Mongo Database  😁: ", "availible data collections are - ", db.list_collection_names() )
     #Prep SQL Connection
     mysqldb = mysql.connector.connect(
     host=db_config_data['mysql']['MYSQL_ADDON_HOST'],
@@ -52,9 +51,6 @@ try:
         print (x)
 except Exception:
     print("Unable to connect to the server.")
-
-
-
 #Identity and Access Mangement - LOGIN and LOGOUT 🚪
 #Creating, Loging In, Validating a User
 from Models_Plan import User
@@ -74,7 +70,6 @@ def load_user(user_id):
     user_lastName = dbAction["lastName"]
     user_displayname = dbAction["displayname"]
     user_fullName = dbAction["name"]
-    #Write to Users Database
     user = User(
         id_= unique_id,
         name = user_fullName,
@@ -96,7 +91,6 @@ def login():
                     'nonce': NONCE,
                     'response_type': 'code',
                     'response_mode': 'query'}
-
     # build request_uri
     request_uri = "{base_url}?{query_params}".format(
         base_url=config["web"]["auth_uri"],
@@ -108,6 +102,7 @@ def login():
 #you get redirect to this endpoint from OKTA to begin token exchange
 @app.route("/authorization-code/callback")  # Step 4 Redirect to authentication prompt
 def callback():
+    # global user_custom_NoSQLdatabase
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     code = request.args.get("code") #Step 4 AuthZ code response
     if not code:
@@ -158,24 +153,28 @@ def callback():
         given_name= user_firstName,
         family_name= user_lastName
     )
-    # print(user.export())
+    session["user"] = user.export()
     find_already = db.users.find_one({"OKTAid": unique_id})
-    print("found already? "f"{find_already}")
+    
     if find_already is None:
-        print("User not already found goind to insert one")
         dbAction = db.users.insert_one(user.export())
-        print(dbAction)
-
-
+    
     login_user(user)
-
+    
     return redirect(url_for("profile"))
 #presents the profile endpoint from your app
+
+#Create Custom User NoSQLDB Connections
+def create_user_NoSQLdatabases():
+    holder_user = session['user']
+    NoSQLConnection = client[str(holder_user['OKTAid'])]
+    return NoSQLConnection
+
 @app.route("/profile")
 @login_required
 def profile():
     return render_template("profile.html", user = current_user)
-    
+
 @app.route("/logout", methods=["GET", "POST"])
 @login_required
 def logout():
@@ -460,7 +459,7 @@ def delete_ingredient(id):
 #############********************************************************************Recipes 🧾
 from Models_Plan import Recipe
 ##########################################Create Routes 🦾
-#Create Recipee => ✅ [FE finish]
+#Create Recipee => ✅ [FE finish] MV2
 @app.route("/recipe", methods = ["GET", "POST"])
 @login_required
 def create_recipe():
@@ -481,6 +480,9 @@ def create_recipe():
         try:
             #Create Recipe Shell
             dbAction = db.recipes.insert_one(form.export())
+            user_db = create_user_NoSQLdatabases()
+            user_dbcollection = user_db['recipes']
+            db_user_Action = user_dbcollection.insert_one(form.export())
             form_dict = request.form.to_dict() #Parse The Form, convert request.form to dictionary then to list of Tuples
             all_ingredients = db.ingredients.find({})
             all_ingredients = list(all_ingredients)
@@ -526,12 +528,22 @@ def create_recipe():
                     elif key.find("execution")>=0:
                         recipe_execution.append({key:value})
             instructions = {'prep': recipe_prep, 'execution': recipe_execution}
+            #Handle Creation to Master
             dbAction_ingredients = db.recipes.update_one(
             {"_id": dbAction.inserted_id},
             {"$set": {
                 "ingredients": final_recipe_ingredients,
                 "instructions": instructions,
                 "img_URI": uploadfile(str(dbAction.inserted_id), "Recipe")
+                }}
+            )
+            #Hanlde Custom User Upload from session
+            dbAction_user_ingredients = user_dbcollection.recipes.update_one(
+            {"_id": db_user_Action.inserted_id},
+            {"$set": {
+                "ingredients": final_recipe_ingredients,
+                "instructions": instructions,
+                "img_URI": uploadfile(str(db_user_Action.inserted_id), "Recipe")
                 }}
             )
             # dbsearch = db.recipes.find_one({"_id": dbAction.inserted_id})
@@ -926,6 +938,7 @@ def create_grocerries():
             "notes": notes,
             "ingredients": recipes_ingredients + nonrecipe_ingredients,
             "recipes": recipe_titles,
+            "date_created": str(date.today()).replace("-","")
         }
         dbAction = db.groceries.insert_one(groceries_list)
         ugh = recipes_ingredients + nonrecipe_ingredients
@@ -947,14 +960,45 @@ def create_grocerries():
 ###########################################Read Routes 👀
 #Singe Read ✅ [FE finish]
 @app.route('/groceries/<id>', methods = ["GET", "POST"])
-def groceries(id):
+def read_groceries(id):
     types = []
     if request.method == "GET":
         try:
             dbAction = db.groceries.find_one({"_id": ObjectId(id)})
-            print(dbAction)
+            recipe_date = str(dbAction['date_created'])
+            recipe_date = recipe_date.replace("-","")
+            table_name = f"{recipe_date}_{str(dbAction['_id'])}"
+            mycursor = mysqldb.cursor()
+            mycursor.execute(f"SELECT * FROM {table_name}")
+            myresult = mycursor.fetchall()
+            mycursor.close()
+            ingredients = []
+            
+            types2 = []
+            for item in types:
+                if (item != ""):
+                    types2.append(item)
+            types2 = list(set(types2))
+            for row in myresult:
+                price = str(row[4])
+                price = price[price.find("(")+1: price.find(")")]
+                dbAction_ingr = db.ingredients.find_one({"_id": ObjectId(row[0])})
+                ingredient = {
+                    "ingredient": dbAction_ingr,
+                    "quantity": row[2],
+                    "unit": row[3],
+                    "price": price,
+                    "total":float(price)*row[2]
+                }
+                ingredients.append(ingredient)
+            types = [target['ingredient']['type'] for target in ingredients]
+            for item in types:
+                if (item != ""):
+                    types2.append(item)
+            types2 = list(set(types2))
+            print(types2)
         except Exception as ex:
-            print("That shit dind't work, can't see all ingredeints")
+           return("That shit dind't work, can't see all ingredeints")
     if request.method == "POST":
         form_dict = request.form.to_dict()
         #Now pull out price and format the data
@@ -978,15 +1022,19 @@ def groceries(id):
             elif key.find("price")>=0 and form_dict[key] =='':
                 price_array.append(0)
         #SQL DB Write!
+        dbgro_find = db.groceries.find_one({"_id": ObjectId(id)})
+        list_date = dbgro_find["date_created"]
+        SQL_Grocerrylist = f"{list_date}_{id}"
         mycursor = mysqldb.cursor()
-        mycursor.execute(f"CREATE TABLE {id} (Ingredient_id VARCHAR(255) PRIMARY KEY, Ingredient_title VARCHAR(255), quantity INT, unit VARCHAR(255), price decimal (5,2))")
-        sql = f"INSERT INTO {id} (Ingredient_id, Ingredient_title, quantity, unit, price) VALUES (%s, %s, %s, %s, %s)"
+        mycursor.execute(f"CREATE TABLE {SQL_Grocerrylist} (Ingredient_id VARCHAR(255) PRIMARY KEY, Ingredient_title VARCHAR(255), quantity INT, unit VARCHAR(255), price decimal (5,2))")
+        sql = f"INSERT INTO {SQL_Grocerrylist} (Ingredient_id, Ingredient_title, quantity, unit, price) VALUES (%s, %s, %s, %s, %s)"
         for x in range(0,len(ingredients_array)):
             val = (str(ingredients_array[x]['_id']), ingredients_array[x]['title'], quantity_array[x], unit_array[x], price_array[x])
             mycursor.execute(sql, val)
         mysqldb.commit()
+        mycursor.close()
         return("Yay")
-    return render_template("read_grocery.html", ingredients = dbAction['ingredients'], identifier = dbAction['title'] + "-" + dbAction['date'])
+    return render_template("read_grocery.html", ingredients = ingredients, types = types2)
     
 #Read All ✅ [FE finish]
 @app.route("/groceries/all", methods = ["GET"])

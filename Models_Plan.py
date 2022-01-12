@@ -82,7 +82,7 @@ class Grocerries(Form):
     notes = TextAreaField('Notes', [validators.Length(min=4, max=2500)])
     ingredients = []
     recipes = []
-    date_created = str(date.today())
+    date_created = ''
     def export(self):
         return (
             {
