@@ -169,7 +169,9 @@ def create_user_NoSQLdatabases():
     holder_user = session['user']
     NoSQLConnection = client[str(holder_user['OKTAid'])]
     return NoSQLConnection
-
+def print_collections(NoSQLConnection):
+    for collection in NoSQLConnection.list_collection_names():
+        print(collection)
 @app.route("/profile")
 @login_required
 def profile():
@@ -926,13 +928,6 @@ def create_grocerries():
             unit = unit_array[x]
             ingredient_holder = {"ingredient": ingredient, "quantity": quantity, "unit": unit }
             nonrecipe_ingredients.append(ingredient_holder)
-        # print(recipes_ingredients + nonrecipe_ingredients)
-        final_ingredients = []
-        # print(f"recipe ti")
-        # for r_ingr in recipes_ingredients:
-        #     if r_ingr['ingredient']['title'] not in nonrecipe_ingredient_titles:
-        #         final_ingredients.append(recipes_ingredients[x])
-        # print(final_ingredients)
         groceries_list = {
             "title": title, 
             "notes": notes,
@@ -940,21 +935,19 @@ def create_grocerries():
             "recipes": recipe_titles,
             "date_created": str(date.today()).replace("-","")
         }
+        #Connect to User NoSQL
+        user_db = create_user_NoSQLdatabases()
+        user_dbcollection = user_db['groceries']
         dbAction = db.groceries.insert_one(groceries_list)
-        ugh = recipes_ingredients + nonrecipe_ingredients
-        types = [target['ingredient']['type'] for target in ugh]
+        user_dbAction = user_dbcollection.insert_one(groceries_list)
+        ugh_this_again = recipes_ingredients + nonrecipe_ingredients
+        types = [target['ingredient']['type'] for target in ugh_this_again]
         types2 = []
         for item in types:
             if (item != ""):
                 types2.append(item)
         types2 = list(set(types2))
-        
-        return (render_template("create_groceries_price.html", grocery_list_NoSQL = dbAction, recipes_ingredients = recipes_ingredients, adhoc = nonrecipe_ingredients, types = types2, id=dbAction.inserted_id))
-        # dbAction_groceries = db.groceries.insert_one({"ingredients": final_ingredients, "title": form.title.data, "date": form.date_created})
-        # types = list(set(types))     
-        # # dbCheck = db.groceries.find_one({"_id": dbAction.inserted_id})
-        # # print(dbCheck) 
-        # return render_template('read_groceries.html', ingredients = final_ingredients, types = types)
+        return (render_template("create_groceries_price.html", grocery_list_NoSQL = user_dbAction, recipes_ingredients = recipes_ingredients, adhoc = nonrecipe_ingredients, types = types2, id=user_dbAction.inserted_id))
     return render_template('create_groceries.html', recipes = recipes, ingredients = ingrdients, form=form, types = types2)
 
 ###########################################Read Routes 👀
@@ -962,12 +955,16 @@ def create_grocerries():
 @app.route('/groceries/<id>', methods = ["GET", "POST"])
 def read_groceries(id):
     types = []
+    #ButFirstConnect to User NoSQL
+    user_db = create_user_NoSQLdatabases()
+    user_dbcollection = user_db['groceries']
     if request.method == "GET":
         try:
-            dbAction = db.groceries.find_one({"_id": ObjectId(id)})
+            dbAction = user_dbcollection.find_one({"_id": ObjectId(id)})
             recipe_date = str(dbAction['date_created'])
-            recipe_date = recipe_date.replace("-","")
-            table_name = f"{recipe_date}_{str(dbAction['_id'])}"
+            list_date = recipe_date.replace("-","")
+            desired_user = session['user']
+            table_name = f"{desired_user['OKTAid']}_date{list_date}_{id}"
             mycursor = mysqldb.cursor()
             mycursor.execute(f"SELECT * FROM {table_name}")
             myresult = mycursor.fetchall()
@@ -1022,9 +1019,10 @@ def read_groceries(id):
             elif key.find("price")>=0 and form_dict[key] =='':
                 price_array.append(0)
         #SQL DB Write!
-        dbgro_find = db.groceries.find_one({"_id": ObjectId(id)})
+        dbgro_find = user_dbcollection.find_one({"_id": ObjectId(id)})
         list_date = dbgro_find["date_created"]
-        SQL_Grocerrylist = f"{list_date}_{id}"
+        desired_user = session['user']
+        SQL_Grocerrylist = f"{desired_user['OKTAid']}_date{list_date}_{id}"
         mycursor = mysqldb.cursor()
         mycursor.execute(f"CREATE TABLE {SQL_Grocerrylist} (Ingredient_id VARCHAR(255) PRIMARY KEY, Ingredient_title VARCHAR(255), quantity INT, unit VARCHAR(255), price decimal (5,2))")
         sql = f"INSERT INTO {SQL_Grocerrylist} (Ingredient_id, Ingredient_title, quantity, unit, price) VALUES (%s, %s, %s, %s, %s)"
@@ -1033,10 +1031,11 @@ def read_groceries(id):
             mycursor.execute(sql, val)
         mysqldb.commit()
         mycursor.close()
-        return("Yay")
+        return redirect(f"/groceries/{id}")
     return render_template("read_grocery.html", ingredients = ingredients, types = types2)
     
 #Read All ✅ [FE finish]
+#Should Deprecate
 @app.route("/groceries/all", methods = ["GET"])
 def all_groceries():
     if request.method == "GET":
