@@ -938,8 +938,8 @@ def create_grocerries():
         #Connect to User NoSQL
         user_db = create_user_NoSQLdatabases()
         user_dbcollection = user_db['groceries']
-        dbAction = db.groceries.insert_one(groceries_list)
-        user_dbAction = user_dbcollection.insert_one(groceries_list)
+        dbAction = db.groceries.insert_one(groceries_list) #💨Write to Master DB
+        user_dbAction = user_dbcollection.insert_one(groceries_list) #💦Write to User DB
         ugh_this_again = recipes_ingredients + nonrecipe_ingredients
         types = [target['ingredient']['type'] for target in ugh_this_again]
         types2 = []
@@ -952,7 +952,7 @@ def create_grocerries():
 
 ###########################################Read Routes 👀
 #Singe Read ✅ [FE finish]
-@app.route('/groceries/<id>', methods = ["GET", "POST"])
+@app.route('/groceries/<id>', methods = ["GET"])
 def read_groceries(id):
     types = []
     #ButFirstConnect to User NoSQL
@@ -970,7 +970,6 @@ def read_groceries(id):
             myresult = mycursor.fetchall()
             mycursor.close()
             ingredients = []
-            
             types2 = []
             for item in types:
                 if (item != ""):
@@ -993,45 +992,9 @@ def read_groceries(id):
                 if (item != ""):
                     types2.append(item)
             types2 = list(set(types2))
-            print(types2)
         except Exception as ex:
            return("That shit dind't work, can't see all ingredeints")
-    if request.method == "POST":
-        form_dict = request.form.to_dict()
-        #Now pull out price and format the data
-        types = []
-        quantity_array = []
-        unit_array = []
-        ingredients_array = []
-        price_array = []
-        recipe_titles = []
-        for key in form_dict.keys():
-            if key.find('ingredient')>=0:
-                ingredient_id = key[key.find("_")+1: len(key)]
-                dbAction_findIngredeint = db.ingredients.find_one({"_id":ObjectId(ingredient_id) })
-                ingredients_array.append(dbAction_findIngredeint)
-            elif key.find("quantity")>=0 and form_dict[key] !='':
-                quantity_array.append(form_dict[key])
-            elif key.find("unit")>=0 and form_dict[key] !='':
-                unit_array.append(form_dict[key])
-            elif key.find("price")>=0 and form_dict[key] !='':
-                price_array.append(form_dict[key])
-            elif key.find("price")>=0 and form_dict[key] =='':
-                price_array.append(0)
-        #SQL DB Write!
-        dbgro_find = user_dbcollection.find_one({"_id": ObjectId(id)})
-        list_date = dbgro_find["date_created"]
-        desired_user = session['user']
-        SQL_Grocerrylist = f"{desired_user['OKTAid']}_date{list_date}_{id}"
-        mycursor = mysqldb.cursor()
-        mycursor.execute(f"CREATE TABLE {SQL_Grocerrylist} (Ingredient_id VARCHAR(255) PRIMARY KEY, Ingredient_title VARCHAR(255), quantity INT, unit VARCHAR(255), price decimal (5,2))")
-        sql = f"INSERT INTO {SQL_Grocerrylist} (Ingredient_id, Ingredient_title, quantity, unit, price) VALUES (%s, %s, %s, %s, %s)"
-        for x in range(0,len(ingredients_array)):
-            val = (str(ingredients_array[x]['_id']), ingredients_array[x]['title'], quantity_array[x], unit_array[x], price_array[x])
-            mycursor.execute(sql, val)
-        mysqldb.commit()
-        mycursor.close()
-        return redirect(f"/groceries/{id}")
+    
     return render_template("read_grocery.html", ingredients = ingredients, types = types2)
     
 #Read All ✅ [FE finish]
@@ -1053,38 +1016,84 @@ def all_groceries():
 def update_groceries(id):
     form = Grocerries(request.form)
     if request.method == 'GET':
+        #NoSQL Data Calling
         dbAction = db.recipes.find({})
         dbAction2 = db.ingredients.find({})
         dbGrocery_search = db.groceries.find_one({"_id": ObjectId(id)})
-        form.ingredients = dbGrocery_search['ingredients']
         form.title.data = dbGrocery_search['title']
-        form.date_created = dbGrocery_search['date']
-        types =[ingredient['type'] for ingredient in form.ingredients]
-        types = list(set(types))
-        print(form.ingredients)
+        form.date_created = str(dbGrocery_search['date_created'])
+        #SQL Data Calling
+        list_date = form.date_created.replace("-","")
+        desired_user = session['user']
+        table_name = f"{desired_user['OKTAid']}_date{list_date}_{id}"
+        mycursor = mysqldb.cursor()
+        mycursor.execute(f"SELECT * FROM {table_name}")
+        myresult = mycursor.fetchall()
+        mycursor.close()
+        ingredients = []
+        types2 = []
+        for row in myresult:
+            price = str(row[4])
+            price = price[price.find("(")+1: price.find(")")]
+            dbAction_ingr = db.ingredients.find_one({"_id": ObjectId(row[0])})
+            ingredient = {
+                "ingredient": dbAction_ingr,
+                "quantity": row[2],
+                "unit": row[3],
+                "price": price,
+                "total":float(price)*row[2]
+            }
+            ingredients.append(ingredient)
+        types = [target['ingredient']['type'] for target in ingredients]
+        types2 = list(set(types))
+        checker = [target['ingredient']['title'] for target in ingredients]
+        remainder = []
+        for item in dbAction2:
+            if item['title'] not in checker:
+                remainder.append(item)
     if request.method == 'POST':
-        final_ingredients = []
+        form_dict = request.form.to_dict()
+        #Now pull out price and format the data
         types = []
-        for item in request.form.keys():
-            print(item)
-            if (item.find("title")>0):
-                id_for_search = item[item.find("id")+15:item.find("title")-5]
-                id_for_search = ObjectId(id_for_search)
-                db_pull = db.ingredients.find_one({"_id": id_for_search})
-                final_ingredients.append(db_pull)
-                title = request.form['title']
-                # types.append(dict(db_pull['type']))
-                if db_pull != None:
-                   types.append(db_pull['type'])
-            else:
-                print((form.title.data))
-        dbAction_groceries = db.groceries.update_one(
-            {"_id": ObjectId(id)},
-            {"$set": {"ingredients": final_ingredients, "title": title, "date": form.date_created}}
-            )
-        types = list(set(types))
-        return render_template('read_groceries.html', ingredients = final_ingredients, types = types)
-    return render_template("update_groceries.html", form = form, types = types, ingredients = dbAction2, recipes = dbAction )
+        quantity_array = []
+        unit_array = []
+        ingredients_array = []
+        price_array = []
+        recipe_titles = []
+        try:
+            for key in form_dict.keys():
+                if key.find('ingredient')>=0:
+                    ingredient_id = key[key.find("_")+1: len(key)]
+                    dbAction_findIngredeint = db.ingredients.find_one({"_id":ObjectId(ingredient_id) })
+                    ingredients_array.append(dbAction_findIngredeint)
+                elif key.find("quantity")>=0 and form_dict[key] !='':
+                    quantity_array.append(form_dict[key])
+                elif key.find("unit")>=0 and form_dict[key] !='':
+                    unit_array.append(form_dict[key])
+                elif key.find("price")>=0 and form_dict[key] !='':
+                    price_array.append(form_dict[key])
+                elif key.find("price")>=0 and form_dict[key] =='':
+                    price_array.append(0)
+            print(ingredients_array)
+            print(price_array)
+            return("Updating Update/Post route")
+        except Exception as ex:
+            return("Not Working")
+        # #SQL DB Write!
+        # dbgro_find = user_dbcollection.find_one({"_id": ObjectId(id)})
+        # list_date = dbgro_find["date_created"]
+        # desired_user = session['user']
+        # SQL_Grocerrylist = f"{desired_user['OKTAid']}_date{list_date}_{id}"
+        # mycursor = mysqldb.cursor()
+        # mycursor.execute(f"CREATE TABLE {SQL_Grocerrylist} (Ingredient_id VARCHAR(255) PRIMARY KEY, Ingredient_title VARCHAR(255), quantity INT, unit VARCHAR(255), price decimal (5,2))")
+        # sql = f"INSERT INTO {SQL_Grocerrylist} (Ingredient_id, Ingredient_title, quantity, unit, price) VALUES (%s, %s, %s, %s, %s)"
+        # for x in range(0,len(ingredients_array)):
+        #     val = (str(ingredients_array[x]['_id']), ingredients_array[x]['title'], quantity_array[x], unit_array[x], price_array[x])
+        #     mycursor.execute(sql, val)
+        # mysqldb.commit()
+        # mycursor.close()
+        # return redirect(f"/groceries/{id}")
+    return render_template("update_groceries.html", form = form, types = types2, remaining_ingredients = remainder, recipes = dbAction, current_ingredients=ingredients )
 
 ###########################################Delete Routes 🚮
 @app.route("/groceries/delete/<id>", methods =  ['POST', 'GET'])
