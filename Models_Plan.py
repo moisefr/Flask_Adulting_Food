@@ -83,6 +83,7 @@ class Grocerries(Form):
     ingredients = []
     recipes = []
     date_created = ''
+    recently_modified = ''
     def export(self):
         return (
             {
@@ -90,6 +91,7 @@ class Grocerries(Form):
             "notes": self.notes.data,
             "ingredients": self.ingredients,
             "recipes": self.recipes,
-            "date": self.date_created
+            "date": self.date_created,
+            "recently_modified":  self.recently_modified
             }
         )

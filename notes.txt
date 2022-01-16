@@ -105,3 +105,54 @@ Krogger Location called{"data":[{"locationId":"09790273","chain":"BP","address":
   'unit_Sazon': 'of them', 'price_Sazon': '2.2', 'ingredient_maggi beef bouillon': 'on', 'quantity_maggi beef bouillon': '2', 'unit_maggi beef bouillon': 'of them', '
   price_maggi beef bouillon': '2.2', 'ingredient_parika': 'on', 'quantity_parika': '5', 'unit_parika': 'g', 'price_parika': '2.2', 'ingredient_Star Anise': 'on', 'quantity_Star Anise': '3', 'unit_Star Anise': 'of them', 
   'price_Star Anise': '2.2', 'ingredient_goya bouillon solid': 'on', 'quantity_goya bouillon solid': '1', 'unit_goya bouillon solid': 'of them', 'price_goya bouillon solid': '2.2', 'ingredient_Red RockEye Salmon': 'on', 'quantity_Red RockEye Salmon': '2', 'unit_Red RockEye Salmon': 'lb', 'price_Red RockEye Salmon': '2.2', 'ingredient_Boneless Skinless Chicken Thighs': 'on', 'quantity_Boneless Skinless Chicken Thighs': '1', 'unit_Boneless Skinless Chicken Thighs': 'lb', 'price_Boneless Skinless Chicken Thighs': '2.2', 'ingredient_ground black pepper': 'on', 'quantity_ground black pepper': '10', 'unit_ground black pepper': 'g', 'price_ground black pepper': '2.2', 'ingredient_salt': 'on', 'quantity_salt': '1', 'unit_salt': 'g', 'price_salt': '2.2'}
+
+
+
+cheddar cheese
+Garlic
+sweet onion
+Green Bell Pepper
+Beef Broth
+tomato sauce
+soft taco shell
+Ground Beef
+ground turkey
+ground black pepper
+maggi cube
+Ginger Root
+cinnamon sticks
+Sazon
+maggi beef bouillon
+parika
+Star Anise
+goya bouillon solid
+Boneless Skinless Chicken Thighs
+
+ground black pepper
+maggi cube
+Beef Broth
+Garlic
+Ground Beef
+Ginger Root
+cinnamon sticks
+Sazon
+sweet onion
+Green Bell Pepper
+maggi beef bouillon
+ground turkey
+parika
+Star Anise
+tomato sauce
+soft taco shell
+cheddar cheese
+goya bouillon solid
+
+
+
+return Response(
+                    response = json.dumps(
+                            {"message": "Unable to Create Groccery List"
+                            }),
+                        status = 400,
+                        mimetype='application/json'
+                )
