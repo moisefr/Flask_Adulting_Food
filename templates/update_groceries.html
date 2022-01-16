@@ -1,86 +1,84 @@
 {% extends 'layout.html' %}
 {% block body %} 
 {% from "includes/_formhelpers.html" import render_field %}
-
-<form method="POST" action="">
-        <div class="form-group">
-            {{render_field(form.title, class_="form-control")}}
-        </div>
-        <p><input type="submit" class="btn btn-primary" value="Submit"></p>
-        <div class="form-group" id="main">
-            <!-- Bootstrap Accordian -->
-            <div class="container" >
-                <div class="row">
-                  <div class="col-6" >
-                      <h2>Current List of Ingredients</h2>
+<h1>Hi</h1>
+<form method="post" action="" name="updates">
+    <div class="form-group">
+        {{render_field(form.title, class_="form-control")}}
+    </div>
+    <input class="btn btn-primary" type="submit" value="Submit" id="submit">
+    <div class="form-group">
+        <div class="container">
+            <div class="row">
+                <div class="col-6">
+                    <h2>Current Ingredients</h2>
                     <div class="accordion accordion-flush" id="accordionFlushExample">
                         {%for type in types%}
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="flush-headingThree">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-{{type}}" aria-expanded="false" aria-controls="flush-collapseThree">
-                                    {{type}}
-                                </button>
-                                </h2>
-                                <div id="flush-{{type}}" class="accordion-collapse collapse" aria-labelledby="flush-headingThree" data-bs-parent="#accordionFlushExample">
-                                    <div class="container">
-                                        <div class="row">
-                                            <div class="col-1">Select</div>
-                                            <div class="col-3">Ingredient</div>
-                                            <div class="col-2">Image</div>
-                                            <div class="col-2">Quantity</div>
-                                            <div class="col-2">Unit</div>
-                                            <div class="col-2">Price</div>
-                                          </div>
+                        <div class="accordion-item">
+                        <h2 class="accordion-header" id="flush-heading{{type}}">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-{{type}}" aria-expanded="false" aria-controls="flush-collapseOne">
+                            {{type}}
+                            </button>
+                        </h2>
+                        <div id="flush-{{type}}" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+                            <div class="accordion-body">
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="col-1">Select</div>
+                                        <div class="col-3">Ingredient</div>
+                                        <div class="col-2">Image</div>
+                                        <div class="col-2">Quantity</div>
+                                        <div class="col-2">Unit</div>
+                                        <div class="col-2">Price</div>
                                     </div>
-                                    {%for ingredient in current_ingredients%}
-                                        {%if ingredient.ingredient.type == type %}
-                                        <div class="accordion-body">
-                                            <div class="container" >
-                                                <div class="row">
-                                                    <div class="col-1"><input checked type="checkbox" name="ingredient_{{ingredient.ingredient._id}}" id = {{ingredient.ingredient_id}} value = "{{ingredient.ingredient.title}}"/></div>
-                                                    <div class="col-3"><a href="/ingredient/{{ingredient.ingredient._id}}">{{ingredient.ingredient.title}}</a></div>
-                                                    <div class="col-2"><img src ={{ url_for('static', filename=ingredient.ingredient.img_URI)}} height="75" width="75" id="ingredient-image" /></div>
-                                                    <div class="col-2"><input type="number" id='quantity' name="quantity_{{ingredient.ingredient.title}}" min="1" style="width: 85%;" step=0.1 value="{{ingredient.quantity}}"></div>
-                                                    <div class="col-2">
-                                                        <select name="unit_{{ingredient.ingredient.title}}" id="unit" style="width: 50px;">
-                                                            <optgroup label="Metric">
-                                                            <option value="{{ingredient.unit}}">{{ingredient.unit}}</option>
-                                                            <option value="of them">Count</option>
-                                                            <option value="g">grams</option>
-                                                            <option value="kg">kilograms</option>
-                                                            <option value="ml">milliliters</option>
-                                                            <option value="L">Liters</option>
-                                                            </optgroup>
-                                                            <optgroup label="That Other Fuck Shit">
-                                                            <option value="lb">pounds</option>
-                                                            <option value="oz">ounces</option>
-                                                            <option value="fl oz">fluid ounces</option>
-                                                            <option value="cups">cups</option>
-                                                            </optgroup>
-                                                        </select>
-                                                </div>
-                                                    <div class="col-2"><input type="number" id='price' name="price_{{ingredient.ingredient.title}}" min="1" style="width: 85%;" step=0.01 value="{{ingredient.price}}"></div>
-                                                </div>
-                                              </div>
-                                        </div>
-                                        {%endif%}
-                                    {%endfor%}
                                 </div>
+                                {%for ingredient in current_ingredients%}
+                                    {%if ingredient.ingredient.type == type %}
+                                    <div class="container" >
+                                        <div class="row">
+                                            <div class="col-1"><input checked type="checkbox" name="ingredient_{{ingredient.ingredient._id}}" id = {{ingredient.ingredient_id}} value = "{{ingredient.ingredient.title}}"/></div>
+                                            <div class="col-3"><a href="/ingredient/{{ingredient.ingredient._id}}">{{ingredient.ingredient.title}}</a></div>
+                                            <div class="col-2"><img src ={{ url_for('static', filename=ingredient.ingredient.img_URI)}} height="75" width="75" id="ingredient-image" /></div>
+                                            <div class="col-2"><input type="number" id='quantity' name="quantity_{{ingredient.ingredient.title}}" min="1" style="width: 85%;" step=0.1 value="{{ingredient.quantity}}"></div>
+                                            <div class="col-2">
+                                                <select name="unit_{{ingredient.ingredient.title}}" id="unit" style="width: 50px;">
+                                                    <optgroup label="Metric">
+                                                    <option value="{{ingredient.unit}}">{{ingredient.unit}}</option>
+                                                    <option value="of them">Count</option>
+                                                    <option value="g">grams</option>
+                                                    <option value="kg">kilograms</option>
+                                                    <option value="ml">milliliters</option>
+                                                    <option value="L">Liters</option>
+                                                    </optgroup>
+                                                    <optgroup label="That Other Fuck Shit">
+                                                    <option value="lb">pounds</option>
+                                                    <option value="oz">ounces</option>
+                                                    <option value="fl oz">fluid ounces</option>
+                                                    <option value="cups">cups</option>
+                                                    </optgroup>
+                                                </select>
+                                            </div>
+                                            <div class="col-2"><input type="number" id='price' name="price_{{ingredient.ingredient.title}}" min="0" style="width: 85%;" step=0.01 value="{{ingredient.price}}"></div>
+                                        </div>
+                                    </div>
+                                    {%endif%}
+                                {%endfor%}
                             </div>
-                        {%endfor%}
+                        </div>
+                        </div>
+                    {%endfor%}
                     </div>
-                  </div>
-                  <div class="col-6" >
-                    <h2>Select Additional Ingredients Ingredients</h2>
+                </div>
+                <div class="col-6">
+                    <h2>Select Additional Ingredients</h2>
                     <div class="accordion accordion-flush" id="accordionFlushExample2">
                         {%for type in types%}
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="flush-headingThree2">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-remaining{{type}}" aria-expanded="false" aria-controls="flush-collapseThree">
-                                    {{type}}
-                                </button>
-                                </h2>
-                                <div id="flush-remaining{{type}}" class="accordion-collapse collapse" aria-labelledby="flush-headingThree" data-bs-parent="#accordionFlushExample2">
+                        <div class="accordion-item">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-remainder{{type}}" aria-expanded="false" aria-controls="flush-collapseOne">
+                                {{type}}
+                            </button>
+                            <div id="flush-remainder{{type}}" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+                                <div class="accordion-body">
                                     <div class="container">
                                         <div class="row">
                                             <div class="col-1">Select</div>
@@ -89,57 +87,47 @@
                                             <div class="col-2">Quantity</div>
                                             <div class="col-2">Unit</div>
                                             <div class="col-2">Price</div>
-                                          </div>
+                                        </div>
                                     </div>
                                     {%for ingredient in remaining_ingredients%}
                                         {%if ingredient.type == type %}
-                                        <div class="accordion-body">
-                                            <div class="container">
-                                                <div class="row">
-                                                    <div class="col-1"><input type="checkbox" name="ingredient_{{ingredient._id}}" id = {{ingredient._id}} value = "{{ingredient.title}}"/></div>
-                                                    <div class="col-3"><a href="/ingredient/{{ingredient._id}}">{{ingredient.title}}</a></div>
-                                                    <div class="col-2"><img src ={{ url_for('static', filename=ingredient.img_URI)}} height="50" width="50" id="ingredient-image" /></div>
-                                                    <div class="col-2"><input type="number" id='quantity' name="quantity_{{ingredient.title}}" min="1" style="width: 85%;" step=0.1></div>
-                                                    <div class="col-2">
-                                                        <select name="unit_{{ingredient}}" id="unit" style="width: 100px;">
-                                                            <optgroup label="Metric">
-                                                            <option value="of them">Count</option>
-                                                            <option value="g">grams</option>
-                                                            <option value="kg">kilograms</option>
-                                                            <option value="ml">milliliters</option>
-                                                            <option value="L">Liters</option>
-                                                            </optgroup>
-                                                            <optgroup label="That Other Fuck Shit">
-                                                            <option value="lb">pounds</option>
-                                                            <option value="oz">ounces</option>
-                                                            <option value="fl oz">fluid ounces</option>
-                                                            <option value="cups">cups</option>
-                                                            </optgroup>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-2"><input type="number" id='price' name="price_{{ingredient.title}}" min="1" style="width: 85%;" step=0.01></div>
-                                                  </div>
+                                        <div class="container">
+                                            <div class="row">
+                                                <div class="col-1"><input type="checkbox" name="ingredient_{{ingredient._id}}" id = {{ingredient._id}} value = "{{ingredient.title}}"/></div>
+                                                <div class="col-3"><a href="/ingredient/{{ingredient._id}}">{{ingredient.title}}</a></div>
+                                                <div class="col-2"><img src ={{ url_for('static', filename=ingredient.img_URI)}} height="50" width="50" id="ingredient-image" /></div>
+                                                <div class="col-2"><input type="number" id='quantity' name="quantity_{{ingredient.title}}" min="0" style="width: 85%;" step=0.1></div>
+                                                <div class="col-2">
+                                                    <select name="unit_{{ingredient}}" id="unit" style="width: 100px;">
+                                                        <optgroup label="Metric">
+                                                        <option value="of them">Count</option>
+                                                        <option value="g">grams</option>
+                                                        <option value="kg">kilograms</option>
+                                                        <option value="ml">milliliters</option>
+                                                        <option value="L">Liters</option>
+                                                        </optgroup>
+                                                        <optgroup label="That Other Fuck Shit">
+                                                        <option value="lb">pounds</option>
+                                                        <option value="oz">ounces</option>
+                                                        <option value="fl oz">fluid ounces</option>
+                                                        <option value="cups">cups</option>
+                                                        </optgroup>
+                                                    </select>
+                                            </div>
+                                                <div class="col-2"><input type="number" id='price' name="price_{{ingredient.title}}" min="0" style="width: 85%;" step=0.01></div>
                                             </div>
                                         </div>
                                         {%endif%}
                                     {%endfor%}
                                 </div>
                             </div>
-                        {%endfor%}
+                            {%endfor%}
+                        </div>
                     </div>
-                  </div>
                 </div>
-              </div>
-        <div>
+            </div>
+        </div>
+    </div>
 </form>
-<style>
-    #main, #items{
-        width: max-content;
-    }
-    #ingredient-image{
-        border-radius: 30%;
-    }
-
-</style>
 
 {% endblock %}

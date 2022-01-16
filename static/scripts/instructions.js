@@ -42,6 +42,11 @@ $(function(){
             }
          });
     });
+    var submit = document.getElementById('submit');
+    var form = document.getElementByName('updates');
+    $(submit).click(function(e){
+        $(form).submit()
+    })
     // jQuery methods go here...
     // $("#inner-grid").droppable()
 });
