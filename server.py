@@ -1106,7 +1106,6 @@ def update_groceries(id):
             for key in form_dict.keys():
                 if key.find('ingredient')>=0:
                     ingredient_id = key[key.find("_")+1: len(key)]
-                    ingredient_id_checker.append(ingredient_id)
                     dbAction_findIngredeint = db.ingredients.find_one({"_id":ObjectId(ingredient_id) })
                     ingredients_array.append(dbAction_findIngredeint)
                 elif key.find("quantity")>=0 and form_dict[key] !='':
@@ -1129,6 +1128,7 @@ def update_groceries(id):
             mycursor.close()
             for x in range(0,len(ingredients_array)):
                 if int(quantity_array[x]) > 0 and float(price_array[x]) >0:
+                    ingredient_id_checker.append(str(ingredients_array[x]["_id"]))
                     ingredient = {
                         "ingredient": ingredients_array[x],
                         "unit": unit_array[x],
@@ -1138,6 +1138,7 @@ def update_groceries(id):
                     final_ingredients.append(ingredient)
 
             current_ingredient_id_chekcer = []
+            rest_ingredients = []
             # check items in table if so Execute SQL update 
             mycursor2 = mysqldb.cursor()
             for item in current_table:
@@ -1145,14 +1146,18 @@ def update_groceries(id):
                 current_ingredient_id_chekcer.append(current_ingredient_id)
                 for stuff in final_ingredients:
                     if current_ingredient_id in ingredient_id_checker:
-                # Ingredient_id, Ingredient_title, quantity, unit, price
-                        sql_query = f"UPDATE {SQL_Grocerrylist} SET Ingredient_title = %s, quantity = %s, unit = %s, price = %s WHERE Ingredient_id = %s"
-                        # sql = "UPDATE customers SET address = %s WHERE address = %s"
-                        val = ({stuff['ingredient']['title']}, {stuff['quantity']},{stuff['unit']},{stuff['price']},{stuff['ingredient']['_id']})
-                        # print(sql_query)
+                        sql_query = "UPDATE {} SET Ingredient_title = %s, quantity = %s, unit = %s, price = %s WHERE Ingredient_id = %s".format(SQL_Grocerrylist)
+                        val = (stuff['ingredient']['title'], stuff['quantity'],stuff['unit'],stuff['price'],str(stuff['ingredient']['_id']))
                         mycursor2.execute(sql_query, val)
-            # print(current_ingredient_id_chekcer)
-            mysqldb.commit()
+                    di_ingredient_id =str(stuff['ingredient']['_id'])
+                    # print(f"{str(stuff['ingredient']['_id'])} : {current_ingredient_id}")
+                    # if di_ingredient_id != current_ingredient_id:
+                    #     print(stuff['ingredient']['title'])
+                    # if str(stuff['ingredient']['_id']) != current_ingredient_id:
+                    #     print(stuff['ingredient']['title'])
+            for items in final_ingredients:
+                print(items)
+            # mysqldb.commit()
             # mycursor2.close()
             #check if new ingredients is in current ingredients id if not insert
                         
