@@ -1,44 +1,63 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<h1>Ingredients</h1>
+<h1></h1>
+<div class="jumbotron jumbotron-fluid">
+  <div class="container">
+    <h1 class="display-4">Create a New Ingredient</h1>
+    <p class="lead">Add Ingredient and use in your new recipes and groccery list</p>
+  </div>
+</div>
 {% from "includes/_formhelpers.html" import render_field %}
 <form method="POST" enctype="multipart/form-data" action="">
-    <div class="form-group">
-      {{render_field(form.name, class_="form-control")}}
+  <div class="container">
+    <div class="row">
+      <div class="col-6">
+        <div class="form-group">
+          {{render_field(form.name, class_="form-control")}}
+        </div>
+      </div>
+      <div class="col-2">
+        <div class="form-group">
+          <label for="state">State of Matter: </label>
+          <select id="state" name="state">
+            <option value=""></option>
+            <option value="solid🧊">Solid</option>
+            <option value="powder👁‍🗨">Powder</option>
+            <option value="crystal💎">Crystal</option>
+            <option value="liquid💦">Liquid</option>
+            <option value="paste🍝">Paste</option>
+            <option value="other🙄">Other(cream, dried, vapor) </option>
+          </select>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="form-group">
+          <label for="type">Type of Ingredient: </label>
+          <select id="type" name="type">
+            <option value=""></option>
+            <option value="Seasoning🧂">Seasoning</option>
+            <option value="Meat🍗">Animal Protein</option>
+            <option value="Non-Meat🥑">Non-Animal Protein (bean, nuts, legumes)</option>
+            <option value="Fish🦈">Fish</option>
+            <option value="Vegetable🥕">Vegetable</option>
+            <option value="Fruit🍇">Fruit</option>
+            <option value="Grain🌾">Grain</option>
+            <option value="Sweetener🍯">Sweetener</option>
+            <option value="Dairy🥛">Dairy</option>
+            <option value="Lipid🧈">Oil/Fat</option>
+            <option value="other😂">Other</option>
+          </select>
+        </div>
+      </div>
     </div>
-    <div class="form-group">
-      {{render_field(form.description, class_="form-control")}}
+    <div class="row">
+      <div class="form-group"><p><span>Add Recipe Image  </span><div class="input-group-prepend">
+        <div class="input-group-text">👀</div>
+      </div><input type="file" name="file" /></p></div>
+      <div class="form-group">{{render_field(form.description, class_="form-control")}}</div>
     </div>
-    <div class="form-group">
-      <label for="state">State of Matter: </label>
-      <select id="state" name="state">
-        <option value="solid">Solid</option>
-        <option value="powder">Powder</option>
-        <option value="crystal">Crystal</option>
-        <option value="liquid">Liquid</option>
-        <option value="paste">Paste</option>
-        <option value="other">Other</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label for="type">Type of Ingredient: </label>
-      <select id="type" name="state">
-        <option value=""></option>
-        <option value="Seasoning">Seasoning</option>
-        <option value="Meat">Animal Protein</option>
-        <option value="Non-Meat">Non-Animal Protein (bean, nuts, legumes)</option>
-        <option value="Fish">Fish</option>
-        <option value="Vegetable">Vegetable</option>
-        <option value="Fruit">Fruit</option>
-        <option value="Grain">Grain</option>
-        <option value="Sweetener">Sweetener</option>
-        <option value="Dairy">Dairy</option>
-        <option value="Lipid">Oil/Fat</option>
-        <option value="other">Other</option>
-      </select>
-    </div>
-    <div class="form-group"><p><input type="file" name="file" /></p></div>
+  </div>
     <p><input type="submit" class="btn btn-primary" value="Create Ingredient"></p>
   </form>
 {% endblock %}

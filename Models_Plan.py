@@ -64,6 +64,7 @@ class Recipe(Form):
     ingredients = []
     date_created = str(date.today())
     author = ''
+    crossreference_recipe_URI = ''
     def export(self):
         return (
             {
@@ -74,7 +75,8 @@ class Recipe(Form):
                 "ingredients": self.ingredients,
                 "instructions": self.instructions,
                 "date_created": self.date_created,
-                "author": self.author
+                "author": self.author,
+                "crossreference_recipe_URI": self.crossreference_recipe_URI
             }
         )
 class Grocerries(Form):

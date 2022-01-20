@@ -288,6 +288,8 @@ def read_ingredient_standard(id):
     if request.method == 'GET':
         try:
             dbConfirm = db.ingredients.find_one({"_id": ObjectId(id)})
+            #Search Recipe DB to pull out recipes with this ingredient
+            #Search Grocereis DB to pull list/times this has been references over time
             return Response(
                         response = json.dumps(
                                 {"message": "Ingredient found", 
@@ -299,7 +301,6 @@ def read_ingredient_standard(id):
                     ) and render_template('read_ingredient.html', ingredient = dbConfirm)
         except Exception as ex:
             return("Unable to retrieve Ingredient")
-    return redirect("/")
 
 #✅See All Ingredients in the DB
 @app.route('/ingredient/all', methods = ['GET'])
@@ -471,21 +472,35 @@ def create_recipe():
     ingredients = list(db.ingredients.find({}))
     selected_ingredients = []
     instructions = []
-    types = [target['type'] for target in ingredients]
-    types2 = []
-    for item in types:
-        if (item != ""):
-            types2.append(item)
-    types2 = list(set(types2))
+    # Connect to User NoSQL
+    user_db = create_user_NoSQLdatabases()
+    user_dbcollection = user_db['recipes']
+    if request.method == 'GET':
+        try:
+            types = [target['type'] for target in ingredients]
+            types2 = []
+            for item in types:
+                if (item != ""):
+                    types2.append(item)
+            types2 = list(set(types2))
+            return render_template('create_recipe.html', form=form, ingredients=ingredients, types = types2)
+        except Exception as ex:
+            return Response(
+                    response = json.dumps(
+                            {"message": "Unable to show the form for some reason"
+                            }),
+                        status = 400,
+                        mimetype='application/json'
+                )
     if request.method =="POST" and form.validate():
         recipe_ingredients = []
         recipe_prep = []
         recipe_execution = []
+        desired_user = session['user']
+        author = desired_user["OKTAid"]
         try:
             #Create Recipe Shell
             dbAction = db.recipes.insert_one(form.export())
-            user_db = create_user_NoSQLdatabases()
-            user_dbcollection = user_db['recipes']
             db_user_Action = user_dbcollection.insert_one(form.export())
             form_dict = request.form.to_dict() #Parse The Form, convert request.form to dictionary then to list of Tuples
             all_ingredients = db.ingredients.find({})
@@ -538,23 +553,25 @@ def create_recipe():
             {"$set": {
                 "ingredients": final_recipe_ingredients,
                 "instructions": instructions,
-                "img_URI": uploadfile(str(dbAction.inserted_id), "Recipe")
+                "img_URI": uploadfile(str(dbAction.inserted_id), "Recipe"),
+                "crossreference_recipe_URI": db_user_Action.inserted_id,
+                "author": author
                 }}
             )
             #Hanlde Custom User Upload from session
-            dbAction_user_ingredients = user_dbcollection.recipes.update_one(
+            dbAction_user_ingredients = user_dbcollection.update_one(
             {"_id": db_user_Action.inserted_id},
             {"$set": {
                 "ingredients": final_recipe_ingredients,
                 "instructions": instructions,
-                "img_URI": uploadfile(str(db_user_Action.inserted_id), "Recipe")
+                "img_URI": uploadfile(str(db_user_Action.inserted_id), "Recipe"),
+                "crossreference_recipe_URI":dbAction.inserted_id,
+                "author": author
                 }}
             )
-            # dbsearch = db.recipes.find_one({"_id": dbAction.inserted_id})
-            # author = load_user(dbsearch['OKTAid'])
-            # print(author)
+            
             flash("Recipe Created!", 'success')
-            redirector = "/recipe/"f"{dbAction.inserted_id}"
+            redirector = "/recipe/"f"{db_user_Action.inserted_id}"
             return Response(
                 response = json.dumps(
                         {"message": "Recipee created", 
@@ -571,26 +588,23 @@ def create_recipe():
                     status = 401,
                     mimetype='application/json'
             )
-    return render_template('create_recipe.html', form=form, ingredients=ingredients, types = types2)
+    
 ######################################Read/Search Routes 📚
-#Standard Read by ID route ✅[FE finish]
+#Standard Read by ID route for User✅[FE finish]
 @app.route('/recipe/<id>', methods = ['GET'])
 def read_recipe(id):
+    user_db = create_user_NoSQLdatabases()
+    user_dbcollection = user_db['recipes']
     if request.method == 'GET':
-        ingredients =[]
+        ingredients = []
         try:
-            dbConfirm = db.recipes.find_one({"_id": ObjectId(id)})
-            # print(dbConfirm['ingredients']['ingredient'])
-            # for ingredient in dbConfirm['ingredients']:
-            #     print (ingredient['ingredient']['type'])
+            dbConfirm = user_dbcollection.find_one({"_id": ObjectId(id)})
             types = [target['ingredient']['type'] for target in dbConfirm['ingredients']]
-            # print(types)
             types2 = []
             for item in types:
                 if (item != ""):
                     types2.append(item)
             types2 = list(set(types2))
-            # print(types2)
             prep = []
             execution = []
             for item in dbConfirm['instructions']['prep']:
@@ -601,8 +615,7 @@ def read_recipe(id):
                 value_holder = str(item.values())
                 final_value = value_holder[value_holder.find("[")+2:value_holder.find("]")-1]
                 execution.append(final_value)
-            print(prep)
-            print(execution)
+            
             return Response(
                         response = json.dumps(
                                 {"message": "Recipee found", 
@@ -620,6 +633,7 @@ def read_recipe(id):
                             mimetype='application/json'
                     )
 
+
 #Standard show all recipes ✅[FE finish]
 @app.route('/recipe/all', methods = ['GET'])
 def read_recipes():
@@ -635,6 +649,10 @@ def read_recipes():
                 ) and render_template('read_recipes_all.html', recipes = all_recipes)
         except  Exception as ex:
             return('Unable to return all ingredients')
+
+#Read Route To redirect to Master DB from recipe all Endpoint
+
+#Search Against your specifed Recipe Database
 
 ##Search against MongoDB✅ [FE finish]
 @app.route('/recipe/search_complex',  methods = ['GET', 'POST'])
@@ -881,6 +899,9 @@ def create_grocerries():
     dbAction = db.recipes.find({})
     dbAction2 = db.ingredients.find({})
     form = Grocerries(request.form)
+    #Connect to User NoSQL
+    user_db = create_user_NoSQLdatabases()
+    user_dbcollection = user_db['groceries']
     if request.method =="GET":
         try:
             recipes = list(dbAction)
@@ -938,9 +959,6 @@ def create_grocerries():
                 "recipes": recipe_titles,
                 "date_created": str(date.today()).replace("-","")
             }
-            #Connect to User NoSQL
-            user_db = create_user_NoSQLdatabases()
-            user_dbcollection = user_db['groceries']
             dbAction = db.groceries.insert_one(groceries_list) #💨Write to Master DB
             user_dbAction = user_dbcollection.insert_one(groceries_list) #💦Write to User DB
             ugh_this_again = recipes_ingredients + nonrecipe_ingredients
@@ -1221,6 +1239,9 @@ def delete_groceries(id):
     
     return redirect("/")
 
+@app.route("/test", methods = ["GET"])
+def test():
+    return render_template("test.html")
 #Testing Area
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 if __name__ == "__main__":
