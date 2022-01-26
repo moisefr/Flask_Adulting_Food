@@ -364,11 +364,11 @@ def read_ingredient_search2():
             all_ingredients = list(db.ingredients.find({}))
             return Response(
                     response = json.dumps(
-                            {"message": "here are all the ingredients"
+                            {"message": "Simple Search Against DB"
                             }),
                         status = 200,
                         mimetype='application/json'
-                ) and render_template('read_ingredient_search2.html', ingredients = all_ingredients)
+                ) and render_template('read_ingredient_search2.html', ingredients = all_ingredients, desired_ingredient='all')
         except  Exception as ex:
             return('Unable to return all ingredients')
     if request.method == 'POST':
@@ -377,10 +377,23 @@ def read_ingredient_search2():
             searcher = hold['ingredients']
             dbAction = db.ingredients.find_one({"title": searcher})
             ingredient_id = dbAction["_id"]
-            return redirect("/ingredient/"f"{ingredient_id}")
+            # return redirect("/ingredient/"f"{ingredient_id}")
+            return Response(
+                    response = json.dumps(
+                            {"message": "here is your desired ingredient"
+                            }),
+                        status = 200,
+                        mimetype='application/json'
+                ) and render_template('read_ingredient_search2.html',desired_ingredient = str(ingredient_id))
             # return list(dbAction)
         except Exception as ex:
-            return ("that shit didn't work")
+            return Response(
+                    response = json.dumps(
+                            {"message": "Unable to Find this Ingredient"
+                            }),
+                        status = 404,
+                        mimetype='application/json'
+                )
 
 ##Search against USGov DB (file)
 

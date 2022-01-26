@@ -2,19 +2,176 @@
 
 {% block body %}
 <div class="container">
-    <h3>Popover Example</h3>
-    <button type="button" class="btn btn-lg btn-danger" id = "example-popover" data-toggle="popover" title="Popover title" data-content="And here's some amazing content. It's very engaging. Right?">Click to toggle popover</button>
+  <div class="row">
+    <div class="col">
+      <div class= 'row' id='starter-prep'>
+        <div class="col-8"><input type="text" id='holder-input' /></div>
+      </div>
+      <div class="row">
+        <div class="col-2" id="Order-Prep">
+            <h4>Order</h4>
+        </div>
+        <div class="col-3" id="divContainer-drop"><h4>Drag & Drop</h4></div>
+        <div class="col-7" id="divContainer"> 
+              <h4>Prep</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class= 'row' id='starter-execution'><input type='button' style='float:left' id='btClickMe2' value='Create More Execution' /></div>
+      <div class="row">
+        <div class="col-2">
+          <div class="Order-Execution">
+            <h2>Order</h2>
+          </div>
+        </div>
+        <div class="col-3" id="divContainer-drop2"><p>droppable</p></div>
+        <div class="col-3">
+          <div class = "Landing-Execution" id="divContainer2" >
+            <h2>Execution</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
+<style>
+  #holder-input{
+    width: 400px;
+    height: 50px;
+  }
+  #input-item{
+    margin-left: 30%;
+  }
+</style>
 <script>
-    $(function () {
-        var frame = '';
+  var element_pos = 0;    // Position of the newly created elements.
+  var iCnt = 0;
+  var iCnt2 = 0;
+  var order_prep = $('#Order-Prep');
+  var order_exec = $('.Order-Execution');
+  prelim_prep_instruction = '';
+  
+  $(document).ready(function() {
+    //PREP Column
+      $(function() { $('#divContainer').draggable(); });
+      $(function() { $('#divContainer-drop').droppable(); });
+      // Create more DIV elements with absolute postioning.
+      $(document).keydown(function(event) {
+        //window.alert(event.keyCode);
+        if (event.keyCode =='13'){
+          var dynamic_div = $(document.createElement('div')).css(
+            "margin-left", "100px"
+          );
+        var input_value = '';
+        input_value = $('#holder-input').val();
+        $(dynamic_div).append("<li >"+input_value+"</li>");
+        $(dynamic_div).text()
+        // Append the newly created DIV to the container.
+        $(dynamic_div).appendTo('#divContainer').draggable(
+          {
+            cursor: "move",
+            drag: function( event, ui ) {
+              prelim_prep_instruction = $(this).text();
+                /*$(this).css({
+                    "background-color": "yellow", 
+                    "font-size": "125%",
+                    "list-style-type": "none",
+                    "width": "10%",
+                    "height":" 35px"
+                });*/
+             }
+        }
+        );
+        var dynamic_div_drop = $(document.createElement('div')).css({
+          border: '1px dashed', position: 'relative',
+          width: 'max-content', height: 'max-content', padding: '3', margin: '0'
+        });
+        $(dynamic_div_drop).append("<input type='text' name='prep" +iCnt+"'"+">");
+        $(dynamic_div_drop).appendTo('#divContainer-drop')
+        $("input").droppable(
+          {
+            activeClass: "active",
+            hoverClass:  "hover",
+            drop :function(event, ui) {
+              $( this ).addClass( "ui-state-highlight" );
+              $( this ).addClass( "ui-widget-header" );
+              $( this ).val(prelim_prep_instruction);
+            }
+          
+          } );
+        $(order_prep).append("<p>"+iCnt+"</p>");
+        iCnt = iCnt + 1;
+        }
+      });
+      
 
-        $('#example-popover').popover({
-          container: 'body',
-          html: true,
-          content: '<p/>Hi'
-        })
-      })
+
+
+
+
+
+
+
+
+      //EXECUTION COLUMN
+      $(function() { $('#divContainer2').draggable(); });
+      // Create more DIV elements with absolute postioning.
+      $('#btClickMe2').click(function() {
+          var dynamic_div2 = $(document.createElement('div')).css({
+            border: '1px dashed', position: 'relative',
+            width: 'max-content', height: 'max-content', padding: '3', margin: '0'
+        });
+          $(dynamic_div2).append("<input type='text' name='execution" +iCnt+"'"+">");
+          // Append the newly created DIV to the container.
+          $(dynamic_div2).appendTo('#divContainer2').draggable();
+          $(order_exec).append("<p>"+iCnt2+"</p>");
+          iCnt2 = iCnt2 + 1;
+      });
+  /*$(function () {
+      
+      var prep_landing = $('.Landing-Prep');
+      var order_execution = $('.Order-Execution');
+      var execution_landing = $('.Landing-Execution');
+      var prep_input = $("prep-entry");
+      var counter = 0;
+      $(document).keydown(function(event) {
+        //window.alert(event.keyCode);
+        if (event.keyCode =='13'){
+          counter = counter +1;
+          
+          prep_landing.append("<div class= 'row' id='draggable'></div>");
+          order_execution.append("<p>"+counter+"</p>");
+          execution_landing.append("<div class= 'row' id='draggable'><input type='text' name='execution" +count<input type='text' name='prep" +counter+"'"+">er+"'"+"></div>");
+          $('#draggable').draggable({
+            cancel: null
+          });
+          $('#draggable input').click(function() {
+            $(this).focus();
+          });
+          window.aler("Hi");
+         
+         
+        }
+      });*/
+      
+        
+
+      
+
+      /*$(".drop-prep").droppable({
+        activeClass: "active",
+        hoverClass:  "hover",
+        drop: function( event, ui ) {
+           $( this ).addClass( "ui-state-highlight" );
+           $( this ).addClass( "ui-widget-header" );
+           //$( this ).val(prelim_instruction);
+        }
+     });*/
+      
+
+    
+    })
 </script>
 {% endblock %}

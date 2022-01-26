@@ -17,10 +17,12 @@
             <div class="col-9">
                 <div class="card border-dark mb-3" style="max-width: 18rem;">
 
-                    <div class="card-header">Type:{{ingredient.type[-1:]}}({{ingredient.type[0:-1]}}) State: {{ingredient.state[-1:]}}({{ingredient.state[0:-1]}}) </div>
+                    <div class="card-header">
+                        <h3 class="card-title">{{ingredient.title}}</h3>
+                        <div>Type:{{ingredient.type[-1:]}}({{ingredient.type[0:-1]}}) State: {{ingredient.state[-1:]}}({{ingredient.state[0:-1]}})</div> 
+                    </div>
                     <img src={{ url_for('static', filename=ingredient.img_URI) }} class="card-img-top" alt="...">
                     <div class="card-body text-dark">
-                      <h1 class="card-title">{{ingredient.title}}</h1>
                       <p class="card-text">{{ingredient.description}}</p>
                 </div>
             </div>

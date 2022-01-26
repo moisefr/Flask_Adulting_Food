@@ -5,15 +5,23 @@
 {% from "includes/_formhelpers.html" import render_field %}
 <form method="POST" enctype="multipart/form-data" action="">
     <div class="form-group">
-      {{render_field(form.title, class_="form-control")}}
+      <div class="row">
+        <div class="col-6">
+          <div class="form-group">
+            {{render_field(form.title, class_="form-control")}}
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="form-group">
+            {{render_field(form.cuisine, class_="form-control")}}
+        </div>
+        </div>
+      </div>
     </div>
+    <div class="form-group"><p><input type="file" name="file" />Add a picture</p></div>
     <div class="form-group">
       {{render_field(form.description, class_="form-control")}}
     </div>
-    <div class="form-group">
-        {{render_field(form.cuisine, class_="form-control")}}
-    </div>
-    <div class="form-group"><p><input type="file" name="file" />Add a picture</p></div>
     <h1>Add Ingredients</h1>
     <div class="accordion accordion-flush" id="accordionFlushExample">
       {%for type in types%}
@@ -104,56 +112,6 @@
     </div>
   </form>
 
-
-  <!-- Ingredients Finnesse -->
-  <style>
-    /* Style the buttons that are used to open and close the accordion panel */
-  .accordion {
-  background-color: #eee;
-  color: #444;
-  cursor: pointer;
-  padding: 18px;
-  width: 100%;
-  text-align: left;
-  border: none;
-  outline: none;
-  transition: 0.4s;
-  }
-
-  /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
-  .active, .accordion:hover {
-  background-color: #ccc;
-  }
-
-  /* Style the accordion panel. Note: hidden by default */
-  #panel {
-  padding: 0 18px;
-  background-color: white;
-  display: none;
-  overflow: hidden;
-  }
-</style>
-<script>
-  var acc = document.getElementsByClassName("accordion");
-  var i;
-
-  for (i = 0; i < acc.length; i++) {
-  acc[i].addEventListener("click", function(event) {
-      /* Toggle between adding and removing the "active" class,
-      to highlight the button that controls the panel */
-      this.classList.toggle("active");
-
-      /* Toggle between hiding and showing the active panel */
-      var panel = this.nextElementSibling;
-      if (panel.style.display === "block") {
-      panel.style.display = "none";
-      } else {
-      panel.style.display = "block";
-      }
-      event.preventDefault();
-  });
-  }
-</script>
 
   <!-- Instructions Finnesse 2 -->
 <style>

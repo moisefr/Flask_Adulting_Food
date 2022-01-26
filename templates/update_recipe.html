@@ -18,70 +18,92 @@
     </div>
     <div class="form-group"><p><input type="file" name="file" /></p></div>
     <h1>Add Ingredients</h1> 
-    <div>
-      {% for type in types %}
-            <button class="accordion">{{type}}</button>
-            <div class="panel"> <br><br>
-            {% for ingredient in ingredients%}
-              {% if type == ingredient.type %}
-                <div class="form-group">
-                  {% for stuff in current_ingredients %}
-                    {% if ingredient.title == stuff.ingredient.title %}
-                      <div>
-                        <input type="checkbox" checked name="{{stuff.ingredient.title}}" id = {{stuff.ingredient._id}} value = "{{stuff.ingredient.title}}"/>
-                        <label for={{stuff.ingredient._id}} style="width: 15%;"> {{stuff.ingredient.title}}</label>
-                        <img src ={{ url_for('static', filename=stuff.ingredient.img_URI)}} height="200" width="200" id="ingredient-image" />
-                        <input type="number" id='quantity' name="quantity_{{stuff.ingredient.title}}"  value="{{stuff.quantity}}" min="1"> 
-                        <select name="unit_{{stuff.ingredient.title}}" id="unit">
-                          <optgroup label="Current Unit">
-                            <option value="{{stuff.unit}}" selected>Count</option>
-                          </optgroup>
-                          <optgroup label="Metric">
-                            <option value="of them">Count</option>
-                            <option value="g">grams</option>
-                            <option value="kg">kilograms</option>
-                            <option value="ml">milliliters</option>
-                            <option value="L">Liters</option>
-                          </optgroup>
-                          <optgroup label="That Other Fuck Shit">
-                            <option value="lb">pounds</option>
-                            <option value="oz">ounces</option>
-                            <option value="fl oz">fluid ounces</option>
-                            <option value="cups">cups</option>
-                          </optgroup>
-                        </select>
-                        <br><br>
+    <div class="accordion accordion-flush" id="accordionFlushExample">
+      {%for type in types%}
+      <div class="accordion-item">
+      <h2 class="accordion-header" id="flush-heading{{type}}">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-{{type}}" aria-expanded="false" aria-controls="flush-collapseOne">
+          {{type}}
+          </button>
+      </h2>
+      <div id="flush-{{type}}" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+          <div class="accordion-body">
+              <div class="container">
+                  <div class="row">
+                      <div class="col-1">Select</div>
+                      <div class="col-3">Ingredient</div>
+                      <div class="col-2">Image</div>
+                      <div class="col-2">Quantity</div>
+                      <div class="col-2">Unit</div>
+                  </div>
+                  {%for ingredient in ingredients%}
+                    {%if ingredient.type == type %}
+                      {% for stuff in current_ingredients %}
+                        {% if ingredient.title == stuff.ingredient.title %}
+                        <div class="container" >
+                          <div class="row">
+                              <div class="col-1"><input checked type="checkbox" name="ingredient_{{stuff.ingredient._id}}" id = {{stuff.ingredient._id}} value = "{{stuff.ingredient.title}}"/></div>
+                              <div class="col-3"><a href="/ingredient/{{stuff.ingredient._id}}">{{stuff.ingredient.title}}</a></div>
+                              <div class="col-2"><img src ={{ url_for('static', filename=stuff.ingredient.img_URI)}} height="75" width="75" id="ingredient-image" /></div>
+                              <div class="col-2"><input type="number" id='quantity' name="quantity_{{stuff.ingredient.title}}" min="1" style="width: 85%;" step=0.1 ></div>
+                              <div class="col-2">
+                                  <select name="unit_{{stuff.ingredient.title}}" id="unit" style="width: 50px;">
+                                      <optgroup label="Metric">
+                                      <option value=""></option>
+                                      <option value="of them">Count</option>
+                                      <option value="g">grams</option>
+                                      <option value="kg">kilograms</option>
+                                      <option value="ml">milliliters</option>
+                                      <option value="L">Liters</option>
+                                      </optgroup>
+                                      <optgroup label="That Other Fuck Shit">
+                                      <option value="lb">pounds</option>
+                                      <option value="oz">ounces</option>
+                                      <option value="fl oz">fluid ounces</option>
+                                      <option value="cups">cups</option>
+                                      </optgroup>
+                                  </select>
+                              </div>
+                          </div>
                       </div>
-                    {% endif %}
-                  {% endfor%}
-                  {%if ingredient.title not in titles%}
-                    <input type="checkbox" name="{{ingredient.title}}" id = {{ingredient._id}} value = "{{ingredient.title}}"/>
-                    <label for={{ingredient._id}} style="width: 15%;"> {{ingredient.title}}</label>
-                    <img src ={{ url_for('static', filename=ingredient.img_URI)}} height="200" width="200" id="ingredient-image" />
-                    <input type="number" id='quantity' name="quantity_{{ingredient.title}}" min="1"> 
-                    <select name="unit_{{ingredient.title}}" id="unit">
-                      <optgroup label="Metric">
-                        <option value="of them">Count</option>
-                        <option value="g">grams</option>
-                        <option value="kg">kilograms</option>
-                        <option value="ml">milliliters</option>
-                        <option value="L">Liters</option>
-                      </optgroup>
-                      <optgroup label="That Other Fuck Shit">
-                        <option value="lb">pounds</option>
-                        <option value="oz">ounces</option>
-                        <option value="fl oz">fluid ounces</option>
-                        <option value="cups">cups</option>
-                      </optgroup>
-                    </select>
-                    <br><br>
-                  {%endif%}
-                </div>
-              {% endif %}
-            {% endfor %}
-            </div>
-      {% endfor %}
-    </div>
+                        {%endif%}
+                      {%endfor%}
+                      {%if ingredient.title not in titles%}
+                        <div class="containter">
+                          <div class="row">
+                            <div class="col-1"><input  type="checkbox" name="{{ingredient.title}}" id = {{ingredient._id}} value = "{{ingredient.title}}"/></div>
+                            <div class="col-3"><label for={{ingredient._id}} style="width: 15%;"> {{ingredient.title}}</label></div>
+                            <div class="col-2"><img src ={{ url_for('static', filename=ingredient.img_URI)}} height="75" width="75" id="ingredient-image" /></div>
+                            <div class="col-2"><input type="number" id='quantity' name="quantity_{{ingredient.title}}" min="1" style="width: 85%;" step=0.1> </div>
+                            <div class="col-2">
+                              <select name="unit_{{ingredient.title}}" id="unit" style="width: 50px;">
+                                <optgroup label="Metric">
+                                  <option value="of them">Count</option>
+                                  <option value="g">grams</option>
+                                  <option value="kg">kilograms</option>
+                                  <option value="ml">milliliters</option>
+                                  <option value="L">Liters</option>
+                                </optgroup>
+                                <optgroup label="That Other Fuck Shit">
+                                  <option value="lb">pounds</option>
+                                  <option value="oz">ounces</option>
+                                  <option value="fl oz">fluid ounces</option>
+                                  <option value="cups">cups</option>
+                                </optgroup>
+                              </select>
+                            </div>
+                            <br><br>
+                          </div>
+                        </div>
+                      {%endif%}
+                    {%endif%}
+                  {%endfor%}
+              </div>
+      </div>
+      </div>
+      </div>
+  {%endfor%}
+  </div>
     <p><input type="submit" class="btn btn-primary" value="Update Recipe {{form.title.data}}"></p>
     <h1>Current Instructions</h1>
     <div class="form-group">
@@ -125,55 +147,6 @@
          </div>
     </div>
   </form>
-
-  <style>
-    /* Style the buttons that are used to open and close the accordion panel */
-  .accordion {
-  background-color: #eee;
-  color: #444;
-  cursor: pointer;
-  padding: 18px;
-  width: 100%;
-  text-align: left;
-  border: none;
-  outline: none;
-  transition: 0.4s;
-  }
-
-  /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
-  .active, .accordion:hover {
-  background-color: #ccc;
-  }
-
-  /* Style the accordion panel. Note: hidden by default */
-  #panel {
-  padding: 0 18px;
-  background-color: white;
-  display: none;
-  overflow: hidden;
-  }
-</style>
-<script>
-  var acc = document.getElementsByClassName("accordion");
-  var i;
-
-  for (i = 0; i < acc.length; i++) {
-  acc[i].addEventListener("click", function(event) {
-      /* Toggle between adding and removing the "active" class,
-      to highlight the button that controls the panel */
-      this.classList.toggle("active");
-
-      /* Toggle between hiding and showing the active panel */
-      var panel = this.nextElementSibling;
-      if (panel.style.display === "block") {
-      panel.style.display = "none";
-      } else {
-      panel.style.display = "block";
-      }
-      event.preventDefault();
-  });
-  }
-</script>
 
  <!-- Instructions Finnesse 2 -->
  <style>
