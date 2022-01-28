@@ -482,7 +482,8 @@ from Models_Plan import Recipe
 @login_required
 def create_recipe():
     form = Recipe(request.form)
-    ingredients = list(db.ingredients.find({}))
+    all_ingredients_shell = db.ingredients.find({})
+    all_ingredients = list(all_ingredients_shell)
     selected_ingredients = []
     instructions = []
     # Connect to User NoSQL
@@ -490,13 +491,13 @@ def create_recipe():
     user_dbcollection = user_db['recipes']
     if request.method == 'GET':
         try:
-            types = [target['type'] for target in ingredients]
+            types = [target['type'] for target in all_ingredients]
             types2 = []
             for item in types:
                 if (item != ""):
                     types2.append(item)
             types2 = list(set(types2))
-            return render_template('create_recipe.html', form=form, ingredients=ingredients, types = types2)
+            return render_template('create_recipe.html', form=form, ingredients=all_ingredients, types = types2)
         except Exception as ex:
             return Response(
                     response = json.dumps(
@@ -516,8 +517,6 @@ def create_recipe():
             dbAction = db.recipes.insert_one(form.export())
             db_user_Action = user_dbcollection.insert_one(form.export())
             form_dict = request.form.to_dict() #Parse The Form, convert request.form to dictionary then to list of Tuples
-            all_ingredients = db.ingredients.find({})
-            all_ingredients = list(all_ingredients)
             ingredient_array = []
             rest_of_paylod = []
             final_recipe_ingredients =[]
@@ -525,6 +524,7 @@ def create_recipe():
             #Get raw ingredient, quantity and unit information from the request
             for key in form_dict.keys():
                 true_value = form_dict[key]
+                print(true_value)
                 for ingredient in all_ingredients:
                     if true_value == ingredient["title"]:
                         ingredient_array.append(ingredient)
@@ -552,6 +552,7 @@ def create_recipe():
             #Consolidate these arrays to full recipe ingredient objects and append to recipe_ingredients final array
             for x in range(0,len(holder_ingredients_array)):
                 final_recipe_ingredients.append({"ingredient": holder_ingredients_array[x], "quantity":quantity_array[x], "unit": unit_array[x]})
+            
             #Handle Instructions using prep and execution handles then create instructions object
             for key,value in form_dict.items():
                 if value !='':
@@ -582,7 +583,6 @@ def create_recipe():
                 "author": author
                 }}
             )
-            
             flash("Recipe Created!", 'success')
             redirector = "/recipe/"f"{db_user_Action.inserted_id}"
             return Response(

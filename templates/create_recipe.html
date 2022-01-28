@@ -79,33 +79,45 @@
   
   </div>
     <h1>Add Instructions</h1>
-    <h3>Click Add Instructions Button To generate a draggable list item</h3>
-    <h3>Drag these list items to your preferred ordered in the Prep and Execution Columns</h3>
-    <h4>Hovering Over the Green Boxes will generate a new Droppable List Input, Drag and Drop and watch the maigc!</h4>
+    <h3>Type an Instruction in the input box above The prep and Execution areas then press the DOWN Arrow Button DO NOT PUSH THE ENTER KEY</h3>
+    <h3>Drag these list items to your preferred order in the Drag and Drop Column(s)</h3>
     <div>
       <p><input type="submit" class="btn btn-primary" value="Submit"></p>
-      <div class="continer">
-        <div class="input-area">
-            <label for = 'element'>Instruction</label>
-            <input type="text" name = 'Instruction' id="input-holder">
-            <button id='inst_button' type="button">Click To Add Instruction List Item</button>
-         </div>
-         <ul id = 'instruction_raw'></ul>
-      </div>
-      
-      <div class="form-group">
-        <div class="headers_instructions">
-          <h1>Prep</h1>
-          <h1>Execution</h1>
-      </div>
-      <div id="outer-grid">
-          <div  id="inner-grid">
-              <div class="Order-Prep"><h2>Order</h2></div>
-              <div class = "Landing-Prep" ><h2>Prep Instructions</h2></div>
+      <div class="container">
+        <div class="row">
+          <div class="col">
+            <div class= 'row' id='starter-prep'>
+              <h2>Prep</h2>
+              <div class="col-8"><input type="text" id='holder-input-prep' /></div>
+            </div>
+            <div class="row">
+              <div class="col-2" id="Order-Prep">
+                  <h4>Order</h4>
+              </div>
+              <div class="col-3" id="divContainer-drop"><h4>Drag & Drop</h4></div>
+              <div class="col-7" id="divContainer"> 
+                    <h4>Prep</h4>
+              </div>
+            </div>
           </div>
-          <div class="form-group" id="inner-grid">
-            <div class="Order-Execution"><h2>Order</h2></div>
-            <div class="Landing-Execution"><h3>Execution Instructions</h3></div>
+          <div class="col">
+            <div class= 'row' id='starter-execution'>
+              <h2>Execution</h2>
+              <div class="col-8"><input type="text" id='holder-input-execution' /></div>
+            </div>
+            <div class="row">
+              <div class="col-2">
+                <div class="Order-Execution">
+                  <h2>Order</h2>
+                </div>
+              </div>
+              <div class="col-3" id="divContainer-drop2"><h4>Drag & Drop</h4></div>
+              <div class="col-3">
+                <div class = "Landing-Execution" id="divContainer2" >
+                  <h2>Execution</h2>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -115,39 +127,14 @@
 
   <!-- Instructions Finnesse 2 -->
 <style>
-  #outer-grid {
-  display: grid;
-  grid-template-rows: 1fr 1fr;
-  grid-template-columns: 1fr 1fr;
-  grid-gap: 8px;
+  #holder-input{
+    width: 400px;
+    height: 50px;
   }
-  #outer-grid > div {
-  background-color: limegreen;
-  color: white;
-  font-size: 4vw;
-  padding: 8px;
+  #input-item{
+    margin-left: 30%;
   }
-  #inner-grid {
-  display: grid;
-  grid-template-columns: 0.2fr 1.8fr;
-  grid-gap: 5px;
-  }
-  #inner-grid > div {
-  background: lightgreen;
-  padding: 8px;
-  height: max-content;
-  }
-  .headers_instructions{
-      display: grid; 
-      grid-template-columns: 1fr 1fr; 
-      grid-template-rows: 1fr; 
-      gap: 0% 0%; 
-      grid-template-areas: 
-          ". ."; 
-      justify-content: start; 
-      align-content: center; 
-      justify-items: start; 
-      align-items: center; 
-  }
+  
 </style>
+
 {% endblock %}
