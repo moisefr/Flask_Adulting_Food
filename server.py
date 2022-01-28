@@ -646,10 +646,50 @@ def read_recipe(id):
                             mimetype='application/json'
                     )
 
+#Standard Show Recipe route for global
+@app.route('/recipe/global/<id>', methods = ['GET'])
+def read_recipe_global(id):
+    if request.method == 'GET':
+        ingredients = []
+        try:
+            dbConfirm = db.recipes.find_one({"_id": ObjectId(id)})
+            types = [target['ingredient']['type'] for target in dbConfirm['ingredients']]
+            types2 = []
+            for item in types:
+                if (item != ""):
+                    types2.append(item)
+            types2 = list(set(types2))
+            prep = []
+            execution = []
+            for item in dbConfirm['instructions']['prep']:
+                value_holder = str(item.values())
+                final_value = value_holder[value_holder.find("[")+2:value_holder.find("]")-1]
+                prep.append(final_value)
+            for item in dbConfirm['instructions']['execution']:
+                value_holder = str(item.values())
+                final_value = value_holder[value_holder.find("[")+2:value_holder.find("]")-1]
+                execution.append(final_value)
+            
+            return Response(
+                        response = json.dumps(
+                                {"message": "Recipee found", 
+                                "id": f"{dbConfirm['_id']}",
+                                "name": f"{dbConfirm['title']}",
+                                }),
+                            status = 200,
+                            mimetype='application/json'
+                    ) and render_template('read_recipe.html', recipe = dbConfirm, ingredient_type= types2, prep=prep, execution=execution)
+        except Exception as ex:
+            return Response(
+                        response = json.dumps(
+                                {"message": "Unable to retrieve Recipe"}),
+                            status = 401,
+                            mimetype='application/json'
+                    )
 
 #Standard show all recipes ✅[FE finish]
 @app.route('/recipe/all', methods = ['GET'])
-def read_recipes():
+def read_recipes_all():
     if request.method == 'GET':
         try:
             all_recipes = list(db.recipes.find({}))
@@ -663,7 +703,25 @@ def read_recipes():
         except  Exception as ex:
             return('Unable to return all ingredients')
 
-#Read Route To redirect to Master DB from recipe all Endpoint
+#Show All Your Recipees ✅[FE finish]
+@app.route('/recipe/mine', methods = ['GET'])
+@login_required
+def read_recipes_mine():
+    if request.method == 'GET':
+        try:
+            user_db = create_user_NoSQLdatabases()
+            user_dbcollection = user_db['recipes']
+            all_my_recipes = list(user_dbcollection.find({}))
+            return Response(
+                    response = json.dumps(
+                            {"message": "here are all the recipes"
+                            }),
+                        status = 200,
+                        mimetype='application/json'
+                ) and render_template('read_recipes_mine.html', recipes = all_my_recipes)
+        except Exception as ex:
+            return('Unable to return all your recipes')
+
 
 #Search Against your specifed Recipe Database
 
@@ -761,7 +819,9 @@ def read_recipe_search2():
 def update_recipe(id):
     form = Recipe(request.form)
     #Pulling Data from DB so we can show it
-    dbAction_findrecord = db.recipes.find_one({"_id": ObjectId(id)})
+    user_db = create_user_NoSQLdatabases()
+    user_dbcollection = user_db['recipes']
+    dbAction_findrecord = user_dbcollection.find_one({"_id": ObjectId(id)})
     prep_array = []
     execution_array = []
     if request.method == 'GET':
@@ -850,7 +910,7 @@ def update_recipe(id):
                     elif key.find("execution")>=0:
                         recipe_execution.append({key:value})
             instructions = {'prep': recipe_prep, 'execution': recipe_execution}
-            dbAction = db.recipes.update_one(
+            dbAction = user_dbcollection.update_one(
                 {"_id": ObjectId(id)},
                 {"$set": 
                     {
@@ -873,14 +933,17 @@ def update_recipe(id):
             return ("Couldn't Update Document")
     
 ############################################Delete Route 🚮
+#User Delete
 @app.route('/recipe/delete/<id>', methods = ['GET', 'POST'])
 @login_required
 def delete_recipe(id):
     if request.method == 'GET':
-        print("Ammount of recipees BEFORE deletion:" f"{db.ingredients.count_documents({})}")
+        user_db = create_user_NoSQLdatabases()
+        user_dbcollection = user_db['recipes']
+        print("Ammount of recipees BEFORE deletion:" f"{user_dbcollection.count_documents({})}")
         try:
-            dbAction = db.recipes.delete_one({"_id": ObjectId(id)})
-            print("Ammount of recipes AFTER deletion:" f"{db.recipes.count_documents({})}")
+            dbAction = user_dbcollection.delete_one({"_id": ObjectId(id)})
+            print("Ammount of recipes AFTER deletion:" f"{user_dbcollection.count_documents({})}")
             #Delete Picture file as well
             #Get file path from the folder
             if os.getcwd().find("static") < 0:
@@ -898,10 +961,13 @@ def delete_recipe(id):
                             }),
                         status = 200,
                         mimetype='application/json'
-            ) and redirect('/recipe/all')
+            ) and redirect('/recipe/mine')
         except Exception as ex:
             return("Delete Operation didn't Work")
     return render_template("home.html")
+
+#Admin Delete controlled by DB Admin
+
 
 #############********************************************************************Grocceries 🛒
 from Models_Plan import Grocerries

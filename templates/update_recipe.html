@@ -42,14 +42,14 @@
                         {% if ingredient.title == stuff.ingredient.title %}
                         <div class="container" >
                           <div class="row">
-                              <div class="col-1"><input checked type="checkbox" name="ingredient_{{stuff.ingredient._id}}" id = {{stuff.ingredient._id}} value = "{{stuff.ingredient.title}}"/></div>
+                              <div class="col-1"><input checked type="checkbox" name="ingredient_{{stuff.ingredient._id}}"  value = "{{stuff.ingredient.title}}"/></div>
                               <div class="col-3"><a href="/ingredient/{{stuff.ingredient._id}}">{{stuff.ingredient.title}}</a></div>
                               <div class="col-2"><img src ={{ url_for('static', filename=stuff.ingredient.img_URI)}} height="75" width="75" id="ingredient-image" /></div>
-                              <div class="col-2"><input type="number" id='quantity' name="quantity_{{stuff.ingredient.title}}" min="1" style="width: 85%;" step=0.1 ></div>
+                              <div class="col-2"><input type="number" id='quantity' name="quantity_{{stuff.ingredient.title}}" value= "{{stuff.quantity}}" min="1" style="width: 85%;" step=0.1 ></div>
                               <div class="col-2">
                                   <select name="unit_{{stuff.ingredient.title}}" id="unit" style="width: 50px;">
                                       <optgroup label="Metric">
-                                      <option value=""></option>
+                                      <option value="{{stuff.unit}}">{{stuff.unit}}</option>
                                       <option value="of them">Count</option>
                                       <option value="g">grams</option>
                                       <option value="kg">kilograms</option>
@@ -106,83 +106,61 @@
   </div>
     <p><input type="submit" class="btn btn-primary" value="Update Recipe {{form.title.data}}"></p>
     <h1>Current Instructions</h1>
-    <div class="form-group">
-      <div class="continer">
-        <div class="input-area">
-            <label for = 'element'>Instruction</label>
-            <input type="text" name = 'Instruction' id="input-holder">
-            <button id='inst_button' type="button">Click To Add Instruction List Item</button>
-         </div>
-         <ul id = 'instruction_raw'></ul>
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <div class= 'row' id='starter-prep'>
+            <h2>Prep</h2>
+            <div class="col-8"><input type="text" id='holder-input-prep' /></div>
+          </div>
+          <div class="row">
+            <div class="col-2" id="Order-Prep">
+                <h4>Order</h4>
+            </div>
+            <div class="col-3" id="divContainer-drop"><h4>Drag & Drop</h4></div>
+            <div class="col-7" id="divContainer"> 
+                  <h4>Prep</h4>
+                  {%for instruction in prep%}
+                    <li>{{instruction}}</li>
+                  {%endfor%}
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class= 'row' id='starter-execution'>
+            <h2>Execution</h2>
+            <div class="col-8"><input type="text" id='holder-input-execution' /></div>
+          </div>
+          <div class="row">
+            <div class="col-2">
+              <div class="Order-Execution">
+                <h2>Order</h2>
+              </div>
+            </div>
+            <div class="col-3" id="divContainer-drop2"><h4>Drag & Drop</h4></div>
+            <div class="col-3">
+              <div class = "Landing-Execution" id="divContainer2" >
+                <h4>Execution</h4>
+                {%for instruction in execution%}
+                <li>{{instruction}}</li>
+                {%endfor%}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="headers_instructions">
-        <h1>Prep</h1>
-        <h1>Execution</h1>
-    </div>
-    <div id="outer-grid">
-          <div class="form-group" id="inner-grid">
-              <div class="Order-Prep"><h2>Order</h2>
-                {% for instruction in prep %}
-                <h2>{{prep.index(instruction)+1}}</h2>
-                {% endfor %}
-              </div>
-              <div class = "Landing-Prep" ><h2>Prep Instructions</h2>
-                {% for instruction in prep %}
-                <h3><input type='text' value="{{instruction}}" name="oldprep{{prep.index(instruction)+1}}" style="font-size:x-large;"></h3>
-                {% endfor %}
-              </div>
-          </div>
-          <div class="form-group" id="inner-grid">
-            <div class="Order-Prep"><h2>Order</h2>
-              {% for instruction in execution %}
-              <h2>{{execution.index(instruction)+1}}</h2>
-              {% endfor %}
-            </div>
-            <div class = "Landing-Prep" ><h2>Execution Instructions</h2>
-              {% for instruction in execution %}
-              <h3><input type='text' value="{{instruction}}" name="oldexecution{{execution.index(instruction)+1}}" style="font-size:x-large;"></h3>
-              {% endfor %}
-            </div>
-          </div>
-         </div>
     </div>
   </form>
 
- <!-- Instructions Finnesse 2 -->
- <style>
-  #outer-grid {
-  display: grid;
-  grid-template-rows: 1fr 1fr;
-  grid-template-columns: 1fr 1fr;
-  grid-gap: 8px;
-  }
-  #outer-grid > div {
-  background-color: limegreen;
-  color: white;
-  font-size: 4vw;
-  padding: 8px;
-  }
-  #inner-grid {
-  display: grid;
-  grid-template-columns: 0.2fr 1.8fr;
-  grid-gap: 5px;
-  }
-  #inner-grid > div {
-  background: lightgreen;
-  padding: 8px;
-  height: max-content;
-  }
-  .headers_instructions{
-      display: grid; 
-      grid-template-columns: 1fr 1fr; 
-      grid-template-rows: 1fr; 
-      gap: 0% 0%; 
-      grid-template-areas: 
-          ". ."; 
-      justify-content: start; 
-      align-content: center; 
-      justify-items: start; 
-      align-items: center; 
-  }
-</style>
+  <style>
+    #holder-input{
+      width: 400px;
+      height: 50px;
+    }
+    #input-item{
+      margin-left: 30%;
+    }
+    
+  </style>
+ 
 {% endblock %}
