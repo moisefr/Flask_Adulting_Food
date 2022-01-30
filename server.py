@@ -1171,12 +1171,51 @@ def read_groceries(id):
 #Should Deprecate
 @app.route("/groceries/all", methods = ["GET"])
 def all_groceries():
+    user_db = create_user_NoSQLdatabases()
+    user_dbcollection = user_db['groceries']
     if request.method == "GET":
         try:
             #Do some SQL stuff
             #Find all tables with given username 
-            dbAction = db.groceries.find({})
-            groceries = list(dbAction)
+            # dbAction = db.groceries.find({})
+            # groceries = list(dbAction)
+            mycursor = mysqldb.cursor()
+            mycursor.execute("SHOW TABLES")
+            user_tables=[]
+            #Get User Tables Names from SQL
+            for x in mycursor:
+                search = str(x)
+                desired_user = session['user']
+                if search.find(desired_user["OKTAid"])>=0:
+                    inputer = search[search.find("'")+1:len(search)-3]
+                    user_tables.append(inputer)
+            listcursor = mysqldb.cursor()
+            final_list = []
+            for table in user_tables:
+                listcursor.execute(f"SELECT * FROM {table}")
+                myresult = listcursor.fetchall()
+                list_name = table[len(table):len(table)-table.find("_")-5:-1]
+                list_name = list_name[::-1]
+                dbAction= user_dbcollection.find_one({"_id": ObjectId(list_name)})
+                ingredients=[]
+                for row in myresult:
+                    price = str(row[4])
+                    price = price[price.find("(")+1: price.find(")")]
+                    dbAction_ingr = db.ingredients.find_one({"_id": ObjectId(row[0])})
+                    ingredient = {
+                        "ingredient": dbAction_ingr,
+                        "quantity": row[2],
+                        "unit": row[3],
+                        "price": price,
+                        "total":float(price)*row[2]
+                    }
+                    ingredients.append(ingredient)
+                table_ingre_pair = {
+                    "groccery_list": dbAction['title'],
+                    "id":str(dbAction['_id']),
+                    "ingredients": ingredients 
+                }
+                final_list.append(table_ingre_pair) 
         except Exception as ex:
             return Response(
                     response = json.dumps(
@@ -1185,7 +1224,7 @@ def all_groceries():
                         status = 400,
                         mimetype='application/json'
                 )
-    return render_template("read_all_groceries.html", groceries = groceries)
+    return render_template("read_all_groceries.html", groceries = final_list)
     
 ###########################################Update Routes 🚅
 #Standard update Route ✅ [FE finish]

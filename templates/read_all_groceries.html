@@ -7,20 +7,20 @@
       <thead>
         <tr>
           <td class="tg-0lax">Title</td>
-          <td class="tg-0lax">Link</td>
-          <td class="tg-0lax">Actions</td>
+          <td class="tg-0lax">Items</td>
+          <!-- <td class="tg-0lax">Actions</td> -->
 
         </tr>
         {% for grocery in groceries%}
           <tr>
-              <td class="tg-0lax"><a href="/groceries/{{grocery._id}}">{{grocery.title}}</a></td>
+              <td class="tg-0lax"><a href="/groceries/{{grocery.id}}">{{grocery.groccery_list}}</a></td>
               <td class="tg-0lax">
                 <ul>{% for ingredient in grocery.ingredients %}
-                    <li>{{ingredient.title}}</li>
+                    <li>{{ingredient.ingredient.title}}</li>
                     {% endfor %}
                 </ul>
               </td>
-              <td class="tg-0lax"><a  href="/groceries/update/{{grocery._id}}">Update</a><p>    </p><a href="delete/{{grocery._id}}">Delete</a></td>
+              <!-- <td class="tg-0lax"><a  href="/groceries/update/{{grocery._id}}">Update</a><p>    </p><a href="delete/{{grocery._id}}">Delete</a></td> -->
           </tr>
         {% endfor %}
       </thead>
