@@ -594,7 +594,7 @@ def create_recipe():
             #Consolidate these arrays to full recipe ingredient objects and append to recipe_ingredients final array
             for x in range(0,len(holder_ingredients_array)):
                 final_recipe_ingredients.append({"ingredient": holder_ingredients_array[x], "quantity":quantity_array[x], "unit": unit_array[x]})
-            
+    
             #Handle Instructions using prep and execution handles then create instructions object
             for key,value in form_dict.items():
                 if value !='':
@@ -629,9 +629,7 @@ def create_recipe():
             redirector = "/recipe/"f"{db_user_Action.inserted_id}"
             return Response(
                 response = json.dumps(
-                        {"message": "Recipee created", 
-                        "id": "hi"
-                        }),
+                        {"message": "Recipee created"}),
                     status = 200,
                     mimetype='application/json'
             )  and redirect(redirector)
