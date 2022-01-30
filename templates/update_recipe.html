@@ -109,58 +109,53 @@
     <div class="container">
       <div class="row">
         <div class="col">
-          <div class= 'row' id='starter-prep'>
-            <h2>Prep</h2>
-            <div class="col-8"><input type="text" id='holder-input-prep' /></div>
+          <div class= 'row' id='starter-prep-update'>
+            <h2>Prep <div id="amount-holder">{{num_prep}}</div></h2>
+            <div class="col-8"><input type="text" id='holder-input-prep-update' style="width: 500px; height: 70px;"/></div>
           </div>
           <div class="row">
-            <div class="col-2" id="Order-Prep">
-                <h4>Order</h4>
+            <div class="col">Order</div>
+            <div class="col">Droppable</div>
+          </div>
+          {%for x in range(0, num_prep)%}
+            <div class="row" id = "divContainer-update" >
+              <div class="col">{{x}}</div>
+              <div class="col"><input type='text' name='prep' value ='{{prep[x]}}' /></div>
             </div>
-            <div class="col-3" id="divContainer-drop"><h4>Drag & Drop</h4></div>
-            <div class="col-7" id="divContainer"> 
-                  <h4>Prep</h4>
-                  {%for instruction in prep%}
-                    <li>{{instruction}}</li>
-                  {%endfor%}
-            </div>
+          {%endfor%}
+          <div class="row">
+            <div class="col" id='order-continued'></div>
+            <div class="col" id = "divContainer-update2"></div>
           </div>
         </div>
         <div class="col">
-          <div class= 'row' id='starter-execution'>
-            <h2>Execution</h2>
-            <div class="col-8"><input type="text" id='holder-input-execution' /></div>
-          </div>
+          <h3>Execution</h3>
           <div class="row">
-            <div class="col-2">
-              <div class="Order-Execution">
-                <h2>Order</h2>
-              </div>
-            </div>
-            <div class="col-3" id="divContainer-drop2"><h4>Drag & Drop</h4></div>
-            <div class="col-3">
-              <div class = "Landing-Execution" id="divContainer2" >
-                <h4>Execution</h4>
-                {%for instruction in execution%}
-                <li>{{instruction}}</li>
-                {%endfor%}
-              </div>
-            </div>
+            <div class="col">Order</div>
+            <div class="col">Droppable</div>
+            <div class="col">Execution</div>
           </div>
         </div>
       </div>
     </div>
   </form>
 
-  <style>
-    #holder-input{
-      width: 400px;
-      height: 50px;
-    }
-    #input-item{
-      margin-left: 30%;
-    }
-    
-  </style>
+ <script>
+  $(function(){
+    var iCnter = Number($("#amount-holder").html()) ;
+    $(document).ready(function() {
+      
+      $(document).keydown(function(event) {
+        //window.alert(event.keyCode);
+        if (event.keyCode =='40'){
+          console.log(iCnter)
+          $("#order-continued").append("<div>"+iCnter+"</div>");
+          $("#divContainer-update2").append("<div class='col'><input type='text' value='"+$('#holder-input-prep-update').val()+"'"+ "name='prep" +iCnter+"'"+"></div>");
+          iCnter = iCnter +1;
+        }
+      });
+    });
+  });
  
+ </script>
 {% endblock %}

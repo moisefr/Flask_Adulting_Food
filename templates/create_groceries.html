@@ -10,12 +10,10 @@
         {{render_field(form.notes, class_="form-control")}}
     </div>
     <p><input type="submit" class="btn btn-primary" value="Submit"></p>
-      <div id="stuff">stuff</div>
-    <div class="container">
+    <div class="row">
         <div class="col">
             <h1>Add Ingredients From a Recipee</h1>
             <div class="row">
-                
                     {% for recipe in recipes%}
                     <div class="col-4">
                         <div class="card border-dark mb-4" >
@@ -46,7 +44,6 @@
                         </div>
                     </div>
                     {% endfor %}
-                
             </div>               
         </div>
         <div class="col">
@@ -117,24 +114,7 @@
    </div>
 </form>
   
-<style>
-      .container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr;
-            gap: 0% 6%;
-            grid-auto-flow: row;
-            grid-template-areas:
-                ". .";
-            width: 100%;
-            }
-        .col{
-            width: 100%;
-        }
-        .main-div{
-            width:  1300px;
-        }   
-  </style>
+
 
   
 {% endblock %}

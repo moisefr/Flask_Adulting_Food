@@ -278,7 +278,13 @@ def create_ingredient():
                     mimetype='application/json'
             ) and redirect('/ingredient/'f"{dbAction.inserted_id}")
         except Exception as ex:
-            return ("unable to create new ingridient")
+            return Response(
+                    response = json.dumps(
+                            {"message": "Unable to Create Ingredient"
+                            }),
+                        status = 400,
+                        mimetype='application/json'
+                )
     return render_template('/create_ingredient.html', form=form)
  
 ######################################Read/Search Routes 📚
@@ -300,7 +306,13 @@ def read_ingredient_standard(id):
                             mimetype='application/json'
                     ) and render_template('read_ingredient.html', ingredient = dbConfirm)
         except Exception as ex:
-            return("Unable to retrieve Ingredient")
+            return Response(
+                    response = json.dumps(
+                            {"message": "Unable to Retrieve"
+                            }),
+                        status = 400,
+                        mimetype='application/json'
+                )
 
 #✅See All Ingredients in the DB
 @app.route('/ingredient/all', methods = ['GET'])
@@ -316,7 +328,13 @@ def read_ingredients():
                         mimetype='application/json'
                 ) and render_template('read_ingredient_all.html', ingredients = all_ingredients)
         except  Exception as ex:
-            return('Unable to return all ingredients')
+            return Response(
+                    response = json.dumps(
+                            {"message": "Unable to show all Ingredients"
+                            }),
+                        status = 400,
+                        mimetype='application/json'
+                )
 
 #Complex Search against MongoDB✅   [FE finish]
 @app.route('/ingredient/search_complex',  methods = ['GET', 'POST'])
@@ -352,7 +370,13 @@ def read_ingredient_search():
                         mimetype='application/json'
                 ) and render_template('read_ingredient_search.html', ingredients = dbData, type_search = tree_filter2)
         except Exception as ex:
-            return ("that shit didn't work")
+            return Response(
+                    response = json.dumps(
+                            {"message": "Unable to Find Ingredient"
+                            }),
+                        status = 400,
+                        mimetype='application/json'
+                )
     return render_template('read_ingredient_search.html')
    
 #Simple Search against MongoDB✅   [FE finish]
@@ -370,7 +394,13 @@ def read_ingredient_search2():
                         mimetype='application/json'
                 ) and render_template('read_ingredient_search2.html', ingredients = all_ingredients, desired_ingredient='all')
         except  Exception as ex:
-            return('Unable to return all ingredients')
+           return Response(
+                    response = json.dumps(
+                            {"message": "Unable to show the page for some reason"
+                            }),
+                        status = 400,
+                        mimetype='application/json'
+                )
     if request.method == 'POST':
         try:
             hold = form.to_dict()
@@ -428,7 +458,8 @@ def update_ingredient(id):
                     "description": description,
                     "state": state,
                     "type": type_ingredient,
-                    "img_URI": new_IMG_URI
+                    "img_URI": new_IMG_URI,
+                    "date_modified": str(date.today())
                     }
                 }
             )
@@ -439,7 +470,13 @@ def update_ingredient(id):
                 mimetype='application/json'
             ) and redirect('/ingredient/'f"{id}")
         except Exception as ex:
-            return ("Couldn't Update Ingredient")
+            return Response(
+                    response = json.dumps(
+                            {"message": "Unable to Update Ingredient"
+                            }),
+                        status = 400,
+                        mimetype='application/json'
+                )
     return render_template('/update_ingredient.html', form=form, current_state = form.state.data, current_type = dbAction_findrecord['type'])
 
 ###########################################Delete Route 🚮
@@ -471,7 +508,13 @@ def delete_ingredient(id):
                         mimetype='application/json'
             ) and redirect(url_for('read_ingredient_search'))
         except Exception as ex:
-            return("Delete Operation didn't Work")
+            return Response(
+                    response = json.dumps(
+                            {"message": "Unable to Delete"
+                            }),
+                        status = 400,
+                        mimetype='application/json'
+                )
     return render_template("home.html")
 
 #############********************************************************************Recipes 🧾
@@ -822,8 +865,6 @@ def update_recipe(id):
     user_db = create_user_NoSQLdatabases()
     user_dbcollection = user_db['recipes']
     dbAction_findrecord = user_dbcollection.find_one({"_id": ObjectId(id)})
-    prep_array = []
-    execution_array = []
     if request.method == 'GET':
         #Data already in the object
         form.title.data = dbAction_findrecord['title']
@@ -841,15 +882,14 @@ def update_recipe(id):
         types2 = list(set(types2))
         titles = [item['ingredient']['title'] for item in current_ingredients ]
         #Display Current Instructions
-        for item in dbAction_findrecord['instructions']['prep']:
-            holder = str(item.keys())
-            key = holder[holder.find("[")+2:holder.find("]")-1]
-            prep_array.append(item[key])
-        for item in dbAction_findrecord['instructions']['execution']:
-            holder = str(item.keys())
-            key = holder[holder.find("[")+2:holder.find("]")-1]
-            execution_array.append(item[key])
-        return render_template('/update_recipe.html', form=form, ingredients = ingredients, types = types2, titles = titles, prep = prep_array, execution = execution_array, current_ingredients=current_ingredients)
+        prep_array = [item for item in dbAction_findrecord['instructions']['prep']]
+        # print(prep_array)
+        execution_array = [item for item in dbAction_findrecord['instructions']['execution']]
+        num_prep = len(prep_array)
+        num_exec = len(execution_array)
+        return render_template('/update_recipe.html', form=form, ingredients = ingredients, types = types2, 
+                    titles = titles, prep = prep_array, execution = execution_array, 
+                        current_ingredients=current_ingredients, num_prep=num_prep, num_exec=num_exec)
     if request.method == 'POST':
         newURI = uploadfile(id, 'Recipe')
         if newURI == "":
@@ -1146,10 +1186,18 @@ def read_groceries(id):
 def all_groceries():
     if request.method == "GET":
         try:
+            #Do some SQL stuff
+            #Find all tables with given username 
             dbAction = db.groceries.find({})
             groceries = list(dbAction)
         except Exception as ex:
-            print("That shit dind't work, can't see all ingredeints")
+            return Response(
+                    response = json.dumps(
+                            {"message": "Unable to Retrieve All Lists"
+                            }),
+                        status = 400,
+                        mimetype='application/json'
+                )
     return render_template("read_all_groceries.html", groceries = groceries)
     
 ###########################################Update Routes 🚅

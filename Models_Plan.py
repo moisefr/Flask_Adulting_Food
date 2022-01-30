@@ -46,13 +46,17 @@ class Ingredient(Form):
     state = StringField('State of Matter')
     type =  StringField('Food Group')
     price = 0
+    date_modified = ''
+    date_created = str(date.today())
     def export(self):
         return (
             {"title": self.name.data, 
             "description": self.description.data,
             "state": self.state.data,
             "type": self.type.data,
-            "img_URI": "<Empty URI>"
+            "img_URI": "<Empty URI>",
+            "date_created": self.date_created,
+            "date_modified": self.date_modified
             }
         )
 class Recipe(Form):
@@ -63,6 +67,7 @@ class Recipe(Form):
     instructions =  {'prep': [], 'execution': []}
     ingredients = []
     date_created = str(date.today())
+    date_modified = ''
     author = ''
     crossreference_recipe_URI = ''
     def export(self):
@@ -75,6 +80,7 @@ class Recipe(Form):
                 "ingredients": self.ingredients,
                 "instructions": self.instructions,
                 "date_created": self.date_created,
+                "date_modified": self.date_modified,
                 "author": self.author,
                 "crossreference_recipe_URI": self.crossreference_recipe_URI
             }

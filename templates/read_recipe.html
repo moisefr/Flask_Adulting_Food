@@ -6,40 +6,43 @@
 </head> -->
 <div>
     <h1>{{recipe.title}}</h1>
-    <div><img src={{ url_for('static', filename=recipe.img_URI) }} alt=”Bananas”  width="60" height="60"></div>
-    <p>{{recipe.description}}</p>
+    <div><img class="rounded mx-auto d-block" src={{ url_for('static', filename=recipe.img_URI) }} alt=”Bananas” style="width: 50%;" ></div>
+    <br>
+    <div class="row gx-5" id="description"><p>{{recipe.description}}</p></div>
     <h1>Ingredients</h1>
-        <div class="main-area">
-            <div class="grid-container">
-                {% for type in ingredient_type %}
-                    <div>
+    <div class="row">
+        {% for type in ingredient_type %}
+            <div class="col">
+                <div class="card" style="width: 18rem;">
+                    <div class="card-header">
                         {{type}}
-                        <div>
-                            {%for ingredient in recipe.ingredients%}
-                                {%if ingredient.ingredient.type == type%}
-                                    <ul>
-                                        <li>
-                                            {{ingredient.ingredient.title}} - {{ingredient.quantity}} {{ingredient.unit}}
-                                        </li>
-                                    </ul>
-                                {%endif%}
-                            {%endfor%}
-                        </div>
                     </div>
-                {% endfor %}
+                    {%for ingredient in recipe.ingredients%}
+                        {%if ingredient.ingredient.type == type%}
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">
+                                    {{ingredient.ingredient.title}} - {{ingredient.quantity}} {{ingredient.unit}}
+                                </li>
+                            </ul>
+                        {%endif%}
+                    {%endfor%}
+                </div>
+            <div>     
+    </div>
             </div>
-        </div>
+        {% endfor %}
+    </div>
     <div>
         <h1>Instructions</h1>
-        <div class="instruct">
-            <div class="instruct-item"> <h2>Prep</h2>
+        <div class="row">
+            <div class="col"> <h2>Prep</h2>
                 <ol>
                 {% for item in prep %}
                     <li>{{item}}</li>
                 {% endfor %}
                 </ol>
             </div>
-            <div class="grid-item"> <h2>Execution</h2>
+            <div class="col"> <h2>Execution</h2>
                 <ol>
                 {% for exec in execution %}
                     <li>{{exec}}</li>
@@ -50,44 +53,15 @@
     </div>
 </div>
 <style>
-    .grid-container {
-        display: grid; 
-        grid-template-columns: 1fr 1fr 1fr; 
-        grid-template-rows: 1fr 1fr 1fr; 
-        gap: 0% 0%; 
-        grid-template-areas: 
-        ". . ."
-        ". . ."
-        ". . ."; 
-        justify-content: start; 
-        align-content: center; 
-        justify-items: start; 
-        align-items: center; 
-    }
-    .grid-item-standard {
-        background-color: #f7793e;
-        padding: 20px;
-        font-size: 30px;
-        text-align: center;
-        width: 75%;
-    }
-    .main-area {
-    }
     .type-area{
         font-size: x-large;
     }
     .ingredient-area{
         display: flex;
     }
-    .instruct {  
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0% 0%;
-        grid-auto-flow: row;
-        justify-content: start;
-        align-content: center;
-        justify-items: start;
-        align-items: center;
+    #description{
+        margin-left: 30%;
     }
+    
 </style>
 {% endblock %}
