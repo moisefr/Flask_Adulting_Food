@@ -567,7 +567,6 @@ def create_recipe():
             #Get raw ingredient, quantity and unit information from the request
             for key in form_dict.keys():
                 true_value = form_dict[key]
-                print(true_value)
                 for ingredient in all_ingredients:
                     if true_value == ingredient["title"]:
                         ingredient_array.append(ingredient)
@@ -600,12 +599,12 @@ def create_recipe():
             for key,value in form_dict.items():
                 if value !='':
                     if key.find("prep")>=0:
-                        recipe_prep.append({key:value})
+                        recipe_prep.append(value)
                     elif key.find("execution")>=0:
-                        recipe_execution.append({key:value})
+                        recipe_execution.append(value)
             instructions = {'prep': recipe_prep, 'execution': recipe_execution}
             #Handle Creation to Master
-            dbAction_ingredients = db.recipes.update_one(
+            dbAction_recipes = db.recipes.update_one(
             {"_id": dbAction.inserted_id},
             {"$set": {
                 "ingredients": final_recipe_ingredients,
@@ -616,7 +615,7 @@ def create_recipe():
                 }}
             )
             #Hanlde Custom User Upload from session
-            dbAction_user_ingredients = user_dbcollection.update_one(
+            dbAction_user_recipes = user_dbcollection.update_one(
             {"_id": db_user_Action.inserted_id},
             {"$set": {
                 "ingredients": final_recipe_ingredients,
@@ -639,7 +638,7 @@ def create_recipe():
         except Exception as ex:
             return Response(
                 response = json.dumps(
-                        {"message": "Couldn't create recipee",
+                        {"message": "Couldn't create recipee"
                         }),
                     status = 401,
                     mimetype='application/json'
@@ -661,17 +660,6 @@ def read_recipe(id):
                 if (item != ""):
                     types2.append(item)
             types2 = list(set(types2))
-            prep = []
-            execution = []
-            for item in dbConfirm['instructions']['prep']:
-                value_holder = str(item.values())
-                final_value = value_holder[value_holder.find("[")+2:value_holder.find("]")-1]
-                prep.append(final_value)
-            for item in dbConfirm['instructions']['execution']:
-                value_holder = str(item.values())
-                final_value = value_holder[value_holder.find("[")+2:value_holder.find("]")-1]
-                execution.append(final_value)
-            
             return Response(
                         response = json.dumps(
                                 {"message": "Recipee found", 
@@ -680,7 +668,8 @@ def read_recipe(id):
                                 }),
                             status = 200,
                             mimetype='application/json'
-                    ) and render_template('read_recipe.html', recipe = dbConfirm, ingredient_type= types2, prep=prep, execution=execution)
+                    ) and render_template('read_recipe.html', recipe = dbConfirm, ingredient_type= types2, 
+                                prep=dbConfirm['instructions']['prep'], execution=dbConfirm['instructions']['execution'])
         except Exception as ex:
             return Response(
                         response = json.dumps(
@@ -946,9 +935,9 @@ def update_recipe(id):
             for key,value in form_dict.items():
                 if value !='':
                     if key.find("prep")>=0:
-                        recipe_prep.append({key:value})
+                        recipe_prep.append(value)
                     elif key.find("execution")>=0:
-                        recipe_execution.append({key:value})
+                        recipe_execution.append(value)
             instructions = {'prep': recipe_prep, 'execution': recipe_execution}
             dbAction = user_dbcollection.update_one(
                 {"_id": ObjectId(id)},

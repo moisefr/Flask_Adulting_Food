@@ -14,7 +14,7 @@
             </div>
           </div>
           <div class="card-body">
-            <div class="row"><h6 class="card-title"><a href="/recipe/global/{{recipe._id}}">{{recipe.title}}</a></h6></div>
+            <div class="row"><h6 class="card-title"><a href="/recipe/{{recipe._id}}">{{recipe.title}}</a></h6></div>
             <div class="row"><img src={{ url_for('static', filename=recipe.img_URI) }} class="card-img-top" alt="..."></div>
             <div class="row"><p class="card-text">{{recipe.description}}</p></div>
           </div>
