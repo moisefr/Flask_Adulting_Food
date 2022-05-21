@@ -1,28 +1,136 @@
+
+
 {% extends 'layout.html' %}
 
 {% block body %}
-
-  <div>
-    <h1>All Ingredients </h1>
-    <table class="table table-dark">
+<div class="demo">
+  <section>
+    <h1>All Ingredients</h1>
+    <input type="text" id="search"  placeholder="Search for names.." title="Type in a name">
+    <button type="button" class="btn btn-primary" onclick="searchIngredients()">Search</button>
+    <div class="tbl-header">
+      <table cellpadding="0" cellspacing="0">
         <thead>
           <tr>
-            <td class="tg-0lax">Title</td>
-            <td class="tg-0lax">image</td>
-            <td class="tg-0lax">Link</td>
-            <td class="tg-0lax">Actions</td>
-
+            <th>Title</th>
+            <th>State</th>
+            <th>Type</th>
+            <th>Image</th>
+            <th>Link</th>
+            <th>Actions</th>
           </tr>
+        </thead>
+      </table>
+    </div>
+    <div class="tbl-content" >
+      <table cellpadding="0" cellspacing="0" id="real-table">
+        <tbody>
           {% for ingredient in ingredients%}
             <tr>
                 <td class="tg-0lax">{{ingredient.title}}</td>
+                <td class="tg-0lax">{{ingredient.type}}</td>
+                <td class="tg-0lax">{{ingredient.state}}</td>
                 <td class="tg-0lax"><img src={{ url_for('static', filename=ingredient.img_URI) }} alt=”Bananas width="50" height="50"></td>
                 <td class="tg-0lax"><a href="/ingredient/{{ingredient._id}}">{{ingredient.title}}</a></td>
                 <td class="tg-0lax"><a  href="update/{{ingredient._id}}">Update</a><p>    </p><a href="delete/{{ingredient._id}}">Delete</a></td>
             </tr>
             
           {% endfor %}
-        </thead>
-    </table>
+        </tbody>
+      </table>
+    </div>
+  </section>
 </div>
+<style>
+  h1{
+    font-size: 30px;
+    color: rgb(11, 11, 11);
+    text-transform: uppercase;
+    font-weight: 300;
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  table{
+    width:100%;
+    table-layout: fixed;
+  }
+  .tbl-header{
+    background-color: rgba(255,255,255,0.3);
+  }
+  .tbl-content{
+    height:300px;
+    overflow-x:auto;
+    margin-top: 0px;
+    border: 1px solid rgba(255,255,255,0.3);
+  }
+  th{
+    padding: 20px 15px;
+    text-align: left;
+    font-weight: 500;
+    font-size: 12px;
+    color: rgb(4, 4, 4);
+    text-transform: uppercase;
+  }
+  td{
+    padding: 15px;
+    text-align: left;
+    vertical-align:middle;
+    font-weight: 300;
+    font-size: 12px;
+    color: rgb(12, 12, 12);
+    border-bottom: solid 1px rgba(255,255,255,0.1);
+  }
+  tbody>tr:hover {
+        background-color: rgba(255,255,255,0.3);
+      }
+  tbody>td:hover:before {
+          content: "";
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: -9999px;
+          bottom: -9999px;
+          background-color: rgba(255,255,255,0.2);
+          z-index: -1;
+        }
+   
+  
+  @import url(https://fonts.googleapis.com/css?family=Roboto:400,500,300,700);
+  table{
+    background: -webkit-linear-gradient(left, #25c481, #25b7c4);
+    background: linear-gradient(to right, #25c481, #25b7c4);
+    font-family: 'Roboto', sans-serif;
+  }
+  section{
+    margin: 50px;
+  }
+</style>
+
+<script>
+  $(window).on("load resize ", function() {
+    var scrollWidth = $('.tbl-content').width() - $('.tbl-content table').width();
+    $('.tbl-header').css({'padding-right':scrollWidth});
+  }).resize();
+</script>
+<script>
+  function searchIngredients() {
+    var input, filter, table, rows;
+    input = document.getElementById("search");
+    table = document.getElementById("real-table");
+    rows = table.getElementsByTagName("tr");
+    filter = input.value.toUpperCase();
+    for(i = 0; i < rows.length; i++){
+      col1 = rows[i].getElementsByTagName("td")[0].textContent.toUpperCase().toString();
+      col2 = rows[i].getElementsByTagName("td")[1].textContent.toUpperCase().toString();
+      col3 = rows[i].getElementsByTagName("td")[2].textContent.toUpperCase().toString();
+      col_string = col1 + col2 + col3;
+      if(col_string.indexOf(filter)>-1){
+        rows[i].style.display = "";
+      }else{
+        rows[i].style.display = "none";
+      }
+    }
+  }
+</script>
 {% endblock %}
+

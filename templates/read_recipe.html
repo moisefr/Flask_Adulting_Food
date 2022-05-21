@@ -1,18 +1,15 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<!-- <head>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/recipe_standard.css') }}">
-</head> -->
 <div>
-    <h1>{{recipe.title}}</h1>
-    <div><img class="rounded mx-auto d-block" src={{ url_for('static', filename=recipe.img_URI) }} alt=”Bananas” style="width: 50%;" ></div>
+    <h1>{{recipe.title}}-{{recipe.img_URI}}</h1>
+    <div><img class="rounded mx-auto d-block" src={{ url_for('static', filename='recipe.img_URI') }} alt=”Bananas” style="width: 50%;" ></div>
     <br>
     <div class="row gx-5" id="description"><p>{{recipe.description}}</p></div>
     <h1>Ingredients</h1>
-    <div class="row">
+    <div class="grid-container">
         {% for type in ingredient_type %}
-            <div class="col">
+            <div class="grid-">
                 <div class="card" style="width: 18rem;">
                     <div class="card-header">
                         {{type}}

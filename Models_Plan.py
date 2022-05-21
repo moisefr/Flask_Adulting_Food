@@ -41,7 +41,7 @@ class User(UserMixin):
 
 class Ingredient(Form):
     name = StringField('Name', [validators.Length(min=1, max=50)])
-    description = TextAreaField('description', [validators.Length(min=4, max=500)])
+    description = TextAreaField("Please provide a general description for this type of ingredient such as where it's usually found, meals it's usally used in etc'", [validators.Length(min=4, max=500)])
     img_URI = ''
     state = StringField('State of Matter')
     type =  StringField('Food Group')
@@ -61,7 +61,7 @@ class Ingredient(Form):
         )
 class Recipe(Form):
     title = StringField('Title', [validators.Length(min=1, max=50)])
-    description = TextAreaField('description', [validators.Length(min=4, max=2500)])
+    description = TextAreaField('Please describe your recipe: what was your inspiration, where is this dish usually eaten, etc...', [validators.Length(min=4, max=2500)])
     img_URI =''
     cuisine = StringField('Recipee Type')
     instructions =  {'prep': [], 'execution': []}

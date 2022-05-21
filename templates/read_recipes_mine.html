@@ -4,22 +4,125 @@
 <div>
   <h1>Here are all your recipes </h1>
   <div class="row">
-    {% for recipe in recipes%}
-       <div class="col-3">
-       <div class="card border-dark mb-4" style="width: 18rem;">
-          <div class="card-header">
-            <div class="row">
-              <div class="col"><p><a  href="update/{{recipe._id}}">Update</a></p></div>
-              <div class="col"><p><a href="delete/{{recipe._id}}">Delete</a></p></div>
+    <div class="col">
+      <div class="filter Area">
+        Filters
+        <div class="row">
+          <div class="col">
+            <label for="state">Type of cuisine </label>
+          <select id="cuisine" name="cuisine" style="overflow:scroll;" onchange="filterSelection()">
+            <option value="all" class="btn active"> all </option>
+            {% for recipe in recipes%}
+              <option value="{{recipe.cuisine}}" class="btn">{{recipe.cuisine}}</option>
+            {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="grid-container">
+        {% for recipe in recipes%}
+           <div class="grid-item {{recipe.cuisine}}">
+            
+            <div class="card border-dark mb-6" style="width: 11em; height: 14em;">
+              <div class="card-header">
+                <div class="row">
+                  <div class="col"><p><a  href="update/{{recipe._id}}">Update</a></p></div>
+                  <div class="col"><p><a href="delete/{{recipe._id}}">Delete</a></p></div>
+                </div>
+              </div>
+              <img src={{ url_for('static', filename=recipe.img_URI) }} id ="img-card" class="card-img-top" alt="...">
+              <div class="card-body" style="width: 11em; height: 12em;">
+                <p class="card-title"><a href="/recipe/{{recipe._id}}">{{recipe.title}}</a></p>
+                <p class="card-text"><span style="font-weight: bold;">{{recipe.cuisine}}: </span>{{recipe.description}}</p>
+              </div>
             </div>
-          </div>
-          <div class="card-body">
-            <div class="row"><h6 class="card-title"><a href="/recipe/{{recipe._id}}">{{recipe.title}}</a></h6></div>
-            <div class="row"><img src={{ url_for('static', filename=recipe.img_URI) }} class="card-img-top" alt="..."></div>
-            <div class="row"><p class="card-text">{{recipe.description}}</p></div>
-          </div>
+          
       </div>
       {% endfor %}
+    </div>
+  </div>
+  <div class="col">
+    <div>
+      <form method="POST"  action="">
+        <div class="form-group">
+          <div class="form-group">
+            <label for="dasearch" style="color: black;">Search for Recipes</label>
+            <input type="search" placeholder="Search by Ingredient" aria-label="Search" name = "dasearch">
+            <datalist id="recipes_search">
+              <!-- <option> swag -->
+              {% for ingredient in all_ingredients%}
+                <option value="{{ingredient}}"> 
+              {% endfor %}
+            </datalist>
+          </div>
+        <p><input type="submit" class="btn btn-primary" value="Submit"></p>
+      </form>
+      <div>
+        <table class="table table-dark">
+            <thead>
+              <tr>
+                <td class="tg-0lax">Type</td>
+                <td class="tg-0lax">image</td>
+                <td class="tg-0lax">Link</td>
+                <td class="tg-0lax">Actions</td>
+    
+              </tr>
+              {% for recipe in table_filtered_recipes%}
+                <tr>
+                    <td class="tg-0lax">{{recipe.cuisine}}</td>
+                    <td class="tg-0lax"><img src={{ url_for('static', filename=recipe.img_URI) }} alt=”Bananas width="50" height="50"></td>
+                    <td class="tg-0lax"><a href="/recipe/{{recipe._id}}">{{recipe.title}}</a></td>
+                    <td class="tg-0lax"><a  href="update/{{recipe._id}}">Update</a><p>    </p><a href="delete/{{recipe._id}}">Delete</a></td>
+                </tr>
+                
+              {% endfor %}
+            </thead>
+        </table>
+    </div>
+
+
+    </div>
+  </div>
   </div>
 
+<style>
+  .grid-container {
+    margin-top: 10%;
+    display: grid; 
+    grid-template-columns: 1fr 1fr 1fr; 
+    grid-template-rows: 1fr; 
+    grid-template-areas: 
+      ". . ."; 
+    justify-content: start; 
+    align-content: center; 
+    justify-items: start; 
+    align-items: center; 
+    width: 100%; 
+    gap: 1% 6%; 
+  }
+</style>
+<script>
+  function filterSelection(){
+    var filter = event.target.value.toUpperCase();
+    var griditems = document.getElementsByClassName("grid-item"); 
+    for (i = 0; i < griditems.length; i++) {
+      var decide = griditems[i].className.slice(10, griditems[i].className.length).toUpperCase();
+      //console.log(decide);
+      if(decide.indexOf(filter) > -1 || filter == "ALL"){
+        griditems[i].style.display = "";
+      }else{
+        griditems[i].style.display = "none";
+      }
+    }
+  }
+  var Options = document.getElementById("cuisine");
+  var btns = Options.getElementsByClassName("btn");
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].addEventListener("click", function() {
+      var current = document.getElementsByClassName("active");
+      current[0].className = current[0].className.replace(" active", "");
+      this.className += " active";
+    });
+  }
+</script>
 {% endblock %}

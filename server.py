@@ -187,17 +187,6 @@ def logout():
 #Rules of the road
 #**** forcing U&D routes access via the front end only (unless you want to remember ids)
 
-###❗Testing Prices Middleware => will add feature to groceriy table
-from krogger_middleware import get_zip_code, configuration_var, Engine, authorize, store_locator, product_price
-@app.route("/price", methods = ['GET'])
-def tester():
-    bearer = authorize()
-    zip_code = get_zip_code()
-    locationids = store_locator(zip_code, bearer)
-    product_price("milk", bearer, 70200931)
-    # for location in locationids:
-    #     product_price("milk", bearer,70200931)
-    return "Done"
 
 #************************************************Configuration for File Uploads 📂**************
 upload_folder = "static/"
@@ -336,94 +325,6 @@ def read_ingredients():
                         mimetype='application/json'
                 )
 
-#Complex Search against MongoDB✅   [FE finish]
-@app.route('/ingredient/search_complex',  methods = ['GET', 'POST'])
-def read_ingredient_search():
-    form = request.form
-    if request.method == 'POST':
-        tree_filter = form['diselecta']
-        tree_filter2 = tree_filter[tree_filter.find("by")+3: len(tree_filter)]
-        search = form['dasearch']
-        if tree_filter2 == '_id':
-            search = ObjectId(search)
-        try:   
-            dbConfirm = db.ingredients.find({tree_filter2: search})
-            dbData = list(dbConfirm)
-            if len(dbData) == 1:
-                for doc in dbData:
-                    doc['_id'] = str(doc['_id'])
-                return Response(
-                    response = json.dumps(
-                            {"message": "ingredient found", 
-                            "id": f"{dbData[0]['_id']}",
-                            "name": f"{dbData[0]['title']}",
-                            }),
-                        status = 200,
-                        mimetype='application/json'
-                ) and render_template('read_ingredient_search.html', ingredients = dbData, type_search = tree_filter2)
-            elif len(dbData) >1 :
-                for doc in dbData:
-                    doc['_id'] = str(doc['_id'])
-                return Response(
-                    response = json.dumps({"message": "query made successfuly, returning array of ingredients"f"{dbData}"}),
-                        status = 200,
-                        mimetype='application/json'
-                ) and render_template('read_ingredient_search.html', ingredients = dbData, type_search = tree_filter2)
-        except Exception as ex:
-            return Response(
-                    response = json.dumps(
-                            {"message": "Unable to Find Ingredient"
-                            }),
-                        status = 400,
-                        mimetype='application/json'
-                )
-    return render_template('read_ingredient_search.html')
-   
-#Simple Search against MongoDB✅   [FE finish]
-@app.route('/ingredient/search_simple',  methods = ['GET', 'POST'])
-def read_ingredient_search2():
-    form = request.form
-    if request.method == 'GET':
-        try:
-            all_ingredients = list(db.ingredients.find({}))
-            return Response(
-                    response = json.dumps(
-                            {"message": "Simple Search Against DB"
-                            }),
-                        status = 200,
-                        mimetype='application/json'
-                ) and render_template('read_ingredient_search2.html', ingredients = all_ingredients, desired_ingredient='all')
-        except  Exception as ex:
-           return Response(
-                    response = json.dumps(
-                            {"message": "Unable to show the page for some reason"
-                            }),
-                        status = 400,
-                        mimetype='application/json'
-                )
-    if request.method == 'POST':
-        try:
-            hold = form.to_dict()
-            searcher = hold['ingredients']
-            dbAction = db.ingredients.find_one({"title": searcher})
-            ingredient_id = dbAction["_id"]
-            # return redirect("/ingredient/"f"{ingredient_id}")
-            return Response(
-                    response = json.dumps(
-                            {"message": "here is your desired ingredient"
-                            }),
-                        status = 200,
-                        mimetype='application/json'
-                ) and render_template('read_ingredient_search2.html',desired_ingredient = str(ingredient_id))
-            # return list(dbAction)
-        except Exception as ex:
-            return Response(
-                    response = json.dumps(
-                            {"message": "Unable to Find this Ingredient"
-                            }),
-                        status = 404,
-                        mimetype='application/json'
-                )
 
 ##Search against USGov DB (file)
 
@@ -597,11 +498,12 @@ def create_recipe():
     
             #Handle Instructions using prep and execution handles then create instructions object
             for key,value in form_dict.items():
+        
                 if value !='':
                     if key.find("prep")>=0:
-                        recipe_prep.append(value)
+                        recipe_prep = value.splitlines()
                     elif key.find("execution")>=0:
-                        recipe_execution.append(value)
+                        recipe_execution = value.splitlines()
             instructions = {'prep': recipe_prep, 'execution': recipe_execution}
             #Handle Creation to Master
             dbAction_recipes = db.recipes.update_one(
@@ -717,26 +619,65 @@ def read_recipe_global(id):
                             mimetype='application/json'
                     )
 
-#Standard show all recipes ✅[FE finish]
-@app.route('/recipe/all', methods = ['GET'])
+#Read and Search All Recipes
+@app.route('/recipe/all', methods = ['GET','POST'])
 def read_recipes_all():
+    all_recipes = list(db.recipes.find({}))
+    all_ingredients = []
+    for item in all_recipes:
+                holder=item['ingredients']
+                for stuff in holder:
+                 decide = stuff['ingredient']['title']
+                 all_ingredients.append(decide)
+    #Read All Recipes
     if request.method == 'GET':
         try:
-            all_recipes = list(db.recipes.find({}))
             return Response(
                     response = json.dumps(
                             {"message": "here are all the recipes"
                             }),
                         status = 200,
                         mimetype='application/json'
-                ) and render_template('read_recipes_all.html', recipes = all_recipes)
+                ) and render_template('read_recipes_all.html', recipes = all_recipes, all_ingredients = all_ingredients)
+        except  Exception as ex:
+            return('Unable to return all recipes')
+    #Search for Recipes by Cuisine and By Ingredient
+    if request.method == 'POST':
+        form = request.form
+        search = form['dasearch']
+        selected = []
+        try:
+            dbConfirm = db.recipes.find({})
+            for item in dbConfirm:
+                holder=item['ingredients']
+                for stuff in holder:
+                 decide = stuff['ingredient']['title']
+                 all_ingredients.append(decide)
+                 if(search in decide):
+                     selected.append(item)
+            return Response(
+                    response = json.dumps(
+                            {"message": "here are all the recipes"
+                            }),
+                        status = 200,
+                        mimetype='application/json'
+                ) and render_template('read_recipes_all.html', table_filtered_recipes = selected, recipes = all_recipes)
         except  Exception as ex:
             return('Unable to return all ingredients')
 
 #Show All Your Recipees ✅[FE finish]
-@app.route('/recipe/mine', methods = ['GET'])
+@app.route('/recipe/mine', methods = ['GET', 'POST'])
 @login_required
 def read_recipes_mine():
+    user_db = create_user_NoSQLdatabases()
+    user_dbcollection = user_db['recipes']
+    all_my_recipes = list(user_dbcollection.find({}))
+    all_ingredients = []
+    for item in all_my_recipes:
+                holder=item['ingredients']
+                for stuff in holder:
+                 decide = stuff['ingredient']['title']
+                 all_ingredients.append(decide)
     if request.method == 'GET':
         try:
             user_db = create_user_NoSQLdatabases()
@@ -748,98 +689,32 @@ def read_recipes_mine():
                             }),
                         status = 200,
                         mimetype='application/json'
-                ) and render_template('read_recipes_mine.html', recipes = all_my_recipes)
+                ) and render_template('read_recipes_mine.html', recipes = all_my_recipes, all_ingredients = all_ingredients)
         except Exception as ex:
             return('Unable to return all your recipes')
-
-
-#Search Against your specifed Recipe Database
-
-##Search against MongoDB✅ [FE finish]
-@app.route('/recipe/search_complex',  methods = ['GET', 'POST'])
-def read_recipe_search():
-    form = request.form
-    #Do Get Landing Request that sends back the table of all posible recipes?
-    if request.method == 'GET':
-        return render_template('read_recipe_search.html')
     if request.method == 'POST':
-        tree_filter = form['diselecta']
-        tree_filter2 = tree_filter[tree_filter.find("by")+3: len(tree_filter)]
+        form = request.form
         search = form['dasearch']
-        if tree_filter2 == '_id':
-            search = ObjectId(search)
-        try:   
-            dbConfirm = db.recipes.find({tree_filter2: search})
-            dbData = list(dbConfirm)
-            if len(dbData) == 0:
-                stringer = tree_filter2+".title"
-                new_cur = db.recipes.find({stringer: search})
-                new_list = list(new_cur)
-                for doc in new_list:
-                    doc['_id'] = str(doc['_id'])
-                return Response(
-                    response = json.dumps(
-                            {"message": "recipe found", 
-                            "id": f"{new_list[0]['_id']}",
-                            "name": f"{new_list[0]['title']}",
-                            }),
-                        status = 200,
-                        mimetype='application/json'
-                ) and render_template('read_recipe_search.html', recipes = new_list, type_search = tree_filter2)        
-            elif len(dbData) == 1:
-                for doc in dbData:
-                    doc['_id'] = str(doc['_id'])
-                return Response(
-                    response = json.dumps(
-                            {"message": "recipe found", 
-                            "id": f"{dbData[0]['_id']}",
-                            "name": f"{dbData[0]['title']}",
-                            }),
-                        status = 200,
-                        mimetype='application/json'
-                ) and render_template('read_recipe_search.html', recipes = dbData, type_search = tree_filter2)
-            elif len(dbData) > 1 :
-                for doc in dbData:
-                    doc['_id'] = str(doc['_id'])
-                return Response(
-                    response = json.dumps({"message": "query made successfuly, returning array of recipes"f"{dbData}"}),
-                        status = 200,
-                        mimetype='application/json'
-                ) and render_template('read_recipe_search.html', recipes = dbData, type_search = tree_filter2)
-        except Exception as ex:
-            return Response(
-                    response = json.dumps(
-                        {"message": "no Recipes Found"}),
-                        status = 401,
-                        mimetype='application/json'
-                )
-
-@app.route('/recipe/search_simple',  methods = ['GET', 'POST'])
-def read_recipe_search2():
-    form = request.form
-    if request.method == 'GET':
+        selected = []
         try:
-            all_recipes = list(db.recipes.find({}))
+            dbConfirm = all_my_recipes
+            for item in dbConfirm:
+                holder=item['ingredients']
+                for stuff in holder:
+                 decide = stuff['ingredient']['title']
+                 all_ingredients.append(decide)
+                 if(search in decide):
+                     selected.append(item)
             return Response(
                     response = json.dumps(
-                            {"message": "here are all the ingredients"
+                            {"message": "here are all the recipes"
                             }),
                         status = 200,
                         mimetype='application/json'
-                ) and render_template('read_recipe_search2.html', recipes = all_recipes)
+                ) and render_template('read_recipes_mine.html', table_filtered_recipes = selected, recipes = all_my_recipes)
         except  Exception as ex:
-            return('Unable to return all recipes')
-    if request.method == 'POST':
-        try:
-            print(form.keys())
-            hold = form.to_dict()
-            searcher = hold['recipes']
-            dbAction = db.recipes.find_one({"title": searcher})
-            recipe_id = dbAction["_id"]
-            return redirect("/recipe/"f"{recipe_id}")
-            # return list(dbAction)
-        except Exception as ex:
-            return ("that shit didn't work")
+            return('Unable to return all ingredients')
+
 
 #*****Note forcing U&D routes access via the front end (unless you want to remember ids)
 
@@ -868,15 +743,17 @@ def update_recipe(id):
                 types2.append(item)
         types2 = list(set(types2))
         titles = [item['ingredient']['title'] for item in current_ingredients ]
+        print(dbAction_findrecord['instructions'])
         #Display Current Instructions
-        prep_array = [item for item in dbAction_findrecord['instructions']['prep']]
-        # print(prep_array)
-        execution_array = [item for item in dbAction_findrecord['instructions']['execution']]
-        num_prep = len(prep_array)
-        num_exec = len(execution_array)
-        return render_template('/update_recipe.html', form=form, ingredients = ingredients, types = types2, 
-                    titles = titles, prep = prep_array, execution = execution_array, 
-                        current_ingredients=current_ingredients, num_prep=num_prep, num_exec=num_exec)
+        return("Hi")
+        # prep_array = [item for item in dbAction_findrecord['instructions']['prep']]
+        # # print(prep_array)
+        # execution_array = [item for item in dbAction_findrecord['instructions']['execution']]
+        # num_prep = len(prep_array)
+        # num_exec = len(execution_array)
+        # return render_template('/update_recipe.html', form=form, ingredients = ingredients, types = types2, 
+        #             titles = titles, prep = prep_array, execution = execution_array, 
+        #                 current_ingredients=current_ingredients, num_prep=num_prep, num_exec=num_exec)
     if request.method == 'POST':
         newURI = uploadfile(id, 'Recipe')
         if newURI == "":

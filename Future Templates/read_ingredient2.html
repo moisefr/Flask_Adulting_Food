@@ -3,6 +3,18 @@
 {% block body %}
 <div>
     <div class="container">
+        <div class="row">
+            <div class="col-3">  
+                <div class="row">Associated Recipes
+                    <div class="row">
+                        <div class="col"><div class="holder">1</div></div>
+                        <div class="col"><div class="holder">1</div></div>
+                        <div class="col"><div class="holder">1</div></div>
+                    </div>
+                </div>
+                <div class="row">Ingredient Stats</div>
+            </div>
+            <div class="col-9">
                 <div class="card border-dark mb-3" style="max-width: 18rem;">
 
                     <div class="card-header">
@@ -13,6 +25,10 @@
                     <div class="card-body text-dark">
                       <p class="card-text">{{ingredient.description}}</p>
                 </div>
+            </div>
+        </div>
+    <div class="row">Similar Ingredients</div>
+    
     </div>
 </div>
 

@@ -108,46 +108,9 @@
     <h1>Current Instructions</h1>
     <div class="container">
       <div class="row">
-        <div class="col">
-          <div class= 'row' id='starter-prep-update'>
-            <h2>Prep <div id="amount-holder">{{num_prep}}</div></h2>
-            <div class="col-8"><input type="text" id='holder-input-prep-update' style="width: 500px; height: 70px;"/></div>
-          </div>
-          <div class="row">
-            <div class="col">Order</div>
-            <div class="col">Instructions</div>
-          </div>
-          {%for x in range(0, num_prep)%}
-            <div class="row" id = "divContainer-update" >
-              <div class="col">{{x}}</div>
-              <div class="col"><input type='text' name='prep' value ='{{prep[x]}}' /></div>
-            </div>
-          {%endfor%}
-          <div class="row">
-            <div class="col" id='order-continued'></div>
-            <div class="col" id = "divContainer-update2"></div>
-          </div>
-        </div>
-        <div class="col">
-          <div class= 'row' id='starter-execution-update'>
-            <h2>Execution <div id="amount-holder-execution">{{num_exec}}</div></h2>
-            <div class="col-8"><input type="text" id='holder-input-execution-update' style="width: 500px; height: 70px;"/></div>
-          </div>
-          <div class="row">
-            <div class="col">Order</div>
-            <div class="col">Instructions</div>
-          </div>
-          {%for x in range(0, num_exec)%}
-            <div class="row" id = "divContainer-update-execution" >
-              <div class="col">{{x}}</div>
-              <div class="col"><input type='text' name='execution' value ={{execution[x]}} /></div>
-            </div>
-          {%endfor%}
-          <div class="row">
-            <div class="col" id='order-continued-execution'></div>
-            <div class="col" id = "divContainer-update2-execution"></div>
-          </div>
-        </div>
+        <h4>Enter prep and execution instructions. place each new instruction on a new line </h4>
+          <div class = "col-6"><h3>Prep</h3><textarea name="prep" id="prep_area" cols="60" rows="10" >Hi</textarea></div>
+          <div class = "col-6"><h3>Execution</h3><textarea name="execution" id="execution_area" cols="60" rows="10"></textarea></div>
       </div>
     </div>
   </form>

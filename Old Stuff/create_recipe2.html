@@ -18,7 +18,7 @@
         </div>
       </div>
     </div>
-    <div class="form-group"><div class="input-group-text" style="width: 25%;">Upload a Picture of your Recipe" 👀</div><input type="file" name="file" /></div>
+    <div class="form-group"><p><input type="file" name="file" />Add a picture</p></div>
     <div class="form-group">
       {{render_field(form.description, class_="form-control")}}
     </div>
@@ -79,13 +79,46 @@
   
   </div>
     <h1>Add Instructions</h1>
+    <h3>Type an Instruction in the input box above The prep and Execution areas then press the DOWN Arrow Button DO NOT PUSH THE ENTER KEY</h3>
+    <h3>Drag these list items to your preferred order in the Drag and Drop Column(s)</h3>
     <div>
       <p><input type="submit" class="btn btn-primary" value="Submit"></p>
       <div class="container">
         <div class="row">
-          <h4>Enter prep and execution instructions. place each new instruction on a new line </h4>
-          <div class = "col-6"><h3>Prep</h3><textarea name="prep" id="prep_area" cols="60" rows="10"></textarea></div>
-          <div class = "col-6"><h3>Execution</h3><textarea name="execution" id="execution_area" cols="60" rows="10"></textarea></div>
+          <div class="col">
+            <div class= 'row' id='starter-prep'>
+              <h2>Prep</h2>
+              <div class="col-8"><input type="text" id='holder-input-prep'  style="width: 500px; height: 70px;"/></div>
+            </div>
+            <div class="row">
+              <div class="col-2" id="Order-Prep">
+                  <h4>Order</h4>
+              </div>
+              <div class="col-3" id="divContainer-drop"><h4>Drag & Drop</h4></div>
+              <div class="col-7" id="divContainer"> 
+                    <h4>Prep</h4>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class= 'row' id='starter-execution'>
+              <h2>Execution</h2>
+              <div class="col-8"><input type="text" id='holder-input-execution'  style="width: 500px; height: 70px;"/></div>
+            </div>
+            <div class="row">
+              <div class="col-2">
+                <div class="Order-Execution">
+                  <h2>Order</h2>
+                </div>
+              </div>
+              <div class="col-3" id="divContainer-drop2"><h4>Drag & Drop</h4></div>
+              <div class="col-3">
+                <div class = "Landing-Execution" id="divContainer2" >
+                  <h2>Execution</h2>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

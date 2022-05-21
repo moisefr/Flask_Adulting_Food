@@ -221,3 +221,15 @@ $(function(){
     // jQuery methods go here...
     // $("#inner-grid").droppable()
 });
+
+
+for (i = 0; i <rows.length; i++){
+      columns = rows[i].getElementsByTagName("td");
+      for (j = 0; j <columns.length-3; j++){
+        cell_value = columns[j].textContent;
+        if (!(cell_value.indexOf(filter) > -1) ){
+          rows[i].style.display = "none";
+        } else {
+          rows[i].style.display = " ";
+        }
+      }
