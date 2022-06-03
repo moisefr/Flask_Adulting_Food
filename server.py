@@ -257,7 +257,7 @@ def landing():
 from Models_Plan import Ingredient
 
 ##########################################Create Routes 🦾
-#Create  an Ingredient ✅[FE finish]
+#Create  an Ingredient 
 @app.route("/ingredient", methods=["GET","POST"])
 @login_required
 def create_ingredient():
@@ -290,7 +290,7 @@ def create_ingredient():
     return render_template('/create_ingredient.html', form=form)
  
 ######################################Read/Search Routes 📚
-#Standard Read by ID route ✅[FE finish]
+#Standard Read by ID route 
 @app.route('/ingredient/<id>', methods = ['GET'])
 def read_ingredient_standard(id):
     if request.method == 'GET':
@@ -338,7 +338,7 @@ def read_ingredients():
                         mimetype='application/json'
                 )
 ##########################################Update Routes 🚅
-#Standard update Route ✅ [FE finish]
+#Standard update Route
 @app.route('/ingredient/update/<id>', methods = ['GET', 'POST'])
 @login_required
 def update_ingredient(id):
@@ -670,7 +670,7 @@ def read_recipes_all():
                             mimetype='application/json'
                     )
 
-#Show All Your Recipees ✅[FE finish]
+#Show All Your Recipees 
 @app.route('/recipe/mine', methods = ['GET', 'POST'])
 @login_required
 def read_recipes_mine():
@@ -984,7 +984,7 @@ def create_grocerries():
     return render_template('create_groceries.html', recipes = recipes, ingredients = ingrdients, form=form, types = types2)
 
 ###########################################Read Routes 👀
-#Singe Read ✅ [FE finish]
+#Singe Read
 @app.route('/groceries/<id>', methods = ["GET", "POST"])
 def read_groceries(id):
     #ButFirstConnect to User NoSQL
@@ -1064,7 +1064,7 @@ def read_groceries(id):
         mycursor.close()
         return redirect(f"/groceries/{str(id)}")
     
-#Read All ✅ [FE finish]
+#Read All
 #Should Deprecate
 @app.route("/groceries/all", methods = ["GET"])
 def all_groceries():
@@ -1122,7 +1122,7 @@ def all_groceries():
     return render_template("read_all_groceries.html", groceries = final_list)
     
 ###########################################Update Routes 🚅
-#Standard update Route ✅ [FE finish]
+#Standard update Route
 @app.route("/groceries/update/<id>",  methods = ["GET", "POST"])
 @login_required
 def update_groceries(id):
