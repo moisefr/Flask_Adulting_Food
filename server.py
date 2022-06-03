@@ -23,6 +23,7 @@ from flask_login import (
     logout_user,
 )
 from jwt_okta_middleware import is_access_token_valid, is_id_token_valid, config
+import random
 #Instantiate app
 app = Flask(__name__)
 #************************************************DB Connection 🌍**********************************************
@@ -234,10 +235,22 @@ def uploadfile(id, route_indicator):
                 img_file = file
         return img_file
 
+def random_feature_generator(collection, amount):
+    if collection == 'ingredient':
+        desired_collection = db.ingredients.find({})
+    elif collection =='recipe':
+        desired_collection = db.recipe.find({})
+    desired_collection_items = list(desired_collection)
+    random_array_items = []
+    for i in range (0,amount):
+        random_item_number = random.randint(0, len(desired_collection_items))
+        random_array_items.append(desired_collection_items[random_item_number])
+    return random_array_items
 ######################################################################********************************Routes 🧳****************#################################################
 #Home Route ✅[FE finish]
 @app.route("/", methods = ["GET", "POST"])
 def landing():
+    # print(random_feature_generator('ingredient', 2))
     return render_template("home.html")
 
 #############********************************************************************Ingridients 🍍
@@ -263,7 +276,7 @@ def create_ingredient():
                         {"message": "ingridient created", 
                         "id": f"{dbAction.inserted_id}"
                         }),
-                    status = 200,
+                    status = 201,
                     mimetype='application/json'
             ) and redirect('/ingredient/'f"{dbAction.inserted_id}")
         except Exception as ex:
@@ -273,7 +286,7 @@ def create_ingredient():
                             }),
                         status = 400,
                         mimetype='application/json'
-                )
+                ) 
     return render_template('/create_ingredient.html', form=form)
  
 ######################################Read/Search Routes 📚
@@ -297,9 +310,9 @@ def read_ingredient_standard(id):
         except Exception as ex:
             return Response(
                     response = json.dumps(
-                            {"message": "Unable to Retrieve"
+                            {"message": "Unable to Retrieve Ingredient"
                             }),
-                        status = 400,
+                        status = 404,
                         mimetype='application/json'
                 )
 
@@ -321,13 +334,9 @@ def read_ingredients():
                     response = json.dumps(
                             {"message": "Unable to show all Ingredients"
                             }),
-                        status = 400,
+                        status = 404,
                         mimetype='application/json'
                 )
-
-
-##Search against USGov DB (file)
-
 ##########################################Update Routes 🚅
 #Standard update Route ✅ [FE finish]
 @app.route('/ingredient/update/<id>', methods = ['GET', 'POST'])
@@ -340,7 +349,7 @@ def update_ingredient(id):
     form.description.data = dbAction_findrecord['description']
     form.state.data = dbAction_findrecord['state']
     form.type.data = dbAction_findrecord['type']  
-    if request.method == 'POST':
+    if request.method == 'POST' and form.validate():
         # print(request.form.keys())
         try:
             #create variable placeholders to take any changes you make to the request.form object
@@ -367,7 +376,7 @@ def update_ingredient(id):
             flash('Ingredient Updated', 'success')
             return Response(
                 response = json.dumps({"message": "query made successfuly, updated ingredient " f"{title}"}),
-                status = 200,
+                status = 201,
                 mimetype='application/json'
             ) and redirect('/ingredient/'f"{id}")
         except Exception as ex:
@@ -400,20 +409,20 @@ def delete_ingredient(id):
                 if (img_search == id):
                     os.remove(file)
             flash('Ingredient and image Deleted', 'success')
+            print("yes")
             return Response(
                 response = json.dumps(
-                            {"message": "ingredient Delete", 
-                            "id": f"{id}"
+                            {"message": "ingredient Delete"
                             }),
                         status = 200,
                         mimetype='application/json'
-            ) and redirect(url_for('read_ingredient_search'))
+            ) and redirect("/ingredient/all")
         except Exception as ex:
             return Response(
                     response = json.dumps(
-                            {"message": "Unable to Delete"
+                            {"message": "Unable to Delete Ingredient"
                             }),
-                        status = 400,
+                        status = 500,
                         mimetype='application/json'
                 )
     return render_template("home.html")
@@ -421,7 +430,7 @@ def delete_ingredient(id):
 #############********************************************************************Recipes 🧾
 from Models_Plan import Recipe
 ##########################################Create Routes 🦾
-#Create Recipee => ✅ [FE finish] MV2
+#Create Recipee
 @app.route("/recipe", methods = ["GET", "POST"])
 @login_required
 def create_recipe():
@@ -447,7 +456,7 @@ def create_recipe():
                     response = json.dumps(
                             {"message": "Unable to show the form for some reason"
                             }),
-                        status = 400,
+                        status = 500,
                         mimetype='application/json'
                 )
     if request.method =="POST" and form.validate():
@@ -495,10 +504,8 @@ def create_recipe():
             #Consolidate these arrays to full recipe ingredient objects and append to recipe_ingredients final array
             for x in range(0,len(holder_ingredients_array)):
                 final_recipe_ingredients.append({"ingredient": holder_ingredients_array[x], "quantity":quantity_array[x], "unit": unit_array[x]})
-    
             #Handle Instructions using prep and execution handles then create instructions object
             for key,value in form_dict.items():
-        
                 if value !='':
                     if key.find("prep")>=0:
                         recipe_prep = value.splitlines()
@@ -531,8 +538,8 @@ def create_recipe():
             redirector = "/recipe/"f"{db_user_Action.inserted_id}"
             return Response(
                 response = json.dumps(
-                        {"message": "Recipee created"}),
-                    status = 200,
+                        {"message": "Recipee created", "id": f"{db_user_Action.inserted_id}"}),
+                    status = 201,
                     mimetype='application/json'
             )  and redirect(redirector)
         except Exception as ex:
@@ -540,12 +547,12 @@ def create_recipe():
                 response = json.dumps(
                         {"message": "Couldn't create recipee"
                         }),
-                    status = 401,
+                    status = 500,
                     mimetype='application/json'
             )
     
 ######################################Read/Search Routes 📚
-#Standard Read by ID route for User✅[FE finish]
+#Standard Read by ID route, uses
 @app.route('/recipe/<id>', methods = ['GET'])
 def read_recipe(id):
     user_db = create_user_NoSQLdatabases()
@@ -583,34 +590,23 @@ def read_recipe(id):
 def read_recipe_global(id):
     if request.method == 'GET':
         ingredients = []
+        dbConfirm = db.recipes.find_one({"_id": ObjectId(id)})
         try:
-            dbConfirm = db.recipes.find_one({"_id": ObjectId(id)})
             types = [target['ingredient']['type'] for target in dbConfirm['ingredients']]
             types2 = []
             for item in types:
                 if (item != ""):
                     types2.append(item)
             types2 = list(set(types2))
-            prep = []
-            execution = []
-            for item in dbConfirm['instructions']['prep']:
-                value_holder = str(item.values())
-                final_value = value_holder[value_holder.find("[")+2:value_holder.find("]")-1]
-                prep.append(final_value)
-            for item in dbConfirm['instructions']['execution']:
-                value_holder = str(item.values())
-                final_value = value_holder[value_holder.find("[")+2:value_holder.find("]")-1]
-                execution.append(final_value)
-            
             return Response(
                         response = json.dumps(
-                                {"message": "Recipee found", 
+                                {"message": "Recipe found", 
                                 "id": f"{dbConfirm['_id']}",
                                 "name": f"{dbConfirm['title']}",
                                 }),
                             status = 200,
                             mimetype='application/json'
-                    ) and render_template('read_recipe.html', recipe = dbConfirm, ingredient_type= types2, prep=prep, execution=execution)
+                    ) and render_template('read_recipe.html', recipe = dbConfirm, ingredient_type= types2,  prep=dbConfirm['instructions']['prep'], execution=dbConfirm['instructions']['execution'])
         except Exception as ex:
             return Response(
                         response = json.dumps(
@@ -640,8 +636,12 @@ def read_recipes_all():
                         mimetype='application/json'
                 ) and render_template('read_recipes_all.html', recipes = all_recipes, all_ingredients = all_ingredients)
         except  Exception as ex:
-            return('Unable to return all recipes')
-    #Search for Recipes by Cuisine and By Ingredient
+            return Response(
+                        response = json.dumps(
+                                {"message": "Unable to retrieve All Recipes"}),
+                            status = 401,
+                            mimetype='application/json'
+                    )
     if request.method == 'POST':
         form = request.form
         search = form['dasearch']
@@ -663,7 +663,12 @@ def read_recipes_all():
                         mimetype='application/json'
                 ) and render_template('read_recipes_all.html', table_filtered_recipes = selected, recipes = all_recipes)
         except  Exception as ex:
-            return('Unable to return all ingredients')
+           return Response(
+                        response = json.dumps(
+                                {"message": "Unable to retrieve All Recipes"}),
+                            status = 401,
+                            mimetype='application/json'
+                    )
 
 #Show All Your Recipees ✅[FE finish]
 @app.route('/recipe/mine', methods = ['GET', 'POST'])
@@ -685,13 +690,18 @@ def read_recipes_mine():
             all_my_recipes = list(user_dbcollection.find({}))
             return Response(
                     response = json.dumps(
-                            {"message": "here are all the recipes"
+                            {"message": "here are all your recipes"
                             }),
                         status = 200,
                         mimetype='application/json'
                 ) and render_template('read_recipes_mine.html', recipes = all_my_recipes, all_ingredients = all_ingredients)
         except Exception as ex:
-            return('Unable to return all your recipes')
+            return Response(
+                        response = json.dumps(
+                                {"message": "Unable to retrieve All Your Recipes"}),
+                            status = 401,
+                            mimetype='application/json'
+                    )
     if request.method == 'POST':
         form = request.form
         search = form['dasearch']
@@ -707,17 +717,19 @@ def read_recipes_mine():
                      selected.append(item)
             return Response(
                     response = json.dumps(
-                            {"message": "here are all the recipes"
+                            {"message": "here are all your recipes"
                             }),
                         status = 200,
                         mimetype='application/json'
                 ) and render_template('read_recipes_mine.html', table_filtered_recipes = selected, recipes = all_my_recipes)
         except  Exception as ex:
-            return('Unable to return all ingredients')
-
-
+            return Response(
+                        response = json.dumps(
+                                {"message": "Unable to retrieve All Your Recipes"}),
+                            status = 401,
+                            mimetype='application/json'
+                    )
 #*****Note forcing U&D routes access via the front end (unless you want to remember ids)
-
 ##########################################Update Routes 🚅
 @app.route('/recipe/update/<id>', methods = ['GET', 'POST'])
 @login_required
@@ -743,17 +755,13 @@ def update_recipe(id):
                 types2.append(item)
         types2 = list(set(types2))
         titles = [item['ingredient']['title'] for item in current_ingredients ]
-        print(dbAction_findrecord['instructions'])
+        current_instructions = dbAction_findrecord['instructions']
         #Display Current Instructions
-        return("Hi")
-        # prep_array = [item for item in dbAction_findrecord['instructions']['prep']]
-        # # print(prep_array)
-        # execution_array = [item for item in dbAction_findrecord['instructions']['execution']]
-        # num_prep = len(prep_array)
-        # num_exec = len(execution_array)
-        # return render_template('/update_recipe.html', form=form, ingredients = ingredients, types = types2, 
-        #             titles = titles, prep = prep_array, execution = execution_array, 
-        #                 current_ingredients=current_ingredients, num_prep=num_prep, num_exec=num_exec)
+        prep_array = current_instructions['prep']
+        execution_array = current_instructions['execution']
+        return render_template('/update_recipe.html', form=form, ingredients = ingredients, types = types2, 
+          titles = titles, prep = prep_array, execution = execution_array, 
+          current_ingredients=current_ingredients)
     if request.method == 'POST':
         newURI = uploadfile(id, 'Recipe')
         if newURI == "":
@@ -810,9 +818,9 @@ def update_recipe(id):
             for key,value in form_dict.items():
                 if value !='':
                     if key.find("prep")>=0:
-                        recipe_prep.append(value)
+                        recipe_prep = value.splitlines()
                     elif key.find("execution")>=0:
-                        recipe_execution.append(value)
+                        recipe_execution = value.splitlines()
             instructions = {'prep': recipe_prep, 'execution': recipe_execution}
             dbAction = user_dbcollection.update_one(
                 {"_id": ObjectId(id)},
@@ -834,7 +842,12 @@ def update_recipe(id):
                 mimetype='application/json'
             ) and redirect('/recipe/'f"{id}")
         except Exception as ex:
-            return ("Couldn't Update Document")
+            return Response(
+                        response = json.dumps(
+                                {"message": "Unable to update recipe"}),
+                            status = 401,
+                            mimetype='application/json'
+                    )
     
 ############################################Delete Route 🚮
 #User Delete
@@ -867,11 +880,14 @@ def delete_recipe(id):
                         mimetype='application/json'
             ) and redirect('/recipe/mine')
         except Exception as ex:
-            return("Delete Operation didn't Work")
+            return Response(
+                        response = json.dumps(
+                                {"message": "Unable to delete recipe"}),
+                            status = 500,
+                            mimetype='application/json'
+                    )
     return render_template("home.html")
-
 #Admin Delete controlled by DB Admin
-
 
 #############********************************************************************Grocceries 🛒
 from Models_Plan import Grocerries
@@ -896,8 +912,13 @@ def create_grocerries():
                     types2.append(item)
             types2 = list(set(types2))
         except Exception as ex:
-            return("That shit didn't work")
-    if request.method == "POST":
+            return Response(
+                        response = json.dumps(
+                                {"message": "Unable to create grocery list"}),
+                            status = 401,
+                            mimetype='application/json'
+                    )
+    if request.method == "POST" and form.validate():
         types = []
         nonrecipe_ingredient_titles = []
         nonrecipe_ingredients = []
@@ -966,7 +987,6 @@ def create_grocerries():
 #Singe Read ✅ [FE finish]
 @app.route('/groceries/<id>', methods = ["GET", "POST"])
 def read_groceries(id):
-    types = []
     #ButFirstConnect to User NoSQL
     user_db = create_user_NoSQLdatabases()
     user_dbcollection = user_db['groceries']
@@ -981,12 +1001,8 @@ def read_groceries(id):
             mycursor.execute(f"SELECT * FROM {table_name}")
             myresult = mycursor.fetchall()
             mycursor.close()
+            type_holder = []
             ingredients = []
-            types2 = []
-            for item in types:
-                if (item != ""):
-                    types2.append(item)
-            types2 = list(set(types2))
             for row in myresult:
                 price = str(row[4])
                 price = price[price.find("(")+1: price.find(")")]
@@ -999,13 +1015,17 @@ def read_groceries(id):
                     "total":float(price)*row[2]
                 }
                 ingredients.append(ingredient)
-            types = [target['ingredient']['type'] for target in ingredients]
-            for item in types:
-                if (item != ""):
-                    types2.append(item)
-            types2 = list(set(types2))
+            types = ["Seasoning🧂", "Meat🍗","Non-Meat🥑", "Fish🦈"
+            "Vegetable🥕", "Fruit🍇", "Grain🌾",
+            "Sweetener🍯", "Dairy🥛", "Lipid🧈","other😂"]
+            return render_template("read_grocery.html", ingredients = ingredients, types=types, groccery=dbAction)   
         except Exception as ex:
-           return("That shit dind't work, can't see all ingredeints")
+            return Response(
+                        response = json.dumps(
+                                {"message": "Unable produce groccery list"}),
+                            status = 401,
+                            mimetype='application/json'
+                    )
     if request.method == "POST":
         form_dict = request.form.to_dict()
         #Now pull out price and format the data
@@ -1036,13 +1056,13 @@ def read_groceries(id):
         mycursor = mysqldb.cursor()
         mycursor.execute(f"CREATE TABLE {SQL_Grocerrylist} (Ingredient_id VARCHAR(255) PRIMARY KEY, Ingredient_title VARCHAR(255), quantity INT, unit VARCHAR(255), price decimal (5,2))")
         sql = f"INSERT INTO {SQL_Grocerrylist} (Ingredient_id, Ingredient_title, quantity, unit, price) VALUES (%s, %s, %s, %s, %s)"
+        print(ingredients_array)
         for x in range(0,len(ingredients_array)):
             val = (str(ingredients_array[x]['_id']), ingredients_array[x]['title'], quantity_array[x], unit_array[x], price_array[x])
             mycursor.execute(sql, val)
         mysqldb.commit()
         mycursor.close()
         return redirect(f"/groceries/{str(id)}")
-    return render_template("read_grocery.html", ingredients = ingredients, types = types2)
     
 #Read All ✅ [FE finish]
 #Should Deprecate
@@ -1054,8 +1074,6 @@ def all_groceries():
         try:
             #Do some SQL stuff
             #Find all tables with given username 
-            # dbAction = db.groceries.find({})
-            # groceries = list(dbAction)
             mycursor = mysqldb.cursor()
             mycursor.execute("SHOW TABLES")
             user_tables=[]
@@ -1141,16 +1159,17 @@ def update_groceries(id):
                 "total":float(price)*row[2]
             }
             ingredients.append(ingredient)
-        types = [target['ingredient']['type'] for target in ingredients]
-        
-        types2 = list(set(types))
-        checker = [target['ingredient']['title'] for target in ingredients]
+        types = ["Seasoning🧂", "Meat🍗","Non-Meat🥑", "Fish🦈"
+            "Vegetable🥕", "Fruit🍇", "Grain🌾",
+            "Sweetener🍯", "Dairy🥛", "Lipid🧈","other😂"]
+        checker = [target['ingredient'] for target in ingredients if target !=""]
         remainder =[]
         all_ingredients=list(all_ingre)
         for ingredient in all_ingredients:
-            if ingredient['title'] not in checker:
+            if ingredient not in checker:
                 remainder.append(ingredient)
-        return render_template("update_groceries.html", form = form, types = types2, remaining_ingredients = remainder, recipes = dbAction, current_ingredients=ingredients )
+        return render_template("update_groceries.html", form = form, types = types, recipes = dbAction, 
+                                current_ingredients=ingredients, remaining_ingredients = remainder )
     if request.method == 'POST':
         form_dict = request.form.to_dict()
         types = []
@@ -1234,7 +1253,7 @@ def update_groceries(id):
                     response = json.dumps(
                             {"message": "Unable to Update Groccery List"
                             }),
-                        status = 400,
+                        status = 500,
                         mimetype='application/json'
                 )
     
@@ -1266,7 +1285,6 @@ def delete_groceries(id):
                         status = 400,
                         mimetype='application/json'
                 )
-    
     return redirect("/")
 
 @app.route("/test", methods = ["GET"])

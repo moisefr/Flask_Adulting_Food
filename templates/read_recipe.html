@@ -2,14 +2,14 @@
 
 {% block body %}
 <div>
-    <h1>{{recipe.title}}-{{recipe.img_URI}}</h1>
-    <div><img class="rounded mx-auto d-block" src={{ url_for('static', filename='recipe.img_URI') }} alt=”Bananas” style="width: 50%;" ></div>
+    <h1>{{recipe.title}}</h1>
+    <div class="img-area"><img src={{ url_for('static', filename=recipe.img_URI) }}  alt="..." width="200"></div>
     <br>
     <div class="row gx-5" id="description"><p>{{recipe.description}}</p></div>
     <h1>Ingredients</h1>
     <div class="grid-container">
         {% for type in ingredient_type %}
-            <div class="grid-">
+            <div class="grid-item">
                 <div class="card" style="width: 18rem;">
                     <div class="card-header">
                         {{type}}
@@ -59,6 +59,23 @@
     #description{
         margin-left: 30%;
     }
+    .grid-container {
+        display: grid; 
+        grid-template-columns: 1fr 1fr 1fr 1fr; 
+        grid-template-rows: 1fr; 
+        gap: 3% 1%; 
+        grid-template-areas: 
+          ". . . . "; 
+        justify-content: start; 
+        align-content: center; 
+        justify-items: start; 
+        align-items: center; 
+        width: 100%; 
+      }
+      .grid-item{
+        align-items: top; 
+      }
+
     
 </style>
 {% endblock %}

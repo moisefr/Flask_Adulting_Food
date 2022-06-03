@@ -1,5 +1,9 @@
 {% extends 'layout.html' %}
 {% block body %} 
+<h1>{{groccery.title}}</h1>
+<a href="/groceries/update/{{groccery._id}}">
+  <button type="button" class="btn btn-primary">Update List</button>
+</a> 
 <div>
     {% for type in types %}
           <button class="accordion">{{type}}</button>
