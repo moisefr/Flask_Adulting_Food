@@ -4,19 +4,135 @@
     <div class="jumbotron bg-dark text-white">
       <h1>Welcome!</h1>      
       <p>Zaddy Lyrics</p>
-    </div>    
-  </div>
-  <div class="row align-items-center">
-    <div class="col">
-      <a class="btn btn-primary" href="/ingredient" role="button">Add Ingredient</a>
-    </div>
-    <div class="col">
-      <a class="btn btn-primary" href="/recipe" role="button">Add Recipe</a>
-    </div>
-    <div class="col">
-      <a href="/groceries"><button type="button" class="btn btn-info"> Create Groccerrie list</button></a>
-    </div>
+    </div> 
+    <div class="container2">
+      <div class="endpoint" id="left">
+        <h3>Ingredients</h3>
+        <div class="img-row">
+          Image/Icon goes here
+        </div>
+        <div class = "sub-row">
+          <div class="data-area" id="data-ingredients">
+            Template data here
+          </div>
+          <div class="endpoint-area" id="endpoint-add">
+            <a class="btn btn-primary" id="feature" href="/ingredient" role="button"><h2>+</h2></a>
+          </div>
+        </div>
+      </div>
+      <div class="endpoint" id="mid">
+        <h3>Recipes</h3>
+        <div class="img-row">
+          Image/Icon goes here
+        </div>
+        <div class = "sub-row">
+          <div class="data-area" id="data-ingredients">
+            Template data here
+          </div>
+          <div class="endpoint-area" id="endpoint-add">
+            <a class="btn btn-primary" id="feature" href="/recipe" role="button"><h2>+</h2></a>
+          </div>
+        </div>
+        <!-- <a class="btn btn-primary" href="/recipe" role="button">Add Recipe</a> -->
+      </div>
+      <div class="endpoint" id="right">
+        <h3>Groceries</h3>
+        <div class="img-row">
+          Image/Icon goes here
+        </div>
+        <div class = "sub-row">
+          <div class="data-area" id="data-ingredients">
+            Template data here
+          </div>
+          <div class="endpoint-area" id="endpoint-add">
+            <a class="btn btn-primary" id="feature" href="/groceries" role="button"><h2>+</h2></a>
+          </div>
+        </div>
+        <!-- <a class="btn btn-primary" href="/recipe" role="button">Add Recipe</a> -->
+      </div>
+        <!-- <a href="/groceries"><button type="button" class="btn btn-info"> Create Groccerrie list</button></a> -->
+      </div>
+    </div>   
   </div>
   
+  <style>
+    .container{
+      margin: 5% 5% 5% 5%;
+    }
+    .container2 {
+      display: grid; 
+      grid-template-columns: 1fr 1fr 1fr; 
+      grid-template-rows: 1fr; 
+      gap: 0% 1%; 
+      grid-template-areas: 
+        ". . ."; 
+      justify-content: start; 
+      align-content: center; 
+      justify-items: start; 
+      align-items: center; 
+      width: 100%; 
+      box-shadow: rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
+      margin: 5% 0% 5% 0%;
+      height: auto;
+      border: 2px solid black;
+      padding: 3% 0% 3% 2%;
+    }
+    .endpoint{
+      background-color: white;
+      border: 2px solid black;
+      border-radius: 5px;
+      height: 100%;
+      width: 75%;
+    }
+    #left{
+      box-shadow: #dc143c 1px 2px 1px 1px;
+    }
+    #mid{
+      box-shadow: #45a335 1px 2px 1px 1px;
+    }
+    #right{
+      box-shadow: #a7a7f5 1px 2px 1px 1px;
+    }
+    .sub-row{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr;
+      gap: 0% 0%;
+      grid-auto-flow: row;
+      justify-content: start;
+      align-content: center;
+      justify-items: start;
+      align-items: center;
+      grid-template-areas:
+        ". .";
+      width: 100%;
+    }
+    .data-area{
+      border-right: 2px solid black;
+      height: 100%;
+    }
+    .img-row{
+      border-bottom: 2px solid black;
+    }
+    #feature{
+      border-radius:50%;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+    .img-row{
+      display: flex;
+      justify-content: center;
+      
+    }
+    #endpoint-add{
+      padding: 3% 0% 3% 0%;
+      /* Center vertically and horizontally */
+      position: relative;
+      left: 25%;
+    }
+    
+    
+  </style>
 {% endblock %}
 
