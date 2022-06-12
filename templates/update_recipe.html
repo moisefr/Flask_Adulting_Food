@@ -109,8 +109,20 @@
     <div class="container">
       <div class="row">
         <h4>Enter prep and execution instructions. place each new instruction on a new line </h4>
-          <div class = "col-6"><h3>Prep</h3><textarea name="prep" id="prep_area" cols="60" rows="10" >Hi</textarea></div>
-          <div class = "col-6"><h3>Execution</h3><textarea name="execution" id="execution_area" cols="60" rows="10"></textarea></div>
+          <div class = "col-6"><h3>Prep</h3>
+            <textarea name="prep" id="prep_area" cols="60" rows="100" >
+              {% for item in prep %}
+                {{item}}
+              {% endfor %}
+          </textarea>
+        </div>
+          <div class = "col-6"><h3>Execution</h3>
+            <textarea name="execution" id="execution_area" cols="60" rows="100">
+                {% for item in execution %}
+                  {{item}}
+                {% endfor %}
+            </textarea>
+          </div>
       </div>
     </div>
   </form>

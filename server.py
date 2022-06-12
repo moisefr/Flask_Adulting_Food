@@ -139,8 +139,7 @@ def callback():
     #If tokens are exhcnages successfully then we get user credentials
     # Authorization flow successful, get userinfo and login user
     userinfo_response = requests.get(config["web"]["userinfo_uri"],  headers={'Authorization': f'Bearer {access_token}'}).json()
-    # for item in userinfo_response.keys():
-    #     print(userinfo_response.keys())
+    
     unique_id = userinfo_response["sub"]
     user_email = userinfo_response["email"]
     user_firstName = userinfo_response["given_name"]
@@ -148,6 +147,7 @@ def callback():
     user_displayname = userinfo_response["preferred_username"]
     user_fullName = userinfo_response["name"]
     #Write to Users Database
+    #Use the NoSQL User DB Object Moving Forward
     user = User(
         id_= unique_id,
         name = user_fullName,
@@ -178,7 +178,8 @@ def print_collections(NoSQLConnection):
 @app.route("/profile")
 @login_required
 def profile():
-    return render_template("profile.html", user = current_user)
+    
+    return render_template("profile.html", user = current_user.export().items())
 
 @app.route("/logout", methods=["GET", "POST"])
 @login_required
@@ -239,19 +240,24 @@ def random_feature_generator(collection, amount):
     if collection == 'ingredient':
         desired_collection = db.ingredients.find({})
     elif collection =='recipe':
-        desired_collection = db.recipe.find({})
+        desired_collection = db.recipes.find({})
+    elif collection =='grocery':
+        desired_collection = db.groceries.find({})
     desired_collection_items = list(desired_collection)
+    # print(desired_collection_items)
     random_array_items = []
     for i in range (0,amount):
-        random_item_number = random.randint(0, len(desired_collection_items))
+        random_item_number = random.randint(0, len(desired_collection_items))-1
         random_array_items.append(desired_collection_items[random_item_number])
     return random_array_items
 ######################################################################********************************Routes 🧳****************#################################################
 #Home Route ✅[FE finish]
 @app.route("/", methods = ["GET", "POST"])
 def landing():
-    # print(random_feature_generator('ingredient', 2))
-    return render_template("home.html")
+    ingredients = random_feature_generator('ingredient', 3)
+    recipes = random_feature_generator('recipe', 3)
+    groceries = random_feature_generator('grocery', 3)
+    return render_template("home.html", ingredients = ingredients, recipes = recipes, groceries=groceries)
 
 #############********************************************************************Ingridients 🍍
 from Models_Plan import Ingredient
@@ -835,6 +841,19 @@ def update_recipe(id):
                     }
                 }
             )
+            dbAction2 = db.recipes.update_one(
+                {"crossreference_recipe_URI": ObjectId(id)},
+                {"$set": 
+                    {
+                    "title": title,
+                    "description": description,
+                    "cuisine": state,
+                    "img_URI": newURI,
+                    "ingredients": final_recipe_ingredients,
+                    "instructions": instructions
+                    }
+                }
+            )
             flash('Recipe Updated', 'success')
             return Response(
                 response = json.dumps({"message": "query made successfuly, updated recipe"}),
@@ -903,9 +922,10 @@ def create_grocerries():
     user_dbcollection = user_db['groceries']
     if request.method =="GET":
         try:
-            recipes = list(dbAction)
-            ingrdients = list(dbAction2)
-            types = [target['type'] for target in ingrdients]
+            # recipes = list(dbAction)
+            # ingrdients = list(dbAction2)
+            types = [target['type'] for target in list(dbAction2)]
+            global types2 
             types2 = []
             for item in types:
                 if (item != ""):
@@ -981,7 +1001,7 @@ def create_grocerries():
                         status = 400,
                         mimetype='application/json'
                 )
-    return render_template('create_groceries.html', recipes = recipes, ingredients = ingrdients, form=form, types = types2)
+    return render_template('create_groceries.html', myrecipes = list(dbAction), ingredients = list(dbAction2), form=form, types = types2)
 
 ###########################################Read Routes 👀
 #Singe Read
@@ -1001,7 +1021,7 @@ def read_groceries(id):
             mycursor.execute(f"SELECT * FROM {table_name}")
             myresult = mycursor.fetchall()
             mycursor.close()
-            type_holder = []
+            type_holder= []
             ingredients = []
             for row in myresult:
                 price = str(row[4])
@@ -1015,9 +1035,8 @@ def read_groceries(id):
                     "total":float(price)*row[2]
                 }
                 ingredients.append(ingredient)
-            types = ["Seasoning🧂", "Meat🍗","Non-Meat🥑", "Fish🦈"
-            "Vegetable🥕", "Fruit🍇", "Grain🌾",
-            "Sweetener🍯", "Dairy🥛", "Lipid🧈","other😂"]
+                type_holder.append(ingredient['ingredient']['type'])
+            types=list(set(type_holder))
             return render_template("read_grocery.html", ingredients = ingredients, types=types, groccery=dbAction)   
         except Exception as ex:
             return Response(

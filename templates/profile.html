@@ -1,31 +1,98 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<div>
-    <h2>My Profile</h2>
-    <p>Hello, <span>{{ user.email }}</span>. Below is the information that was read with your <a
+<div class="header" style="width: 100%;">
+    <h2>Welcome {{user.name}}</h2>
+    <p>Shout out to OKTA for facilitated login + Auth capabilities via tokens <a
             href="https://developer.okta.com/docs/api/resources/oidc.html#get-user-information"
             target="_blank">Access Token</a>.
     </p>
-
 </div>
+<br/>
 
-<table class="table table-striped">
-    <thead>
-    <tr>
-        <th>Claim</th>
-        <th>Value</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for key, claim in user.claims() %}
-    <tr>
-        <td>{{ key }}</td>
-        <td id="claim-{{ key }}">
-            {{ claim }}
-        </td>
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>
+<div class="container2">
+    <div class="profile-left">
+        <div class="row-4">
+            <div class="avatar">
+                <img src="https://i1.wp.com/programmingwithmosh.com/wp-content/uploads/2019/01/2000px-React-icon.svg_.png?ssl=1" width="120"/>
+            </div>
+        </div>
+        <div class="row-8">
+            <ul>
+                {% for key, attr in user %}
+                    <li><b>{{ key }}:</b>{{attr}}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="profile-right">
+        <div class="row-6">
+            <h2>Mose Recent Ingredients</h2>
+            <ol>
+
+            </ol>
+        </div>
+        <div class="row-6">
+            <h2>Freqeuently Used Recipe</h2>
+            <div>Most Recent Recipe Here</div>
+        </div>
+    </div>
+</div>
+<style>
+    .body{
+        width: 100%;
+    }
+    .container2 {  
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr;
+        gap: 0% 0%;
+        grid-auto-flow: row;
+        justify-content: start;
+        align-content: center;
+        justify-items: start;
+        align-items: center;
+        grid-template-areas:
+          ". .";
+        width: 100%;
+      }
+      .profile-left{
+        width: 70%;
+        height: 300px;
+      }
+      .profile-right{
+          width: 70%; 
+          height: 300px;
+      }
+      .row-8{
+          border-style: solid;
+          border-width: 1px;
+      }
+      .center {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      .row-6{
+          height: 50%;
+      }
+      .row-8{
+          height: 67%;
+          background-color: #fffdd0;
+      }
+      .row-4{
+          height: 33%;
+          
+      }
+      .avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        margin-left: 25%;
+        background-color: aliceblue;
+        align-items: center;
+      }
+      
+</style>
 {% endblock %}
