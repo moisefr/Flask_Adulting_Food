@@ -4,6 +4,8 @@
 <div>
     <h1>{{recipe.title}}</h1>
     <div class="img-area"><img src={{ url_for('static', filename=recipe.img_URI) }}  alt="..." width="200"></div>
+    <h2>Author: {{author.name}}</h2>
+    <h3>Date Created: {{recipe.date_created}}</h3>
     <br>
     <div class="row gx-5" id="description"><h3><b>Description:</b></h3><p>{{recipe.description}}</p></div>
     <h1>Ingredients</h1>

@@ -302,8 +302,15 @@ def read_ingredient_standard(id):
     if request.method == 'GET':
         try:
             dbConfirm = db.ingredients.find_one({"_id": ObjectId(id)})
-            #Search Recipe DB to pull out recipes with this ingredient
-            #Search Grocereis DB to pull list/times this has been references over time
+            #update the amount of times accessed attribute
+            dbCounter = db.ingredients.update_one(
+                {"_id": ObjectId(id)},
+                {"$set": 
+                    {
+                    "amount_of_times_accessed": dbConfirm['amount_of_times_accessed'] + 1
+                    }
+                }
+            )
             return Response(
                         response = json.dumps(
                                 {"message": "Ingredient found", 
@@ -375,7 +382,8 @@ def update_ingredient(id):
                     "state": state,
                     "type": type_ingredient,
                     "img_URI": new_IMG_URI,
-                    "date_modified": str(date.today())
+                    "date_modified": str(date.today()),
+                    "amount_of_times_accessed": dbAction_findrecord['amount_of_times_accessed'] + 1
                     }
                 }
             )
@@ -395,7 +403,8 @@ def update_ingredient(id):
                 )
     return render_template('/update_ingredient.html', form=form, current_state = form.state.data, current_type = dbAction_findrecord['type'])
 
-###########################################Delete Route 🚮
+###########################################Delete Route 🚮 - Admin Only
+""""
 @app.route('/ingredient/delete/<id>', methods = ['GET', 'POST'])
 @login_required
 def delete_ingredient(id):
@@ -431,7 +440,8 @@ def delete_ingredient(id):
                         status = 500,
                         mimetype='application/json'
                 )
-    return render_template("home.html")
+    return render_template("home.html") 
+"""
 
 #############********************************************************************Recipes 🧾
 from Models_Plan import Recipe
@@ -526,7 +536,8 @@ def create_recipe():
                 "instructions": instructions,
                 "img_URI": uploadfile(str(dbAction.inserted_id), "Recipe"),
                 "crossreference_recipe_URI": db_user_Action.inserted_id,
-                "author": author
+                "author": author,
+                "date_created": str(date.today())
                 }}
             )
             #Hanlde Custom User Upload from session
@@ -537,7 +548,8 @@ def create_recipe():
                 "instructions": instructions,
                 "img_URI": uploadfile(str(db_user_Action.inserted_id), "Recipe"),
                 "crossreference_recipe_URI":dbAction.inserted_id,
-                "author": author
+                "author": author,
+                "date_created": str(date.today())
                 }}
             )
             flash("Recipe Created!", 'success')
@@ -559,12 +571,15 @@ def create_recipe():
     
 ######################################Read/Search Routes 📚
 #Standard Read by ID route, uses
+import re
 @app.route('/recipe/<id>', methods = ['GET'])
 def read_recipe(id):
     user_db = create_user_NoSQLdatabases()
     user_dbcollection = user_db['recipes']
     if request.method == 'GET':
         ingredients = []
+        prep_array = []
+        execution_array = []
         try:
             dbConfirm = user_dbcollection.find_one({"_id": ObjectId(id)})
             types = [target['ingredient']['type'] for target in dbConfirm['ingredients']]
@@ -573,6 +588,24 @@ def read_recipe(id):
                 if (item != ""):
                     types2.append(item)
             types2 = list(set(types2))
+            #Get Name of Author
+            author_obj = db.users.find_one({"OKTAid": str(dbConfirm['author'])})
+            for item in dbConfirm['instructions']['prep']:
+                if re.search('[a-zA-Z]', item):
+                    prep_array.append(item)
+            for item in dbConfirm['instructions']['execution']:
+                if re.search('[a-zA-Z]', item):
+                    execution_array.append(item)
+             #update the amount of times accessed attribute
+            counter = int(dbConfirm['amount_of_times_accessed']) +1
+            dbCounter = user_dbcollection.update_one(
+                {"_id": ObjectId(id)},
+                {"$set": 
+                    {
+                    "amount_of_times_accessed": counter
+                    }
+                }
+            )
             return Response(
                         response = json.dumps(
                                 {"message": "Recipee found", 
@@ -582,7 +615,7 @@ def read_recipe(id):
                             status = 200,
                             mimetype='application/json'
                     ) and render_template('read_recipe.html', recipe = dbConfirm, ingredient_type= types2, 
-                                prep=dbConfirm['instructions']['prep'], execution=dbConfirm['instructions']['execution'])
+                                prep=prep_array, execution=execution_array, author = author_obj)
         except Exception as ex:
             return Response(
                         response = json.dumps(
@@ -597,6 +630,8 @@ def read_recipe_global(id):
     if request.method == 'GET':
         ingredients = []
         dbConfirm = db.recipes.find_one({"_id": ObjectId(id)})
+        execution_array = []
+        prep_array = []
         try:
             types = [target['ingredient']['type'] for target in dbConfirm['ingredients']]
             types2 = []
@@ -604,6 +639,22 @@ def read_recipe_global(id):
                 if (item != ""):
                     types2.append(item)
             types2 = list(set(types2))
+            author_obj = db.users.find_one({"OKTAid": str(dbConfirm['author'])})
+            for item in dbConfirm['instructions']['prep']:
+                if re.search('[a-zA-Z]', item):
+                    prep_array.append(item)
+            for item in dbConfirm['instructions']['execution']:
+                if re.search('[a-zA-Z]', item):
+                    execution_array.append(item)
+            counter = int(dbConfirm['amount_of_times_accessed']) +1
+            dbCounter = db.recipes.update_one(
+                {"_id": ObjectId(id)},
+                {"$set": 
+                    {
+                    "amount_of_times_accessed": counter 
+                    }
+                }
+            )
             return Response(
                         response = json.dumps(
                                 {"message": "Recipe found", 
@@ -612,7 +663,7 @@ def read_recipe_global(id):
                                 }),
                             status = 200,
                             mimetype='application/json'
-                    ) and render_template('read_recipe.html', recipe = dbConfirm, ingredient_type= types2,  prep=dbConfirm['instructions']['prep'], execution=dbConfirm['instructions']['execution'])
+                    ) and render_template('read_recipe.html', recipe = dbConfirm, ingredient_type= types2,  prep=prep_array, execution=execution_array, author = author_obj)
         except Exception as ex:
             return Response(
                         response = json.dumps(
@@ -1095,8 +1146,7 @@ def all_groceries():
             #Do some SQL stuff
             #Find all tables with given username 
             mycursor = mysqldb.cursor()
-            mycursor.execute("SHOW TABLES")
-            
+            # mycursor.execute("SHOW TABLES")
             user_tables=[]
             #Get User Tables Names from SQL
             for x in mycursor:

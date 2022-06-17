@@ -42,9 +42,9 @@ class Ingredient(Form):
     img_URI = ''
     state = StringField('State of Matter')
     type =  StringField('Food Group')
-    price = 0
     date_modified = ''
     date_created = str(date.today())
+    amount_of_times_accessed = 0
     def export(self):
         return (
             {"title": self.name.data, 
@@ -53,7 +53,8 @@ class Ingredient(Form):
             "type": self.type.data,
             "img_URI": "<Empty URI>",
             "date_created": self.date_created,
-            "date_modified": self.date_modified
+            "date_modified": self.date_modified,
+            "amount_of_times_accessed": self.amount_of_times_accessed
             }
         )
 class Recipe(Form):
@@ -67,6 +68,7 @@ class Recipe(Form):
     date_modified = ''
     author = ''
     crossreference_recipe_URI = ''
+    amount_of_times_accessed = 0
     def export(self):
         return (
             {
@@ -79,7 +81,8 @@ class Recipe(Form):
                 "date_created": self.date_created,
                 "date_modified": self.date_modified,
                 "author": self.author,
-                "crossreference_recipe_URI": self.crossreference_recipe_URI
+                "crossreference_recipe_URI": self.crossreference_recipe_URI,
+                "amount_of_times_accessed": self.amount_of_times_accessed
             }
         )
 class Grocerries(Form):
