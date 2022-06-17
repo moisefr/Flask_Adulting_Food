@@ -22,10 +22,6 @@ class User(UserMixin):
                 'email': self.email,
                 }.items()
 
-    # @staticmethod
-    # def get(user_id):
-    #     return USERS_DB.get(user_id)
-    # @staticmethod
     def export(self):
         return (
             {
