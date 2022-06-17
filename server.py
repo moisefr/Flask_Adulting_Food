@@ -1090,11 +1090,13 @@ def all_groceries():
     user_db = create_user_NoSQLdatabases()
     user_dbcollection = user_db['groceries']
     if request.method == "GET":
+        
         try:
             #Do some SQL stuff
             #Find all tables with given username 
             mycursor = mysqldb.cursor()
             mycursor.execute("SHOW TABLES")
+            
             user_tables=[]
             #Get User Tables Names from SQL
             for x in mycursor:
@@ -1123,13 +1125,16 @@ def all_groceries():
                         "price": price,
                         "total":float(price)*row[2]
                     }
+                    print(ingredient)
                     ingredients.append(ingredient)
                 table_ingre_pair = {
                     "groccery_list": dbAction['title'],
                     "id":str(dbAction['_id']),
                     "ingredients": ingredients 
                 }
+                
                 final_list.append(table_ingre_pair) 
+            
         except Exception as ex:
             return Response(
                     response = json.dumps(
