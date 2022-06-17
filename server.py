@@ -256,7 +256,7 @@ def random_feature_generator(collection, amount):
 def landing():
     ingredients = random_feature_generator('ingredient', 3)
     recipes = random_feature_generator('recipe', 3)
-    groceries = random_feature_generator('grocery', 3)
+    groceries = random_feature_generator('grocery', 0)
     return render_template("home.html", ingredients = ingredients, recipes = recipes, groceries=groceries)
 
 #############********************************************************************Ingridients 🍍
@@ -265,7 +265,7 @@ from Models_Plan import Ingredient
 ##########################################Create Routes 🦾
 #Create  an Ingredient 
 @app.route("/ingredient", methods=["GET","POST"])
-@login_required
+# @login_required
 def create_ingredient():
     #this binds form entries to the object class, it's like saying all the 
     #let the data entered in the form or postman map to the attributes defined in the class
@@ -282,7 +282,7 @@ def create_ingredient():
                         {"message": "ingridient created", 
                         "id": f"{dbAction.inserted_id}"
                         }),
-                    status = 201,
+                    status = 200,
                     mimetype='application/json'
             ) and redirect('/ingredient/'f"{dbAction.inserted_id}")
         except Exception as ex:
@@ -346,7 +346,7 @@ def read_ingredients():
 ##########################################Update Routes 🚅
 #Standard update Route
 @app.route('/ingredient/update/<id>', methods = ['GET', 'POST'])
-@login_required
+# @login_required
 def update_ingredient(id):
     form = Ingredient(request.form)
     #Form Binding -Sets data in the form oject attributes to what's already in the database so when html template presents you see the previous data
@@ -382,7 +382,7 @@ def update_ingredient(id):
             flash('Ingredient Updated', 'success')
             return Response(
                 response = json.dumps({"message": "query made successfuly, updated ingredient " f"{title}"}),
-                status = 201,
+                status = 200,
                 mimetype='application/json'
             ) and redirect('/ingredient/'f"{id}")
         except Exception as ex:
@@ -397,7 +397,7 @@ def update_ingredient(id):
 
 ###########################################Delete Route 🚮
 @app.route('/ingredient/delete/<id>', methods = ['GET', 'POST'])
-@login_required
+# @login_required
 def delete_ingredient(id):
     if request.method == 'GET':
         print("Ammount of documents before deletion:" f"{db.ingredients.count_documents({})}")
