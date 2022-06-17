@@ -265,7 +265,7 @@ from Models_Plan import Ingredient
 ##########################################Create Routes 🦾
 #Create  an Ingredient 
 @app.route("/ingredient", methods=["GET","POST"])
-# @login_required
+@login_required
 def create_ingredient():
     #this binds form entries to the object class, it's like saying all the 
     #let the data entered in the form or postman map to the attributes defined in the class
@@ -346,7 +346,7 @@ def read_ingredients():
 ##########################################Update Routes 🚅
 #Standard update Route
 @app.route('/ingredient/update/<id>', methods = ['GET', 'POST'])
-# @login_required
+@login_required
 def update_ingredient(id):
     form = Ingredient(request.form)
     #Form Binding -Sets data in the form oject attributes to what's already in the database so when html template presents you see the previous data
@@ -397,7 +397,7 @@ def update_ingredient(id):
 
 ###########################################Delete Route 🚮
 @app.route('/ingredient/delete/<id>', methods = ['GET', 'POST'])
-# @login_required
+@login_required
 def delete_ingredient(id):
     if request.method == 'GET':
         print("Ammount of documents before deletion:" f"{db.ingredients.count_documents({})}")
