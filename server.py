@@ -113,7 +113,7 @@ def callback():
         return "The code was not returned or is not accessible", 403
     query_params = {'grant_type': 'authorization_code',
                     'code': code,
-                    'redirect_uri': request.base_url
+                    'redirect_uri': os.environ['REDIRECT']
                     }
     query_params = requests.compat.urlencode(query_params)
     #This is where the token exchange begins, we send in the token URI from the app
