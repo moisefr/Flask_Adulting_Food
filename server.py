@@ -135,7 +135,7 @@ def callback():
     # print("#access TOKEN - 🟢: \n"f"{access_token}\n" +  " #identity TOKEN - 🔵: \n"f"{id_token}")
     if not is_access_token_valid(access_token, os.environ['ISSUER']):
         return "Access token is invalid", 403
-    if not is_id_token_valid(id_token, os.environ['ISSUER'], os.environ['CLIENT'], NONCE):
+    if not is_id_token_valid(id_token, os.environ['ISSUER'], os.environ['CLIENT_ID'], NONCE):
         return "ID token is invalid", 403
     
     #If tokens are exhcnages successfully then we get user credentials
