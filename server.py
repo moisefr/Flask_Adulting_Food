@@ -132,7 +132,7 @@ def callback():
         return "Unsupported token type. Should be 'Bearer'.", 403
     access_token = exchange["access_token"]  
     id_token = exchange["id_token"]
-    # print("#access TOKEN - 🟢: \n"f"{access_token}\n" +  " #identity TOKEN - 🔵: \n"f"{id_token}")
+    print("#access TOKEN - 🟢: \n"f"{access_token}\n" +  " #identity TOKEN - 🔵: \n"f"{id_token}")
     if not is_access_token_valid(access_token, os.environ['ISSUER']):
         return "Access token is invalid", 403
     if not is_id_token_valid(id_token, os.environ['ISSUER'], os.environ['CLIENT_ID'], NONCE):
