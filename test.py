@@ -6,10 +6,7 @@ from datetime import date
 from werkzeug.utils import secure_filename
 from wtforms import Form, StringField, TextAreaField, PasswordField, form, validators
 import pymongo
-from flask_mysqldb import MySQL
-from getpass import getpass
-import mysql.connector
-from mysql.connector import connect, Error
+
 
 app = Flask("Helpful_Food_App")
 
