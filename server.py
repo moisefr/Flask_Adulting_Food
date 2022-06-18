@@ -34,7 +34,7 @@ app = Flask("Helpful_Food_App")
 # #Prepping NoSQL Connection string
 # connection_string_array = [db_config_data['mongodb'][key] for key in db_config_data['mongodb'].keys()]
 # connection_string_NoSQL = "".join(connection_string_array)
-client = pymongo.MongoClient(connection_string_NoSQL, serverSelectionTimeoutMS=15000)
+client = pymongo.MongoClient(os.environ['connection_string_NoSQL'], serverSelectionTimeoutMS=15000)
 ##Check if the connection was made to the DBs
 try:
     # Check for NoSQL connection
@@ -42,10 +42,10 @@ try:
     # print("Connected to Admin/Dev Mongo Database  😁: ", "availible data collections are - ", db.list_collection_names() )
     #Prep SQL Connection
     mysqldb = mysql.connector.connect(
-    host=SQL_HOST,
-    user=SQL_USER,
-    password=SQL_PASSWORD,
-    database = SQL_DB
+    host=os.environ['SQL_HOST'],
+    user=os.environ['SQL_USER'],
+    password=os.environ['SQL_PASSWORD'],
+    database = os.environ['SQL_DB']
     )
     mycursor = mysqldb.cursor()
     mycursor.execute("SHOW TABLES")
@@ -88,8 +88,8 @@ def load_user(user_id):
 @app.route("/login")
 def login():
     # get request params
-    query_params = {'client_id': CLIENT_ID,
-                    'redirect_uri': REDIRECT,
+    query_params = {'client_id': os.environ['CLIENT_ID'],
+                    'redirect_uri': os.environ['REDIRECT'],
                     'scope': "openid email profile",
                     'state': APP_STATE,
                     'nonce': NONCE,
@@ -97,7 +97,7 @@ def login():
                     'response_mode': 'query'}
     # build request_uri
     request_uri = "{base_url}?{query_params}".format(
-        base_url=AUTH,
+        base_url=os.environ['AUTH'],
         query_params=requests.compat.urlencode(query_params)
     )
     return redirect(request_uri) #Redirect to OKTA
@@ -120,10 +120,10 @@ def callback():
     #pass in wuth credentials (client ID and secret)
     #OKTA hoepfully sends back access and ID tokens
     exchange = requests.post(
-        TOKEN,
+        os.environ['TOKEN'],
         headers=headers,
         data=query_params,
-        auth=(CLIENT_ID, SECRET),
+        auth=(os.environ['CLIENT_ID'], os.environ['SECRET']),
     ).json() ##############STEP 5 sending credentials to toekn endpoint
 
     # Get tokens and validate
@@ -132,14 +132,14 @@ def callback():
     access_token = exchange["access_token"]  
     id_token = exchange["id_token"]
     # print("#access TOKEN - 🟢: \n"f"{access_token}\n" +  " #identity TOKEN - 🔵: \n"f"{id_token}")
-    if not is_access_token_valid(access_token, ISSUER):
+    if not is_access_token_valid(access_token, os.environ['ISSUER']):
         return "Access token is invalid", 403
-    if not is_id_token_valid(id_token, ISSUER, CLIENT, NONCE):
+    if not is_id_token_valid(id_token, os.environ['ISSUER'], os.environ['CLIENT'], NONCE):
         return "ID token is invalid", 403
     
     #If tokens are exhcnages successfully then we get user credentials
     # Authorization flow successful, get userinfo and login user
-    userinfo_response = requests.get(USER_URI,  headers={'Authorization': f'Bearer {access_token}'}).json()
+    userinfo_response = requests.get(os.environ['USER_URI'],  headers={'Authorization': f'Bearer {access_token}'}).json()
     
     unique_id = userinfo_response["sub"]
     user_email = userinfo_response["email"]
