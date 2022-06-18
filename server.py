@@ -964,7 +964,7 @@ from Models_Plan import Grocerries
 ##########################################Create Routes 🦾
 #👽Create Grocerries 
 @app.route("/groceries", methods = ["GET", "POST"])
-def create_grocerries():
+def create_groceries():
     dbAction = db.recipes.find({})
     dbAction2 = db.ingredients.find({})
     form = Grocerries(request.form)
@@ -1186,7 +1186,7 @@ def all_groceries():
         except Exception as ex:
             return Response(
                     response = json.dumps(
-                            {"message": "Unable to Retrieve All Lists"
+                            {"message": "Unable to Retrieve All Lists, Try reloading the browser"
                             }),
                         status = 400,
                         mimetype='application/json'
