@@ -118,6 +118,7 @@ def callback():
     query_params = requests.compat.urlencode(query_params)
     #This is where the token exchange begins, we send in the token URI from the app
     #pass in wuth credentials (client ID and secret)
+    print(query_params)
     #OKTA hoepfully sends back access and ID tokens
     exchange = requests.post(
         os.environ['TOKEN'],
@@ -125,7 +126,7 @@ def callback():
         data=query_params,
         auth=(os.environ['CLIENT_ID'], os.environ['SECRET']),
     ).json() ##############STEP 5 sending credentials to toekn endpoint
-
+    print(exchange)
     # Get tokens and validate
     if not exchange.get("token_type"):
         return "Unsupported token type. Should be 'Bearer'.", 403
@@ -197,7 +198,6 @@ if not os.path.exists(upload_folder):
    os.mkdir(upload_folder)
 app.config['UPLOAD_FOLDER'] = upload_folder
 app.secret_key = 'whatitiscuhwhatisup'
-mailgun_secret_key_value = None
 #######################********************************Handles File Uploads ⬆
 def uploadfile(id, route_indicator):
     if request.method == 'POST':
