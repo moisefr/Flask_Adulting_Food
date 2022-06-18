@@ -25,7 +25,7 @@ from flask_login import (
 from jwt_okta_middleware import is_access_token_valid, is_id_token_valid, config
 import random
 #Instantiate app
-app = Flask(__name__)
+app = Flask("Helpful_Food_App")
 #************************************************DB Connection 🌍**********************************************
 #Pull DB Config for NoSQL and SQL
 db_config_data = None
@@ -196,6 +196,7 @@ if not os.path.exists(upload_folder):
    os.mkdir(upload_folder)
 app.config['UPLOAD_FOLDER'] = upload_folder
 app.secret_key = 'whatitiscuhwhatisup'
+mailgun_secret_key_value = None
 #######################********************************Handles File Uploads ⬆
 def uploadfile(id, route_indicator):
     if request.method == 'POST':
@@ -257,7 +258,7 @@ def landing():
     ingredients = random_feature_generator('ingredient', 3)
     recipes = random_feature_generator('recipe', 3)
     groceries = random_feature_generator('grocery', 0)
-    return render_template("home.html", ingredients = ingredients, recipes = recipes, groceries=groceries)
+    return render_template("home.html", ingredients = ingredients, recipes = recipes, groceries=groceries, value=mailgun_secret_key_value)
 
 #############********************************************************************Ingridients 🍍
 from Models_Plan import Ingredient
@@ -1359,11 +1360,13 @@ def delete_groceries(id):
                 )
     return redirect("/")
 
-@app.route("/test", methods = ["GET"])
-def test():
-    return render_template("test.html")
-#Testing Area
+
+#Final Configs
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
-if __name__ == "__main__":
-    app.run()
+
+
+# if __name__ == "__main__":
+#App Run
+port = int(os.environ.get("PORT", 5000))
+app.run(host='0.0.0.0', port=port, debug=True)
     #ssl_context=('cert.pem', 'key.pem')

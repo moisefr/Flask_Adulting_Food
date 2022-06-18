@@ -233,3 +233,9 @@ for (i = 0; i <rows.length; i++){
           rows[i].style.display = " ";
         }
       }
+
+      gunicorn --certfile cert.pem --keyfile key.pem -b 0.0.0.0:8000 hello:app
+
+
+      Creating app... done, ⬢ glacial-wave-20065
+https://glacial-wave-20065.herokuapp.com/ | https://git.heroku.com/glacial-wave-20065.git
