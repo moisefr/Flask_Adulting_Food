@@ -39,7 +39,7 @@ client = pymongo.MongoClient(os.environ['connection_string_NoSQL'], serverSelect
 try:
     # Check for NoSQL connection
     db = client.Adulting_Food
-    # print("Connected to Admin/Dev Mongo Database  😁: ", "availible data collections are - ", db.list_collection_names() )
+    print("Connected to Admin/Dev Mongo Database  😁: ", "availible data collections are - ", db.list_collection_names() )
     #Prep SQL Connection
     mysqldb = mysql.connector.connect(
     host=os.environ['SQL_HOST'],
@@ -49,9 +49,9 @@ try:
     )
     mycursor = mysqldb.cursor()
     mycursor.execute("SHOW TABLES")
-    # print("SQL DB Connection Successful, tables below 😁: ")
-    # for x in mycursor:
-    #     print (x)
+    print("SQL DB Connection Successful, tables below 😁: ")
+    for x in mycursor:
+        print (x)
 except Exception:
     print("Unable to connect to the server.")
 #Identity and Access Mangement - LOGIN and LOGOUT 🚪
