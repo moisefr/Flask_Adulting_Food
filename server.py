@@ -22,7 +22,7 @@ from flask_login import (
     login_user,
     logout_user,
 )
-from jwt_okta_middleware import is_access_token_valid, is_id_token_valid, config
+from jwt_okta_middleware import is_access_token_valid, is_id_token_valid
 import random
 #Instantiate app
 app = Flask("Helpful_Food_App")
