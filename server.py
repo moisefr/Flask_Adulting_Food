@@ -1365,5 +1365,5 @@ def test():
 #Testing Area
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 if __name__ == "__main__":
-    app.run(port = 5000, debug=True)
+    app.run()
     #ssl_context=('cert.pem', 'key.pem')
