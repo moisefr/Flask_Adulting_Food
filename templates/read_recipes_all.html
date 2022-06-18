@@ -42,7 +42,6 @@
             <label for="dasearch" style="color: black;">Search for Recipes</label>
             <input type="search" placeholder="Search by Ingredient" aria-label="Search" name = "dasearch">
             <datalist id="recipes_search">
-              <!-- <option> swag -->
               {% for ingredient in all_ingredients%}
                 <option value="{{ingredient}}"> 
               {% endfor %}
