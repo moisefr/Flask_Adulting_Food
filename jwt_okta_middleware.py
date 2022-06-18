@@ -25,11 +25,11 @@ def is_id_token_valid(token, issuer, client_id, nonce):
         return False
 
 
-def load_config(fname='./client_secrets.json'):
-    config = None
-    with open(fname) as f:
-        config = json.load(f)
-    return config
+# def load_config(fname='./client_secrets.json'):
+#     config = None
+#     with open(fname) as f:
+#         config = json.load(f)
+#     return config
 
 
-config = load_config()
+# config = load_config()
