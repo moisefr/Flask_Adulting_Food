@@ -28,12 +28,12 @@ import random
 app = Flask("Helpful_Food_App")
 #************************************************DB Connection 🌍**********************************************
 #Pull DB Config for NoSQL and SQL
-db_config_data = None
-with open('db_credentials.json') as f:
-    db_config_data = json.load(f)
-#Prepping NoSQL Connection string
-connection_string_array = [db_config_data['mongodb'][key] for key in db_config_data['mongodb'].keys()]
-connection_string_NoSQL = "".join(connection_string_array)
+# db_config_data = None
+# with open('db_credentials.json') as f:
+#     db_config_data = json.load(f)
+# #Prepping NoSQL Connection string
+# connection_string_array = [db_config_data['mongodb'][key] for key in db_config_data['mongodb'].keys()]
+# connection_string_NoSQL = "".join(connection_string_array)
 client = pymongo.MongoClient(connection_string_NoSQL, serverSelectionTimeoutMS=15000)
 ##Check if the connection was made to the DBs
 try:
@@ -57,7 +57,8 @@ except Exception:
 #Identity and Access Mangement - LOGIN and LOGOUT 🚪
 #Creating, Loging In, Validating a User
 from Models_Plan import User
-app.config.update({'SECRET_KEY': 'SomethingNotEntirelySecret'}) #used to sign off on tokens
+# app.config.update({'SECRET_KEY': 'SomethingNotEntirelySecret'}) 
+#used to sign off on tokens
 login_manager = LoginManager()
 login_manager.init_app(app)
 APP_STATE = 'ApplicationState'
