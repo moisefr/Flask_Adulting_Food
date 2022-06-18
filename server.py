@@ -39,19 +39,19 @@ client = pymongo.MongoClient(connection_string_NoSQL, serverSelectionTimeoutMS=1
 try:
     # Check for NoSQL connection
     db = client.Adulting_Food
-    print("Connected to Admin/Dev Mongo Database  😁: ", "availible data collections are - ", db.list_collection_names() )
+    # print("Connected to Admin/Dev Mongo Database  😁: ", "availible data collections are - ", db.list_collection_names() )
     #Prep SQL Connection
     mysqldb = mysql.connector.connect(
-    host=db_config_data['mysql']['MYSQL_ADDON_HOST'],
-    user=db_config_data['mysql']['MYSQL_ADDON_USER'],
-    password=db_config_data['mysql']['MYSQL_ADDON_PASSWORD'],
-    database = db_config_data['mysql']['MYSQL_ADDON_DB']
+    host=SQL_HOST,
+    user=SQL_USER,
+    password=SQL_PASSWORD,
+    database = SQL_DB
     )
     mycursor = mysqldb.cursor()
     mycursor.execute("SHOW TABLES")
-    print("SQL DB Connection Successful, tables below 😁: ")
-    for x in mycursor:
-        print (x)
+    # print("SQL DB Connection Successful, tables below 😁: ")
+    # for x in mycursor:
+    #     print (x)
 except Exception:
     print("Unable to connect to the server.")
 #Identity and Access Mangement - LOGIN and LOGOUT 🚪
@@ -87,8 +87,8 @@ def load_user(user_id):
 @app.route("/login")
 def login():
     # get request params
-    query_params = {'client_id': config["web"]["client_id"],
-                    'redirect_uri': config["web"]["redirect_uri"],
+    query_params = {'client_id': CLIENT_ID,
+                    'redirect_uri': REDIRECT,
                     'scope': "openid email profile",
                     'state': APP_STATE,
                     'nonce': NONCE,
@@ -96,7 +96,7 @@ def login():
                     'response_mode': 'query'}
     # build request_uri
     request_uri = "{base_url}?{query_params}".format(
-        base_url=config["web"]["auth_uri"],
+        base_url=AUTH,
         query_params=requests.compat.urlencode(query_params)
     )
     return redirect(request_uri) #Redirect to OKTA
@@ -119,10 +119,10 @@ def callback():
     #pass in wuth credentials (client ID and secret)
     #OKTA hoepfully sends back access and ID tokens
     exchange = requests.post(
-        config["web"]["token_uri"],
+        TOKEN,
         headers=headers,
         data=query_params,
-        auth=(config["web"]["client_id"], config["web"]["client_secret"]),
+        auth=(CLIENT_ID, SECRET),
     ).json() ##############STEP 5 sending credentials to toekn endpoint
 
     # Get tokens and validate
@@ -131,14 +131,14 @@ def callback():
     access_token = exchange["access_token"]  
     id_token = exchange["id_token"]
     # print("#access TOKEN - 🟢: \n"f"{access_token}\n" +  " #identity TOKEN - 🔵: \n"f"{id_token}")
-    if not is_access_token_valid(access_token, config["web"]["issuer"]):
+    if not is_access_token_valid(access_token, ISSUER):
         return "Access token is invalid", 403
-    if not is_id_token_valid(id_token, config["web"]["issuer"], config["web"]["client_id"], NONCE):
+    if not is_id_token_valid(id_token, ISSUER, CLIENT, NONCE):
         return "ID token is invalid", 403
     
     #If tokens are exhcnages successfully then we get user credentials
     # Authorization flow successful, get userinfo and login user
-    userinfo_response = requests.get(config["web"]["userinfo_uri"],  headers={'Authorization': f'Bearer {access_token}'}).json()
+    userinfo_response = requests.get(USER_URI,  headers={'Authorization': f'Bearer {access_token}'}).json()
     
     unique_id = userinfo_response["sub"]
     user_email = userinfo_response["email"]
@@ -258,7 +258,7 @@ def landing():
     ingredients = random_feature_generator('ingredient', 3)
     recipes = random_feature_generator('recipe', 3)
     groceries = random_feature_generator('grocery', 0)
-    return render_template("home.html", ingredients = ingredients, recipes = recipes, groceries=groceries, value=mailgun_secret_key_value)
+    return render_template("home.html", ingredients = ingredients, recipes = recipes, groceries=groceries)
 
 #############********************************************************************Ingridients 🍍
 from Models_Plan import Ingredient
