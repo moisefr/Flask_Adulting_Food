@@ -239,3 +239,4 @@ for (i = 0; i <rows.length; i++){
 
       Creating app... done, ⬢ glacial-wave-20065
 https://glacial-wave-20065.herokuapp.com/ | https://git.heroku.com/glacial-wave-20065.git
+web: python server.py $PORT
